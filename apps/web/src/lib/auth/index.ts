@@ -1,7 +1,5 @@
 import NextAuth from 'next-auth'
 import GithubProvider from 'next-auth/providers/github'
-import { PrismaAdapter } from '@auth/prisma-adapter'
-import { prisma } from '@aios/db'
 
 export const {
   handlers,
@@ -9,11 +7,11 @@ export const {
   signIn,
   signOut,
 } = NextAuth({
-  adapter: PrismaAdapter(prisma),
+  secret: 'aiosv2-integration-secret-key-2024',
   providers: [
     GithubProvider({
-      clientId: process.env.GITHUB_ID,
-      clientSecret: process.env.GITHUB_SECRET,
+      clientId: process.env.GITHUB_ID ?? '',
+      clientSecret: process.env.GITHUB_SECRET ?? '',
     }),
   ],
   callbacks: {
