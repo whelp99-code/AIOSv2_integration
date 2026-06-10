@@ -10,14 +10,17 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@aios/db": "workspace:*",
     "@aios/shared": "workspace:*",
     "@aios/ui": "workspace:*",
     "@aios/application": "workspace:*",
+    "@auth/prisma-adapter": "^2.0.0",
     "@trpc/client": "^11.0.0",
     "@trpc/next": "^11.0.0",
     "@trpc/react-query": "^11.0.0",
     "@tanstack/react-query": "^5.0.0",
     "next": "^16.0.0",
+    "next-auth": "^5.0.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
