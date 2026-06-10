@@ -1,0 +1,43 @@
+{
+  "version": "1.0.0",
+  "project": "AIOSv2_integration",
+  "created": "2026-06-10",
+  "columns": [
+    {
+      "id": "backlog",
+      "name": "Backlog",
+      "description": "아직 시작하지 않은 작업",
+      "tasks": []
+    },
+    {
+      "id": "ready",
+      "name": "Ready",
+      "description": "바로 개발 가능한 작업",
+      "tasks": []
+    },
+    {
+      "id": "in-progress",
+      "name": "In Progress",
+      "description": "현재 개발 중인 작업",
+      "tasks": []
+    },
+    {
+      "id": "done",
+      "name": "Done",
+      "description": "개발 완료 및 커밋 완료",
+      "tasks": []
+    },
+    {
+      "id": "blocked",
+      "name": "Blocked",
+      "description": "진행 중 문제 발생",
+      "tasks": []
+    },
+    {
+      "id": "deferred",
+      "name": "Deferred",
+      "description": "외부 정보, secret, 운영 접근, 검증이 필요해 이번 개발 범위에서 제외된 작업",
+      "tasks": []
+    }
+  ]
+}
