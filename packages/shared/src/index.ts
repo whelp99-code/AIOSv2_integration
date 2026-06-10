@@ -1,9 +1,9 @@
 // @aios/shared - Shared types, utilities, and constants
 
 // Types
-export * from './types/common';
-export * from './types/api';
-export * from './types/domain';
+export type * from './types/common';
+export type * from './types/api';
+export type * from './types/domain';
 
 // Utilities
 export * from './utils/logger';

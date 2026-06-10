@@ -7,8 +7,7 @@ import type {
   ApprovalRequest, 
   ApprovalDecision,
   ApprovalPolicy,
-  ApprovalRule,
-  AutoApprovalConfig
+  ApprovalRule
 } from '@aios/domain';
 
 export interface IAutoApprovalResolver {
@@ -41,15 +40,20 @@ export class AutoApprovalResolver implements IAutoApprovalResolver {
     
     if (canApprove) {
       return {
-        approved: true,
-        reason: 'Auto-approved based on policy'
+        requestId: request.id,
+        decision: 'approved',
+        reason: 'Auto-approved based on policy',
+        decidedBy: 'system',
+        decidedAt: new Date()
       };
     }
     
     return {
-      approved: false,
+      requestId: request.id,
+      decision: 'pending',
       reason: 'Requires manual approval',
-      conditions: ['Manual review required']
+      decidedBy: 'system',
+      decidedAt: new Date()
     };
   }
   

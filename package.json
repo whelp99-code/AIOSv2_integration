@@ -2,6 +2,7 @@
   "name": "aios-v2-integration",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "description": "AIOS Unified Platform - Modular Monolith Monorepo",
   "scripts": {
     "dev": "turbo dev",
@@ -25,6 +26,7 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.0",
+    "@eslint/js": "^10.0.1",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
     "eslint": "^9.0.0",

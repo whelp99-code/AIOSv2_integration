@@ -7,8 +7,8 @@
 export * from './runtime-interface';
 
 // Role Contracts
-export * from './hermes-role';
-export * from './opencode-role';
+export type { IHermesRole, HermesTaskDispatchResult } from './hermes-role';
+export type { IOpencodeRole, CodeSpecification, CodeGenerationResult, GeneratedFile, FileChangeResult, CommitMetadataResult } from './opencode-role';
 
 // Task Management
 export * from './task-dispatcher';

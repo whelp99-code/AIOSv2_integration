@@ -4,8 +4,8 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
-    include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
-    exclude: ['node_modules', 'dist', '.next'],
+    include: ['tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
+    exclude: ['node_modules', 'dist', '.next', '**/node_modules/**'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],

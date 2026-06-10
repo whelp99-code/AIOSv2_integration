@@ -7,6 +7,7 @@ import type {
   Result, 
   ResultCreationRequest,
   ResultUpdateRequest,
+  ResultContent,
   TaskResult
 } from '@aios/domain';
 
@@ -37,21 +38,23 @@ export interface IResultRecordingUseCase {
   getResultsByProject(projectId: string): Promise<Result[]>;
 }
 
+const DEFAULT_CONTENT: ResultContent = {
+  summary: '',
+  changes: [],
+  files: [],
+  commits: [],
+  issues: []
+};
+
 export class ResultRecordingUseCase implements IResultRecordingUseCase {
   async recordTaskResult(taskId: string, result: TaskResult): Promise<Result> {
     const resultRecord: Result = {
       id: `result-${Date.now()}`,
       taskId,
-      phase: result.phase || 'unknown',
+      phase: 'unknown',
       type: result.status === 'done' ? 'success' : 'failure',
       status: 'draft',
-      content: {
-        summary: result.summary || '',
-        changes: result.changes || [],
-        files: result.files || [],
-        commits: result.commits || [],
-        issues: result.issues || []
-      },
+      content: DEFAULT_CONTENT,
       createdAt: new Date(),
       metadata: {}
     };
@@ -66,19 +69,21 @@ export class ResultRecordingUseCase implements IResultRecordingUseCase {
   
   async updateResult(resultId: string, request: ResultUpdateRequest): Promise<Result> {
     // 결과 업데이트 로직
+    const content: ResultContent = {
+      summary: request.content?.summary ?? DEFAULT_CONTENT.summary,
+      changes: request.content?.changes ?? DEFAULT_CONTENT.changes,
+      files: request.content?.files ?? DEFAULT_CONTENT.files,
+      commits: request.content?.commits ?? DEFAULT_CONTENT.commits,
+      issues: request.content?.issues ?? DEFAULT_CONTENT.issues
+    };
+    
     return {
       id: resultId,
       taskId: '',
       phase: '',
       type: 'success',
       status: request.status || 'draft',
-      content: request.content || {
-        summary: '',
-        changes: [],
-        files: [],
-        commits: [],
-        issues: []
-      },
+      content,
       createdAt: new Date(),
       metadata: {}
     };
@@ -92,13 +97,7 @@ export class ResultRecordingUseCase implements IResultRecordingUseCase {
       phase: '',
       type: 'success',
       status: 'draft',
-      content: {
-        summary: '',
-        changes: [],
-        files: [],
-        commits: [],
-        issues: []
-      },
+      content: DEFAULT_CONTENT,
       createdAt: new Date(),
       metadata: {}
     };

@@ -51,15 +51,13 @@ export default [
   },
   {
     ignores: [
-      'node_modules/**',
-      'dist/**',
-      '**/dist/**',
-      '.next/**',
-      '**/.next/**',
-      'coverage/**',
+      'node_modules/',
+      'dist/',
+      '.next/',
+      'coverage/',
       '*.config.js',
       '*.config.ts',
-      'packages/db/prisma/**',
+      'packages/db/prisma/',
     ],
   },
 ]

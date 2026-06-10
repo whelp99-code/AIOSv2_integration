@@ -53,7 +53,15 @@ function RecentActivity({ activities }: RecentActivityProps) {
 }
 
 export function Dashboard() {
-  const { data: session } = useSession()
+  const { data: session, status } = useSession()
+
+  if (status === 'loading') {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-gray-500">Loading...</div>
+      </div>
+    )
+  }
 
   const stats = [
     { title: 'Total Projects', value: '12', change: '+2 this week', trend: 'up' as const },

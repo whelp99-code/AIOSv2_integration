@@ -1,6 +1,6 @@
 /**
  * Domain Models Index
- * 모든 도메인 모델 내보내기
+ * 도메인 패키지 메인 내보내기
  */
 
 // Project models
@@ -15,11 +15,12 @@ export type {
 export type { 
   Task, 
   TaskStatus, 
+  Priority,
+  AgentType,
   TaskCreationRequest, 
   TaskUpdateRequest, 
   TaskResult 
 } from './task';
-export { Priority, AgentType } from './task';
 
 // Agent Job models
 export type { 

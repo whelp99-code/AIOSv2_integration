@@ -24,8 +24,6 @@ model User {
   accounts  Account[]
   sessions  Session[]
   projects  Project[]
-  tasks     Task[]
-  results   Result[]
 
   @@map("users")
 }

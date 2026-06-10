@@ -103,11 +103,11 @@ export class GitHubService {
     branch?: string
   ): Promise<{ sha: string }> {
     // Get existing file SHA if updating
-    let sha: string | undefined
+    let sha: string | undefined = undefined
     try {
-      const { data } = await this.client.getRepo(repo.owner, repo.repo)
       // Note: In real implementation, you'd get the file's SHA
-    } catch (error) {
+      // const { data } = await this.client.getRepo(repo.owner, repo.repo)
+    } catch (_error) {
       // File doesn't exist, create new
     }
 
