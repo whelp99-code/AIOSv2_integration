@@ -13,3 +13,6 @@ export * from './use-cases/phase-progression';
 
 // Agents
 export * from './agents';
+
+// Kanban
+export * from './kanban';
