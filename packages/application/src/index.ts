@@ -10,3 +10,6 @@ export * from './services/core-workflow';
 export * from './use-cases/task-creation';
 export * from './use-cases/result-recording';
 export * from './use-cases/phase-progression';
+
+// Agents
+export * from './agents';
