@@ -1,0 +1,25 @@
+{
+  "name": "@aios/infrastructure",
+  "version": "0.1.0",
+  "private": true,
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@aios/shared": "workspace:*",
+    "@aios/domain": "workspace:*",
+    "@prisma/client": "^6.0.0",
+    "axios": "^1.6.0",
+    "ioredis": "^5.3.0"
+  },
+  "devDependencies": {
+    "prisma": "^6.0.0",
+    "typescript": "^5.5.0",
+    "vitest": "^3.0.0"
+  }
+}
