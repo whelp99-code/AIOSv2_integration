@@ -6,20 +6,32 @@
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
-    "test": "turbo test",
-    "lint": "turbo lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint . --ext .ts,.tsx",
+    "lint:fix": "eslint . --ext .ts,.tsx --fix",
     "typecheck": "turbo typecheck",
     "clean": "turbo clean",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,md}\"",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "turbo build && changeset publish"
+    "release": "turbo build && changeset publish",
+    "db:generate": "pnpm --filter @aios/db db:generate",
+    "db:push": "pnpm --filter @aios/db db:push",
+    "db:migrate": "pnpm --filter @aios/db db:migrate",
+    "db:studio": "pnpm --filter @aios/db db:studio"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.0.0",
     "prettier": "^3.2.0",
     "turbo": "^2.0.0",
-    "typescript": "^5.5.0"
+    "typescript": "^5.5.0",
+    "vitest": "^3.0.0"
   },
   "packageManager": "pnpm@10.0.0",
   "engines": {
