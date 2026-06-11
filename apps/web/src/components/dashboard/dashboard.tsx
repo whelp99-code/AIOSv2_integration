@@ -34,6 +34,19 @@ interface Partner {
   status?: string
 }
 
+interface Workflow {
+  id: string
+  name: string
+  description?: string
+  status?: string
+}
+
+interface FaiosHealth {
+  status?: string
+  service?: string
+  uptime?: number
+}
+
 interface StatsCardProps {
   title: string
   value: string | number
@@ -98,18 +111,21 @@ export function Dashboard() {
   const [outlookStatus, setOutlookStatus] = useState<OutlookStatus | null>(null)
   const [customers, setCustomers] = useState<Customer[]>([])
   const [partners, setPartners] = useState<Partner[]>([])
+  const [workflows, setWorkflows] = useState<Workflow[]>([])
+  const [faiosHealth, setFaiosHealth] = useState<FaiosHealth | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchData() {
       try {
-        // 병렬로 데이터 가져오기
-        const [statusRes, mailsRes, customersRes, partnersRes] = await Promise.all([
+        const [statusRes, mailsRes, customersRes, partnersRes, workflowsRes, faiosRes] = await Promise.all([
           fetch('/api/proxy/outlook/status'),
           fetch('/api/proxy/outlook/messages'),
           fetch('/api/customers'),
-          fetch('/api/partners')
+          fetch('/api/partners'),
+          fetch('/api/workflows'),
+          fetch('/api/aios-v3/health')
         ])
 
         if (statusRes.ok) {
@@ -131,6 +147,16 @@ export function Dashboard() {
           const partnersData = await partnersRes.json()
           setPartners(partnersData.partners || [])
         }
+
+        if (workflowsRes.ok) {
+          const workflowsData = await workflowsRes.json()
+          setWorkflows(workflowsData.workflows || [])
+        }
+
+        if (faiosRes.ok) {
+          const faiosData = await faiosRes.json()
+          setFaiosHealth(faiosData)
+        }
         
         setLoading(false)
       } catch (err) {
@@ -151,7 +177,6 @@ export function Dashboard() {
     )
   }
 
-  // 통계 계산
   const unreadCount = mails.filter(m => !m.isRead).length
   const totalCount = mails.length
   const recentMails = mails.slice(0, 15)
@@ -185,19 +210,18 @@ export function Dashboard() {
       loading
     },
     { 
-      title: 'Outlook 연결', 
-      value: outlookStatus?.connected ? '연결됨' : '연결 안됨', 
-      change: outlookStatus?.aiProvider || 'N/A',
-      trend: outlookStatus?.connected ? 'up' : 'down', 
-      icon: '🔗', 
-      color: outlookStatus?.connected ? '#d1fae5' : '#fee2e2',
+      title: '워크플로우', 
+      value: workflows.length, 
+      change: faiosHealth?.status === 'ok' ? 'F-aios-v3 연결됨' : '연결 안됨',
+      trend: faiosHealth?.status === 'ok' ? 'up' : 'down', 
+      icon: '⚡', 
+      color: '#e0e7ff',
       loading
     },
   ]
 
   return (
     <div style={{ padding: '32px', backgroundColor: '#f9fafb', minHeight: '100vh' }}>
-      {/* Welcome Header */}
       <div style={{ marginBottom: '32px' }}>
         <h1 style={{ fontSize: '28px', fontWeight: '700', color: '#111827', margin: '0 0 8px 0' }}>
           Welcome back, {session?.user?.name || 'User'}! 👋
@@ -212,7 +236,6 @@ export function Dashboard() {
         )}
       </div>
 
-      {/* Stats Grid */}
       <div style={{ 
         display: 'grid', 
         gridTemplateColumns: 'repeat(4, 1fr)', 
@@ -224,13 +247,11 @@ export function Dashboard() {
         ))}
       </div>
 
-      {/* Content Grid */}
       <div style={{ 
         display: 'grid', 
         gridTemplateColumns: '2fr 1fr', 
         gap: '24px'
       }}>
-        {/* 실제 메일 목록 */}
         <div style={{
           backgroundColor: 'white',
           borderRadius: '12px',
@@ -324,9 +345,7 @@ export function Dashboard() {
           </div>
         </div>
 
-        {/* 사이드바 */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          {/* Outlook 연결 상태 */}
           <div style={{
             backgroundColor: 'white',
             borderRadius: '12px',
@@ -335,11 +354,11 @@ export function Dashboard() {
             padding: '24px'
           }}>
             <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#111827', margin: '0 0 16px 0' }}>
-              🔗 Outlook 연결 상태
+              🔗 시스템 상태
             </h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: '14px', color: '#6b7280' }}>연결 상태</span>
+                <span style={{ fontSize: '14px', color: '#6b7280' }}>Outlook</span>
                 <span style={{ 
                   fontSize: '14px', 
                   color: outlookStatus?.connected ? '#059669' : '#dc2626',
@@ -349,9 +368,13 @@ export function Dashboard() {
                 </span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: '14px', color: '#6b7280' }}>인증 방식</span>
-                <span style={{ fontSize: '14px', color: '#111827' }}>
-                  {outlookStatus?.authMode || 'N/A'}
+                <span style={{ fontSize: '14px', color: '#6b7280' }}>F-aios-v3</span>
+                <span style={{ 
+                  fontSize: '14px', 
+                  color: faiosHealth?.status === 'ok' ? '#059669' : '#dc2626',
+                  fontWeight: '500'
+                }}>
+                  {faiosHealth?.status === 'ok' ? '✅ 연결됨' : '❌ 연결 안됨'}
                 </span>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -361,27 +384,8 @@ export function Dashboard() {
                 </span>
               </div>
             </div>
-            <a 
-              href="http://localhost:10200" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              style={{
-                display: 'block',
-                marginTop: '16px',
-                padding: '12px',
-                backgroundColor: '#f3f4f6',
-                borderRadius: '8px',
-                textAlign: 'center',
-                fontSize: '14px',
-                color: '#374151',
-                textDecoration: 'none'
-              }}
-            >
-              Mail Intelligence 열기
-            </a>
           </div>
 
-          {/* 고객/파트너 요약 */}
           <div style={{
             backgroundColor: 'white',
             borderRadius: '12px',
@@ -423,7 +427,43 @@ export function Dashboard() {
             </div>
           </div>
 
-          {/* 빠른 실행 */}
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+            border: '1px solid #e5e7eb',
+            padding: '24px'
+          }}>
+            <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#111827', margin: '0 0 16px 0' }}>
+              ⚡ 워크플로우
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '14px', color: '#6b7280' }}>워크플로우 수</span>
+                <span style={{ fontSize: '14px', color: '#111827', fontWeight: '600' }}>
+                  {workflows.length}개
+                </span>
+              </div>
+            </div>
+            {workflows.length > 0 && (
+              <div style={{ marginTop: '16px' }}>
+                <h4 style={{ fontSize: '14px', fontWeight: '600', color: '#111827', margin: '0 0 8px 0' }}>
+                  워크플로우 목록
+                </h4>
+                {workflows.slice(0, 5).map((workflow) => (
+                  <div key={workflow.id} style={{
+                    padding: '8px 0',
+                    borderBottom: '1px solid #f3f4f6',
+                    fontSize: '13px',
+                    color: '#374151'
+                  }}>
+                    {workflow.name} - {workflow.status || 'active'}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
           <div style={{
             backgroundColor: 'white',
             borderRadius: '12px',
@@ -439,7 +479,7 @@ export function Dashboard() {
                 { icon: '📧', label: '메일 가져오기', action: 'import' },
                 { icon: '👥', label: '고객 관리', action: 'customers' },
                 { icon: '🤝', label: '파트너 관리', action: 'partners' },
-                { icon: '⚙️', label: '설정', action: 'settings' },
+                { icon: '⚡', label: '워크플로우', action: 'workflows' },
               ].map((item) => (
                 <button 
                   key={item.action}
@@ -457,7 +497,7 @@ export function Dashboard() {
                     gap: '8px'
                   }}
                   onClick={() => {
-                    if (item.action === 'settings') {
+                    if (item.action === 'import') {
                       window.open('http://localhost:10200', '_blank')
                     }
                   }}

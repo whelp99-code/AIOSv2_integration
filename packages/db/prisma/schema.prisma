@@ -24,6 +24,8 @@ model User {
   accounts  Account[]
   sessions  Session[]
   projects  Project[]
+  customers Customer[]
+  partners  Partner[]
 
   @@map("users")
 }
@@ -140,6 +142,150 @@ model AgentJob {
   metadata    Json?
 
   @@map("agent_jobs")
+}
+
+// Customer model (AIOS v1 통합)
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  domain    String?
+  industry  String?
+  status    String   @default("active")
+  notes     String?
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user     User          @relation(fields: [userId], references: [id])
+  contacts Contact[]
+  tasks    Task[]
+
+  @@map("customers")
+}
+
+// Partner model (AIOS v1 통합)
+model Partner {
+  id        String   @id @default(cuid())
+  name      String
+  domain    String?
+  type      String?
+  status    String   @default("active")
+  notes     String?
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("partners")
+}
+
+// Contact model
+model Contact {
+  id        String   @id @default(cuid())
+  name      String
+  email     String?
+  phone     String?
+  position  String?
+  customerId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@map("contacts")
+}
+
+// Mail Message model (Mail Intelligence 통합)
+model MailMessage {
+  id              String   @id @default(cuid())
+  subject         String
+  fromEmail       String
+  fromName        String?
+  bodyPreview     String?
+  body            String?
+  receivedAt      DateTime
+  isRead          Boolean  @default(false)
+  importance      String?
+  webLink         String?
+  groupKey        String?
+  status          String?
+  aiAnalysis      Json?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@map("mail_messages")
+}
+
+// Workflow model (F-aios-v3 통합)
+model Workflow {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  type        String
+  status      String   @default("active")
+  config      Json?
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  user     User            @relation(fields: [userId], references: [id])
+  executions WorkflowExecution[]
+
+  @@map("workflows")
+}
+
+// Workflow Execution model
+model WorkflowExecution {
+  id          String   @id @default(cuid())
+  workflowId  String
+  status      String   @default("pending")
+  input       Json?
+  output      Json?
+  error       String?
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+
+  // Relations
+  workflow Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+
+  @@map("workflow_executions")
+}
+
+// Knowledge Document model (지식베이스 통합)
+model KnowledgeDocument {
+  id        String   @id @default(cuid())
+  title     String
+  content   String
+  category  String?
+  tags      String[]
+  source    String?
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("knowledge_documents")
+}
+
+// Learning Data model (학습 데이터 통합)
+model LearningData {
+  id        String   @id @default(cuid())
+  type      String
+  input     Json
+  output    Json
+  feedback  String?
+  score     Float?
+  userId    String
+  createdAt DateTime @default(now())
+
+  @@map("learning_data")
 }
 
 // Kanban Board model
