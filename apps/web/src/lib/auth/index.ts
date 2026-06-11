@@ -7,7 +7,7 @@ export const {
   signIn,
   signOut,
 } = NextAuth({
-  secret: 'aiosv2-integration-secret-key-2024',
+  secret: process.env.NEXTAUTH_SECRET || 'aiosv2-dev-secret-2024',
   providers: [
     GithubProvider({
       clientId: process.env.GITHUB_ID ?? '',
