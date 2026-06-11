@@ -20,6 +20,20 @@ interface OutlookStatus {
   authMode?: string
 }
 
+interface Customer {
+  id: string
+  name: string
+  industry?: string
+  status?: string
+}
+
+interface Partner {
+  id: string
+  name: string
+  type?: string
+  status?: string
+}
+
 interface StatsCardProps {
   title: string
   value: string | number
@@ -82,16 +96,20 @@ export function Dashboard() {
   const { data: session, status } = useSession()
   const [mails, setMails] = useState<MailMessage[]>([])
   const [outlookStatus, setOutlookStatus] = useState<OutlookStatus | null>(null)
+  const [customers, setCustomers] = useState<Customer[]>([])
+  const [partners, setPartners] = useState<Partner[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchData() {
       try {
-        // 서버 사이드 프록시를 통해 데이터 가져오기
-        const [statusRes, mailsRes] = await Promise.all([
+        // 병렬로 데이터 가져오기
+        const [statusRes, mailsRes, customersRes, partnersRes] = await Promise.all([
           fetch('/api/proxy/outlook/status'),
-          fetch('/api/proxy/outlook/messages')
+          fetch('/api/proxy/outlook/messages'),
+          fetch('/api/customers'),
+          fetch('/api/partners')
         ])
 
         if (statusRes.ok) {
@@ -102,6 +120,16 @@ export function Dashboard() {
         if (mailsRes.ok) {
           const mailsData = await mailsRes.json()
           setMails(mailsData.messages || [])
+        }
+
+        if (customersRes.ok) {
+          const customersData = await customersRes.json()
+          setCustomers(customersData.customers || [])
+        }
+
+        if (partnersRes.ok) {
+          const partnersData = await partnersRes.json()
+          setPartners(partnersData.partners || [])
         }
         
         setLoading(false)
@@ -139,30 +167,30 @@ export function Dashboard() {
       loading 
     },
     { 
-      title: '읽지 않은 메일', 
-      value: unreadCount, 
-      change: unreadCount > 0 ? '확인 필요' : '모두 읽음', 
-      trend: unreadCount > 0 ? 'up' : 'down', 
-      icon: '📬', 
+      title: '고객', 
+      value: customers.length, 
+      change: 'AIOS v1 연동', 
+      trend: 'up' as const, 
+      icon: '👥', 
+      color: '#d1fae5',
+      loading
+    },
+    { 
+      title: '파트너', 
+      value: partners.length, 
+      change: 'AIOS v1 연동', 
+      trend: 'up' as const, 
+      icon: '🤝', 
       color: '#fef3c7',
       loading
     },
     { 
       title: 'Outlook 연결', 
       value: outlookStatus?.connected ? '연결됨' : '연결 안됨', 
-      change: outlookStatus?.authMode || 'N/A',
+      change: outlookStatus?.aiProvider || 'N/A',
       trend: outlookStatus?.connected ? 'up' : 'down', 
       icon: '🔗', 
       color: outlookStatus?.connected ? '#d1fae5' : '#fee2e2',
-      loading
-    },
-    { 
-      title: 'AI 프로바이더', 
-      value: outlookStatus?.aiProvider === 'f-aios-v3' ? 'F-AIOS-v3' : outlookStatus?.aiProvider || 'N/A', 
-      change: 'LM Studio 연결',
-      trend: 'up', 
-      icon: '🤖', 
-      color: '#e0e7ff',
       loading
     },
   ]
@@ -175,7 +203,7 @@ export function Dashboard() {
           Welcome back, {session?.user?.name || 'User'}! 👋
         </h1>
         <p style={{ fontSize: '15px', color: '#6b7280', margin: 0 }}>
-          AIOS 통합 대시보드 - 실제 메일 인텔리전스
+          AIOS 통합 대시보드 - 모든 프로젝트 통합 관리
         </p>
         {error && (
           <p style={{ fontSize: '14px', color: '#dc2626', marginTop: '8px' }}>
@@ -240,7 +268,7 @@ export function Dashboard() {
               </div>
             ) : recentMails.length === 0 ? (
               <div style={{ padding: '40px', textAlign: 'center', color: '#6b7280' }}>
-                메일이 없습니다. Mail Intelligence에서 메일을 가져오세요.
+                메일이 없습니다.
               </div>
             ) : (
               recentMails.map((mail, idx) => (
@@ -353,6 +381,48 @@ export function Dashboard() {
             </a>
           </div>
 
+          {/* 고객/파트너 요약 */}
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '12px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+            border: '1px solid #e5e7eb',
+            padding: '24px'
+          }}>
+            <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#111827', margin: '0 0 16px 0' }}>
+              👥 고객/파트너
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '14px', color: '#6b7280' }}>고객</span>
+                <span style={{ fontSize: '14px', color: '#111827', fontWeight: '600' }}>
+                  {customers.length}명
+                </span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '14px', color: '#6b7280' }}>파트너</span>
+                <span style={{ fontSize: '14px', color: '#111827', fontWeight: '600' }}>
+                  {partners.length}명
+                </span>
+              </div>
+            </div>
+            <div style={{ marginTop: '16px' }}>
+              <h4 style={{ fontSize: '14px', fontWeight: '600', color: '#111827', margin: '0 0 8px 0' }}>
+                최근 고객
+              </h4>
+              {customers.slice(0, 5).map((customer) => (
+                <div key={customer.id} style={{
+                  padding: '8px 0',
+                  borderBottom: '1px solid #f3f4f6',
+                  fontSize: '13px',
+                  color: '#374151'
+                }}>
+                  {customer.name} - {customer.industry || 'N/A'}
+                </div>
+              ))}
+            </div>
+          </div>
+
           {/* 빠른 실행 */}
           <div style={{
             backgroundColor: 'white',
@@ -367,8 +437,8 @@ export function Dashboard() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               {[
                 { icon: '📧', label: '메일 가져오기', action: 'import' },
-                { icon: '🔍', label: '메일 분석', action: 'analyze' },
-                { icon: '📊', label: '리포트', action: 'report' },
+                { icon: '👥', label: '고객 관리', action: 'customers' },
+                { icon: '🤝', label: '파트너 관리', action: 'partners' },
                 { icon: '⚙️', label: '설정', action: 'settings' },
               ].map((item) => (
                 <button 
