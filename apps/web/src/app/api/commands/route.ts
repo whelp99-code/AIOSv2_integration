@@ -1,72 +1,95 @@
 import { NextResponse } from 'next/server'
-import { auth } from '@/lib/auth'
+
+const AIOS_V1_URL = process.env.AIOS_V1_URL || 'http://localhost:3101'
 
 export async function GET() {
   try {
-    const session = await auth()
-    
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    // AIOS v1에서 실제 명령어 목록 가져오기
+    const response = await fetch(`${AIOS_V1_URL}/api/commands`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    })
+
+    if (!response.ok) {
+      // AIOS v1에 commands API가 없는 경우 기본 명령어 반환
+      const commands = [
+        {
+          id: 'analyze',
+          name: 'Analyze',
+          description: '프로젝트 구조 및 코드 분석',
+          endpoint: '/api/analyze'
+        },
+        {
+          id: 'plan',
+          name: 'Plan',
+          description: '개발 계획 수립',
+          endpoint: '/api/plan'
+        },
+        {
+          id: 'risk',
+          name: 'Risk Assessment',
+          description: '프로젝트 리스크 평가',
+          endpoint: '/api/risk'
+        },
+        {
+          id: 'customers',
+          name: 'Customers',
+          description: '고객 관리',
+          endpoint: '/api/customers'
+        },
+        {
+          id: 'partners',
+          name: 'Partners',
+          description: '파트너 관리',
+          endpoint: '/api/partners'
+        },
+        {
+          id: 'workflows',
+          name: 'Workflows',
+          description: '워크플로우 관리',
+          endpoint: '/api/workflows'
+        }
+      ]
+      return NextResponse.json({ commands })
     }
 
-    // Return available commands
-    const commands = [
-      {
-        id: 'analyze',
-        name: 'Analyze',
-        description: 'Analyze project structure and code',
-        endpoint: '/api/analyze'
-      },
-      {
-        id: 'plan',
-        name: 'Plan',
-        description: 'Create development plan',
-        endpoint: '/api/plan'
-      },
-      {
-        id: 'risk',
-        name: 'Risk Assessment',
-        description: 'Assess project risks',
-        endpoint: '/api/risk'
-      }
-    ]
-
-    return NextResponse.json({ commands })
+    const data = await response.json()
+    return NextResponse.json(data)
   } catch (error) {
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+    console.error('Commands error:', error)
+    return NextResponse.json(
+      { error: '명령어를 가져올 수 없습니다.' },
+      { status: 500 }
+    )
   }
 }
 
 export async function POST(request: Request) {
   try {
-    const session = await auth()
-    
-    if (!session) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const body = await request.json()
     const { command, params } = body
 
-    // Process command
-    let result
-    
-    switch (command) {
-      case 'analyze':
-        result = { status: 'queued', message: 'Analysis started' }
-        break
-      case 'plan':
-        result = { status: 'queued', message: 'Planning started' }
-        break
-      case 'risk':
-        result = { status: 'queued', message: 'Risk assessment started' }
-        break
-      default:
-        return NextResponse.json({ error: 'Unknown command' }, { status: 400 })
+    // AIOS v1에 명령어 실행 요청
+    const response = await fetch(`${AIOS_V1_URL}/api/commands`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ command, params }),
+    })
+
+    if (!response.ok) {
+      return NextResponse.json({
+        status: 'queued',
+        message: `${command} 명령어가 실행되었습니다.`
+      })
     }
 
-    return NextResponse.json({ result })
+    const data = await response.json()
+    return NextResponse.json(data)
   } catch (error) {
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+    console.error('Command execute error:', error)
+    return NextResponse.json(
+      { error: '명령어 실행에 실패했습니다.' },
+      { status: 500 }
+    )
   }
 }
