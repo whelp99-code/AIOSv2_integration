@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 
-const MAIL_INTELLIGENCE_URL = process.env.MAIL_INTELLIGENCE_URL || 'http://localhost:10200'
+const MAIL_INTELLIGENCE_URL = process.env.MAIL_INTELLIGENCE_URL || 'http://localhost:3010'
 
 export async function GET() {
   try {
