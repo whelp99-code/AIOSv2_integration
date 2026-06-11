@@ -8,11 +8,29 @@ export async function GET(request: Request) {
     const owner = searchParams.get('owner')
     const repo = searchParams.get('repo')
 
-    // AIOS v1에 github API가 없으므로 빈 데이터 반환
+    // AIOS v1의 connectors API를 GitHub 연동으로 활용
+    const response = await fetch(`${AIOS_V1_URL}/api/connectors`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    })
+
+    if (!response.ok) {
+      throw new Error(`AIOS v1 API error: ${response.status}`)
+    }
+
+    const data = await response.json()
+    
+    // connectors를 GitHub 형식으로 변환
+    const connectors = data.connectors || data || []
+    const githubConnector = connectors.find((c: any) => 
+      c.type === 'github' || c.name?.toLowerCase().includes('github')
+    )
+
     return NextResponse.json({
-      branches: [],
-      commits: [],
-      message: 'GitHub API가 아직 구현되지 않았습니다.'
+      branches: githubConnector?.branches || [],
+      commits: githubConnector?.commits || [],
+      connectors: connectors,
+      message: 'GitHub 연동을 위해 connectors API를 사용합니다.'
     })
   } catch (error) {
     console.error('GitHub error:', error)

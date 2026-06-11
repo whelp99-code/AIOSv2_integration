@@ -4,8 +4,30 @@ const AIOS_V1_URL = process.env.AIOS_V1_URL || 'http://localhost:3101'
 
 export async function GET() {
   try {
-    // AIOS v1에 automation API가 없으므로 빈 배열 반환
-    return NextResponse.json({ workflows: [] })
+    // AIOS v1의 actions API를 automation으로 활용
+    const response = await fetch(`${AIOS_V1_URL}/api/actions`, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    })
+
+    if (!response.ok) {
+      throw new Error(`AIOS v1 API error: ${response.status}`)
+    }
+
+    const data = await response.json()
+    
+    // actions를 automation workflows 형식으로 변환
+    const workflows = (data.actions || data || []).map((action: any) => ({
+      id: action.id || action.name,
+      name: action.name || action.title,
+      description: action.description,
+      status: action.status || 'active',
+      type: 'automation',
+      createdAt: action.createdAt,
+      updatedAt: action.updatedAt
+    }))
+
+    return NextResponse.json({ workflows })
   } catch (error) {
     console.error('Automation error:', error)
     return NextResponse.json(
@@ -17,11 +39,25 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    // AIOS v1에 automation API가 없으므로 에러 반환
-    return NextResponse.json(
-      { error: '자동화 API가 아직 구현되지 않았습니다.' },
-      { status: 501 }
-    )
+    const body = await request.json()
+    const { workflowId, input } = body
+
+    // AIOS v1의 actions API로 자동화 실행
+    const response = await fetch(`${AIOS_V1_URL}/api/actions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: workflowId,
+        params: input
+      }),
+    })
+
+    if (!response.ok) {
+      throw new Error(`AIOS v1 API error: ${response.status}`)
+    }
+
+    const data = await response.json()
+    return NextResponse.json(data)
   } catch (error) {
     console.error('Automation execute error:', error)
     return NextResponse.json(
