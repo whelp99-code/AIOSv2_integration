@@ -7,27 +7,17 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url)
     const owner = searchParams.get('owner')
     const repo = searchParams.get('repo')
-    
-    let url = `${AIOS_V1_URL}/api/github`
-    if (owner && repo) {
-      url += `?owner=${encodeURIComponent(owner)}&repo=${encodeURIComponent(repo)}`
-    }
-    
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
+
+    // AIOS v1에 github API가 없으므로 빈 데이터 반환
+    return NextResponse.json({
+      branches: [],
+      commits: [],
+      message: 'GitHub API가 아직 구현되지 않았습니다.'
     })
-
-    if (!response.ok) {
-      throw new Error(`AIOS v1 API error: ${response.status}`)
-    }
-
-    const data = await response.json()
-    return NextResponse.json(data)
   } catch (error) {
-    console.error('GitHub proxy error:', error)
+    console.error('GitHub error:', error)
     return NextResponse.json(
-      { error: 'Failed to fetch GitHub data' },
+      { error: 'GitHub 데이터를 가져올 수 없습니다.' },
       { status: 500 }
     )
   }
