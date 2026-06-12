@@ -1,193 +1,244 @@
 # AIOSv2 Integration 테스트 결과 분석 보고서
 
-## 1. 테스트 결과 요약
-
-| 항목 | 결과 | 상태 |
-|------|------|------|
-| Mail Intelligence | 0건 (메일 없음) | ⚠️ 확인 필요 |
-| 고객 API | 5명 | ✅ 정상 |
-| 파트너 API | 3명 | ✅ 정상 |
-| 워크플로우 API | 34개 | ✅ 정상 |
-| 태스크 API | 34개 | ✅ 정상 |
-| 승인 API | 0건 | ⚠️ 확인 필요 |
-| F-aios-v3 헬스 | 연결 불가 | ❌ 오류 |
+**분석 일시**: 2026-06-12 12:30 KST  
+**분석 대상**: TEST_REPORT.md  
+**작업 디렉토리**: /Users/jmpark/Documents/Playground/AIOSv2_integration
 
 ---
 
-## 2. 이슈 분석
+## Executive Summary
 
-### 2.1 Mail Intelligence 메일 0건 원인
+테스트 결과는 전반적으로 정확하나, **3가지 주요 문제점**이 발견되었습니다.  
+가장 심각한 문제는 **프록시 라우트의 잘못된 백엔드 URL 구성**입니다.
 
-**원인:** Mail Intelligence 서버 연결 불가
+---
 
-**분석:**
-- `apps/web/src/app/api/proxy/outlook/messages/route.ts` 파일에서 Mail Intelligence 서버에 연결 시도
-- 연결 대상: `MAIL_INTELLIGENCE_URL` 환경변수 또는 기본값 `http://localhost:10200`
-- Mail Intelligence 서버가 실행 중이지 않아 fetch 요청 실패
-- 에러 발생 시 빈 배열(`messages: []`) 반환으로 인해 0건으로 표시
+## 1. 테스트 결과 정확성 검증
 
-**현재 구현 상태:**
+### ✅ 정확한 부분
+
+| 항목 | 테스트 보고서 | 실제 확인 결과 |
+|------|-------------|---------------|
+| Mail Intelligence (3010) | ✅ 정상 | ✅ 정확함 |
+| AIOS API Server (3200) | ✅ 정상 | ✅ 정확함 (`apps/api/src/index.ts:14`에서 확인) |
+| AIOS Web Server (3300) | ✅ 정상 | ✅ 정확함 (`apps/web/package.json:6`에서 확인) |
+| Approvals API | ✅ 3개 항목 반환 | ✅ 정확함 (인메모리 스토어 사용) |
+| Outlook 프록시 | ✅ 44개 메일 | ✅ 정확함 |
+
+### ⚠️ 불일치 발견
+
+**포트 3100 관련 불일치:**
+- 테스트 보고서: "AIOSv2 (지정된 포트) 3100 ❌ 미동작"
+- `packages/shared/src/constants/ports.ts`: `WEB: 3100`으로 정의됨
+- `apps/web/package.json`: `next dev -p 3300`으로 설정됨
+- `.env.example`: `NEXTAUTH_URL=http://localhost:3100`
+
+**결론**: 코드상 포트 설정이 불일치합니다.
+
+---
+
+## 2. 발견된 문제의 원인 분석
+
+### 문제 1: 포트 구성 불일치 (Medium Severity)
+
+**증상**: 
+- 코드 상 `WEB: 3100`으로 정의되어 있으나, 실제 앱은 `3300`에서 실행됨
+
+**근본 원인**:
+```
+packages/shared/src/constants/ports.ts
+├── WEB: 3100      ← 코드 정의
+├── API: 3200      ← 실제 실행 포트
+└── LIGHT_RAG: 3300 ← 실제 Web 앱 포트 (LIGHT_RAG로 오인?)
+
+apps/web/package.json
+└── "dev": "next dev -p 3300"  ← 실제 실행 포트
+```
+
+**영향도**: 
+- 테스트 파일 `tests/integration.test.ts:3`에서 `WEB_URL = 'http://localhost:3100'` 사용
+- 포트 불일치로 테스트 실패 가능성
+
+---
+
+### 문제 2: 프록시 라트의 잘못된 백엔드 URL (Critical Severity)
+
+**증상**: 
+- `/api/customers`, `/api/partners`, `/api/workflows`, `/api/tasks` API 오류 발생
+- 오류 메시지: "Failed to fetch customers", "Failed to fetch partners" 등
+
+**근본 원인**:
 ```typescript
-// plugins/mail-plugin/src/index.ts
-// 실제 메일 분석 라우트가 주석 처리됨
-registerRoutes(router: any) {
-  // router.get('/api/mail', getMails);
-  // router.post('/api/mail/analyze', analyzeMail);
+// apps/web/src/app/api/customers/route.ts:3
+const AIOS_V1_URL = process.env.AIOS_V1_URL || 'http://localhost:3101'
+//                                    ↑ 포트 3101로 설정됨
+//                                    ↑ 실제 서버는 3200에서 실행 중
+```
+
+**영향받는 파일들**:
+| 파일 | 문제 |
+|------|------|
+| `apps/web/src/app/api/customers/route.ts` | `http://localhost:3101`로 프록시 |
+| `apps/web/src/app/api/partners/route.ts` | `http://localhost:3101`로 프록시 |
+| `apps/web/src/app/api/workflows/route.ts` | `http://localhost:3101`로 프록시 |
+| `apps/web/src/app/api/tasks/route.ts` | `http://localhost:3101`로 프록시 |
+| `apps/web/src/app/api/plan/route.ts` | `http://localhost:3101`로 프록시 |
+| `apps/web/src/app/api/github/route.ts` | `http://localhost:3101`로 프록시 |
+| `apps/web/src/app/api/knowledge/route.ts` | `http://localhost:3101`로 프록시 |
+| `apps/web/src/app/api/risk/route.ts` | `http://localhost:3101`로 프록시 |
+
+**설명**: 
+이 라우트들은 "AIOS v1"이라는 레거시 백엔드로 프록시하도록 설계되었으나,  
+현재 환경에는 해당 서버가 존재하지 않습니다.  
+실제 API 서버는 포트 `3200`에서 실행 중입니다.
+
+---
+
+### 문제 3: Approvals API의 인메모리 저장소 한계 (Low Severity)
+
+**증상**: 
+- Approvals API는 정상 동작
+- 단, 서버 재시작 시 데이터 소실
+
+**근본 원인**:
+```typescript
+// apps/web/src/app/api/approvals/route.ts:23
+const approvals: Map<string, ApprovalRequest> = new Map()
+// 인메모리 저장소 사용 (영구 저장소 아님)
+```
+
+**설명**: 
+테스트에서는 정상 동작하나, 프로덕션 환경에서는 Prisma를 사용한 영구 저장소가 필요합니다.
+
+---
+
+## 3. 해결 방안 제시
+
+### 해결 방안 1: 포트 구성 통일
+
+**옵션 A: 상수 파일 업데이트 (권장)**
+```typescript
+// packages/shared/src/constants/ports.ts
+export const PORTS = {
+  WEB: 3300,        // 변경: 3100 → 3300
+  API: 3200,
+  LIGHT_RAG: 3300,  // 또는 LIGHT_RAG 포트 재정의 필요
+  DASHBOARD: 3400,
+  VOICE: 3500,
+  LM_STUDIO: 1234
+} as const
+```
+
+**옵션 B: 앱 포트 변경**
+```json
+// apps/web/package.json
+"dev": "next dev -p 3100"
+```
+
+---
+
+### 해결 방안 2: 프록시 라우트 URL 수정
+
+**즉시 수정 (빠른 해결)**:
+```typescript
+// 모든 프록시 라우트에서 AIOS_V1_URL 변경
+const AIOS_V1_URL = process.env.AIOS_V1_URL || 'http://localhost:3200'
+//                                                                       ↑ 3101 → 3200
+```
+
+**장기적 해결 (권장)**:
+프록시 라우트를 Prisma 기반 직접 구현으로 전환:
+
+```typescript
+// 예: apps/web/src/app/api/customers/route.ts (새로운 구현)
+import { prisma } from '@aios/db'
+
+export async function GET(request: Request) {
+  const { searchParams } = new URL(request.url)
+  const search = searchParams.get('search') || ''
+  
+  const customers = await prisma.customer.findMany({
+    where: search ? {
+      OR: [
+        { name: { contains: search, mode: 'insensitive' } },
+        { email: { contains: search, mode: 'insensitive' } },
+      ]
+    } : undefined,
+    include: { contacts: true }
+  })
+  
+  return NextResponse.json({ customers })
 }
 ```
 
-**결론:** Mail Intelligence 서버가 별도 프로세스로 동작해야 하며, 현재 해당 서버가 기동되지 않은 상태
-
 ---
 
-### 2.2 승인 API 0건 원인
+### 해결 방안 3: 테스트 파일 포트 업데이트
 
-**원인:** AIOS v1에 approvals API가 미구현
-
-**분석:**
-- `apps/web/src/app/api/approvals/route.ts` 파일에 명시적 주석 확인:
-  ```typescript
-  // AIOS v1에 approvals API가 없으므로 빈 배열 반환
-  return NextResponse.json({ approvals: [] })
-  ```
-- GET/POST 엔드포인트 모두 더미 응답 반환
-- 도메인 모델(`approval-policy.ts`)과 서비스(`auto-approval-resolver.ts`)는 존재하나 실제 API 연동 없음
-
-**현재 구현 상태:**
-- `packages/domain/src/models/approval-policy.ts`: 승인 정책 도메인 모델 정의됨
-- `packages/application/src/agents/auto-approval-resolver.ts`: 자동 승인 해석기 구현됨
-- 실제 저장소(Repository) 및 API 라우터 미구현
-
-**결론:** 승인 관련 비즈니스 로직은 설계되었으나, API 레이어와의 연결이 이루어지지 않은 상태
-
----
-
-### 2.3 F-aios-v3 연결 불가 원인
-
-**원인:** F-aios-v3 서버 미실행 또는 환경변수 미설정
-
-**분석:**
-- `apps/web/src/app/api/aios-v3/health/route.ts`에서 F-aios-v3 서버 연결 시도
-- 연결 대상: `F_AIOS_V3_URL` 환경변수 또는 기본값 `http://localhost:3200`
-- 서버 응답 없음으로 fetch 실패 후 500 에러 반환
-
-**현재 구현 상태:**
 ```typescript
-const F_AIOS_V3_URL = process.env.F_AIOS_V3_URL || 'http://localhost:3200'
-
-export async function GET() {
-  const response = await fetch(`${F_AIOS_V3_URL}/api/health`, {...})
-}
+// tests/integration.test.ts
+const WEB_URL = 'http://localhost:3300'  // 변경: 3100 → 3300
+const API_URL = 'http://localhost:3200'
 ```
 
-**결론:** F-aios-v3는 별도의 외부 서비스이며, 해당 서비스가 기동되지 않았거나 네트워크 연결 문제
+---
+
+## 4. 최종 평가
+
+### 점수: 75/100 (양호)
+
+| 평가 항목 | 점수 | 비고 |
+|-----------|------|------|
+| 서버 구성 | 90/100 | Mail Intelligence, API, Web 서버 정상 |
+| API 기능 | 60/100 | Approvals만 정상, 4개 API 프록시 실패 |
+| 코드 품질 | 80/100 | 모놀리스 구조 우수, 포트 관리 미흡 |
+| 테스트 커버리지 | 70/100 | 통합 테스트 존재하나 포트 불일치 |
+| 문서화 | 80/100 | 테스트 보고서 상세, 설정 문서 보완 필요 |
+
+### 강점 ✅
+1. 모놀리스 모노레포 구조가 잘 구성됨 (Turborepo + pnpm)
+2. Mail Intelligence 통합이 성공적으로 수행됨
+3. Approvals API가 인메모리 저장소로 빠르게 구현됨
+4. tRPC 기반 API 서버가 정상 동작
+
+### 약점 ⚠️
+1. 포트 설정이 코드 전반에 걸쳐 불일치
+2. 레거시 AIOS v1 프록시 라우트가 실제 환경과 불일치
+3. 데이터베이스 연결이 필요한 API가 Prisma를 사용하지 않음
+4. 테스트 환경과 실제 실행 환경의 설정 차이
+
+### 권장 우선순위
+
+| 순위 | 작업 | 예상 소요 시간 |
+|------|------|---------------|
+| 1 | 프록시 라우트 URL 수정 (3101 → 3200) | 30분 |
+| 2 | 포트 상수 통일 (3100 vs 3300) | 15분 |
+| 3 | 테스트 파일 포트 업데이트 | 10분 |
+| 4 | Prisma 기반 API 구현 (장기) | 2-3일 |
 
 ---
 
-## 3. 개선 방안
+## 5. 추가 검증이 필요한 항목
 
-### 3.1 Mail Intelligence 개선
+1. **데이터베이스 연결 상태**
+   ```bash
+   # PostgreSQL 서버 실행 확인
+   psql -h localhost -U user -d aios_v2 -c "SELECT 1"
+   ```
 
-| 우선순위 | 개선 방안 | 설명 |
-|----------|----------|------|
-| 🔴 높음 | Mail Intelligence 서버 기동 | 로컬 개발 환경에서 서버 실행 필요 |
-| 🟡 중간 | 모의 데이터(Mock Data) 추가 | 서버 없이도 테스트 가능한 샘플 데이터 제공 |
-| 🟢 낮음 | 연결 실패 시 폴백 처리 개선 | 사용자에게 명확한 에러 메시지 표시 |
+2. **Prisma 마이그레이션 상태**
+   ```bash
+   pnpm db:generate
+   pnpm db:push
+   ```
 
-**권장 조치:**
-1. Mail Intelligence 서버 기동 스크립트 확인 및 실행
-2. `.env` 파일에 `MAIL_INTELLIGENCE_URL` 설정
-3. 개발 환경용 Mock 구현 추가
-
----
-
-### 3.2 승인 API 개선
-
-| 우선순위 | 개선 방안 | 설명 |
-|----------|----------|------|
-| 🔴 높음 | Approval Repository 구현 | 승인 요청 저장소 구현 |
-| 🔴 높음 | API 라우터 연동 | 도메인 서비스와 API 연결 |
-| 🟡 중간 | 샘플 승인 데이터 추가 | 테스트를 위한 샘플 요청 생성 |
-| 🟢 낮음 | 승인 워크플로우 UI | 프론트엔드 승인 관리 화면 |
-
-**권장 조치:**
-1. `packages/infrastructure/`에 Approval Repository 구현
-2. `apps/api/src/routers/`에 approvals 라우터 추가
-3. Auto-Approval Resolver와 실제 서비스 연결
+3. **환경 변수 검증**
+   ```bash
+   # .env.local 파일 확인
+   cat .env.local | grep -E "(DATABASE_URL|AIOS_V1_URL|MAIL_INTELLIGENCE_URL)"
+   ```
 
 ---
 
-### 3.3 F-aios-v3 연결 개선
-
-| 우선순위 | 개선 방안 | 설명 |
-|----------|----------|------|
-| 🔴 높음 | F-aios-v3 서버 기동 | 해당 서비스 실행 필요 |
-| 🔴 높음 | 환경변수 설정 확인 | `.env` 파일에 `F_AIOS_V3_URL` 확인 |
-| 🟡 중간 | 연결 상태 모니터링 | 헬스 체크 대시보드 구현 |
-| 🟢 낮음 | 재시도 로직 추가 | 일시적 연결 실패 시 자동 재시도 |
-
-**권장 조치:**
-1. F-aios-v3 서비스가 어디서 실행되는지 확인
-2. `F_AIOS_V3_URL` 환경변수 올바르게 설정
-3. 네트워크 연결 상태 확인 (방화벽, 포트 등)
-
----
-
-## 4. 전체 시스템 구조 분석
-
-### 4.1 아키텍처 개요
-
-```
-AIOSv2 Integration (Turborepo + pnpm)
-├── apps/
-│   ├── web/          # Next.js 14 App Router (프론트엔드)
-│   └── api/          # 백엔드 API 서버
-├── packages/
-│   ├── domain/       # 도메인 모델
-│   ├── application/  # 비즈니스 로직
-│   ├── infrastructure/ # 인프라 구현
-│   ├── shared/       # 공통 유틸리티
-│   └── db/          # 데이터베이스
-├── plugins/
-│   ├── plugin-core/  # 플러그인 코어
-│   └── mail-plugin/  # 메일 플러그인
-└── tests/           # 테스트 파일
-```
-
-### 4.2 의존성 관계
-
-- **Mail Intelligence**: 외부 서비스 (포트 10200)
-- **F-aios-v3**: 외부 서비스 (포트 3200)
-- **고객/파트너/워크플로우/태스크**: 로컬 API 또는 DB
-
----
-
-## 5. 결론 및 권장 사항
-
-### 현재 상태 평가
-- ✅ 핵심 도메인 모델 및 비즈니스 로직 설계 완료
-- ✅ 기본 API 구조 구현 완료
-- ⚠️ 외부 서비스 연동 미완료 (Mail, F-aios-v3)
-- ⚠️ 승인 기능 미구현
-
-### 다음 단계
-
-1. **즉시 조치 (1-2일)**
-   - Mail Intelligence 서버 기동 또는 Mock 구현
-   - F-aios-v3 연결 설정 확인
-   - 환경변수(.env) 설정 검증
-
-2. **단기 개선 (1-2주)**
-   - 승인 API 전체 구현
-   - 외부 서비스 연결 재시도 로직 추가
-   - 에러 핸들링 및 로깅 개선
-
-3. **장기 개선 (1개월)**
-   - 통합 테스트 자동화
-   - 모니터링 대시보드 구현
-   - 성능 최적화
-
----
-
-**작성일:** 2026-06-11
-**작성자:** AIOSv2 Integration 분석
+**분석 완료**  
+**다음 단계**: 해결 방안 1, 2, 3을 순차적으로 적용하고 테스트 재실행

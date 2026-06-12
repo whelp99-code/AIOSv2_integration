@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 
-const AIOS_V1_URL = process.env.AIOS_V1_URL || 'http://localhost:3101'
+const AIOS_V1_URL = process.env.AIOS_V1_URL || 'http://localhost:3200'
 
 export async function POST(request: Request) {
   try {
