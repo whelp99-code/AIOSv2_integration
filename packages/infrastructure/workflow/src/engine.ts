@@ -8,7 +8,7 @@ export type WorkflowStepStatus = 'pending' | 'running' | 'completed' | 'failed' 
 export interface WorkflowStep {
   id: string;
   name: string;
-  type: 'action' | 'condition' | 'parallel' | 'loop';
+  type: 'action' | 'condition' | 'parallel' | 'loop' | 'approval';
   config: Record<string, unknown>;
   nextSteps?: string[];
   retryPolicy?: { maxRetries: number; delayMs: number };

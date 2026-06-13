@@ -1,70 +1,56 @@
 import { NextResponse } from 'next/server'
-
-const AIOS_V1_URL = process.env.AIOS_V1_URL || 'http://localhost:3200'
+import { proxyAiosV1Json } from '../../../lib/integrations/aios-v1-proxy'
+import { upstreamErrorResponse } from '../../../lib/integrations/upstream-proxy'
+import { createGatedHandler, GATE_PRESETS } from '../../../lib/integrations/approval-middleware'
 
 export async function GET() {
   try {
-    // AIOS v1의 tasks API를 workflows로 활용
-    const response = await fetch(`${AIOS_V1_URL}/api/tasks`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
+    const result = await proxyAiosV1Json<{ tasks?: Array<Record<string, unknown>> }>({
+      path: '/api/tasks',
     })
 
-    if (!response.ok) {
-      throw new Error(`AIOS v1 API error: ${response.status}`)
+    if (!result.ok) {
+      return NextResponse.json(result.data, { status: result.status })
     }
 
-    const data = await response.json()
-    
-    // tasks를 workflows 형식으로 변환
-    const workflows = (data.tasks || []).map((task: any) => ({
+    const workflows = (result.data.tasks ?? []).map((task) => ({
       id: task.id,
       name: task.title,
       description: task.description,
       status: task.status,
       type: 'task',
       createdAt: task.createdAt,
-      updatedAt: task.updatedAt
+      updatedAt: task.updatedAt,
     }))
 
     return NextResponse.json({ workflows })
   } catch (error) {
-    console.error('Workflows error:', error)
-    return NextResponse.json(
-      { error: '워크플로우를 가져올 수 없습니다.' },
-      { status: 500 }
-    )
+    return upstreamErrorResponse('Workflows error', error)
   }
 }
 
-export async function POST(request: Request) {
-  try {
-    const body = await request.json()
-    const { name, description } = body
-
-    // AIOS v1의 tasks API로 워크플로우 생성
-    const response = await fetch(`${AIOS_V1_URL}/api/tasks`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        title: name,
-        description,
-        status: 'BACKLOG',
-        priority: 'MEDIUM'
-      }),
-    })
-
-    if (!response.ok) {
-      throw new Error(`AIOS v1 API error: ${response.status}`)
+// POST with deploy gate for workflow creation
+export const POST = createGatedHandler(
+  'deploy',
+  GATE_PRESETS.workflowCreate().assignmentId,
+  GATE_PRESETS.workflowCreate().target,
+  async (request) => {
+    try {
+      const body = await request.json()
+      const { name, description } = body
+      const result = await proxyAiosV1Json({
+        path: '/api/tasks',
+        method: 'POST',
+        body: {
+          title: name,
+          description,
+          status: 'BACKLOG',
+          priority: 'MEDIUM',
+        },
+      })
+      return NextResponse.json(result.data, { status: result.status })
+    } catch (error) {
+      return upstreamErrorResponse('Workflow create error', error)
     }
-
-    const data = await response.json()
-    return NextResponse.json(data)
-  } catch (error) {
-    console.error('Workflow create error:', error)
-    return NextResponse.json(
-      { error: '워크플로우 생성에 실패했습니다.' },
-      { status: 500 }
-    )
   }
-}
+)

@@ -22,11 +22,16 @@
     "db:generate": "pnpm --filter @aios/db db:generate",
     "db:push": "pnpm --filter @aios/db db:push",
     "db:migrate": "pnpm --filter @aios/db db:migrate",
-    "db:studio": "pnpm --filter @aios/db db:studio"
+    "db:studio": "pnpm --filter @aios/db db:studio",
+    "collaboration:run": "pnpm --filter @aios/api exec tsx ../../scripts/run-collaboration-contract.ts",
+    "collaboration:continue": "pnpm --filter @aios/api exec tsx ../../scripts/continue-collaboration-queue.ts",
+    "collaboration:dispatch-opencode": "pnpm --filter @aios/api exec tsx ../../scripts/dispatch-opencode-phase5.ts",
+    "collaboration:dispatch-opencode-phase6": "pnpm --filter @aios/api exec tsx ../../scripts/dispatch-opencode-phase6.ts"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.0",
     "@eslint/js": "^10.0.1",
+    "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
     "eslint": "^9.0.0",

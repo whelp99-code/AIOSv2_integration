@@ -10,9 +10,9 @@ echo "📁 프로젝트 디렉토리: $PROJECT_DIR"
 echo ""
 
 # 포트 확인 및 해제
-if lsof -ti :3100 > /dev/null 2>&1; then
-    echo "⚠️  포트 3100이 사용 중입니다. 기존 프로세스를 종료합니다..."
-    lsof -ti :3100 | xargs kill -9 2>/dev/null
+if lsof -ti :3110 > /dev/null 2>&1; then
+    echo "⚠️  포트 3110이 사용 중입니다. 기존 프로세스를 종료합니다..."
+    lsof -ti :3110 | xargs kill -9 2>/dev/null
     sleep 2
 fi
 
@@ -27,13 +27,13 @@ fi
 
 # 개발 서버 시작
 echo "🔧 개발 서버 시작..."
-echo "📡 서버 주소: http://localhost:3100"
+echo "📡 서버 주소: http://localhost:3110"
 echo ""
 echo "접속할 페이지:"
-echo "  - 홈: http://localhost:3100"
-echo "  - 로그인: http://localhost:3100/auth/signin"
-echo "  - 대시보드: http://localhost:3100/dashboard"
-echo "  - 칸반: http://localhost:3100/kanban"
+echo "  - 홈: http://localhost:3110"
+echo "  - 로그인: http://localhost:3110/auth/signin"
+echo "  - 대시보드: http://localhost:3110/dashboard"
+echo "  - 칸반: http://localhost:3110/kanban"
 echo ""
 echo "종료하려면 Ctrl+C를 누르세요."
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

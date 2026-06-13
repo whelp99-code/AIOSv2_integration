@@ -20,3 +20,6 @@ export * from './deferred-decision-handler';
 
 // Logging
 export * from './execution-log';
+
+// Collaboration Sessions
+export * from './session-coordinator';

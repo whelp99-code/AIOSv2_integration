@@ -1,0 +1,45 @@
+---
+description: Cursor + opencode + Codex 협업 역할 분담 (항상 준수)
+alwaysApply: true
+---
+
+# Cursor + opencode Collaboration Roles
+
+이 프로젝트의 AIOS 연동 작업은 **역할 분담 계약**을 따른다.  
+계약 원문: `docs/reports/cursor-opencode-collaboration.md`
+
+## 역할 (절대 혼동하지 말 것)
+
+| 역할 | 담당 | 하지 않는 일 |
+|------|------|--------------|
+| **Cursor** | 계획, 작업 분해, 검토, 협업 상태·evidence 정리, opencode/Codex 핸드오프 | 대규모 구현·패치·테스트 코드 직접 작성 (opencode 영역) |
+| **opencode** | 실제 구현, 패치, 테스트, 수정 반영 | 계획만 하고 구현 안 하기 |
+| **Codex** | review-only artifact, 리팩토링·정리 **제안** | 코드 구현 |
+
+## Cursor가 구현에 손대는 예외
+
+- 사용자가 **명시적으로** Cursor에게 직접 구현을 요청한 경우
+- orchestration을 위해 **계획·assignment·문서·스크립트 등록**만 하는 경우 (PHASE_TASKS, collaboration doc, evidence)
+
+그 외 feature/route/lib/test 구현은 **opencode assignment**로 넘기고, Cursor는 스펙·파일 목록·acceptance criteria를 정리한다.
+
+## 공유 상태
+
+- 세션: `cursor-opencode-main-session`
+- 상태 파일: `.aios/context/collaboration-state.json`
+- 승인 큐: `.aios/context/approval-queue.json`
+- evidence: `docs/evidence/<session-id>.md`
+- phase 진행: `scripts/continue-collaboration-queue.ts` → `pnpm collaboration:continue`
+
+## 승인 게이트
+
+위험 액션: `delete`, `send`, `deploy`, `external-share`  
+승인 전에는 upstream 호출 금지 (409 pending).
+
+## 핸드오프 패턴
+
+1. Cursor: phase 목표·assignment·targetFiles 정의
+2. `pnpm collaboration:continue` 또는 execute API로 opencode에 넘김
+3. opencode: 구현 + `pnpm test` / `pnpm typecheck`
+4. Cursor: 검토 + evidence 갱신
+5. Codex: review-only assignment

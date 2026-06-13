@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 interface Device {
   id: string
@@ -41,11 +41,100 @@ const mockEvents: SecurityEvent[] = [
   { id: '6', time: '2026-06-11 13:30:07', type: 'blocked', source: '45.33.32.156', destination: '10.0.1.1', description: '알려진 악성 IP에서 접근 시도', severity: 'high' },
 ]
 
-type TabKey = 'devices' | 'security' | 'topology'
+interface SangforWorkflow {
+  id: string
+  name?: string
+  title?: string
+  status?: string
+}
+
+type TabKey = 'devices' | 'security' | 'topology' | 'workflows'
 
 export default function SangforPage() {
   const [activeTab, setActiveTab] = useState<TabKey>('devices')
   const [selectedDevice, setSelectedDevice] = useState<Device | null>(null)
+  const [devices, setDevices] = useState<Device[]>(mockDevices)
+  const [events, setEvents] = useState<SecurityEvent[]>(mockEvents)
+  const [workflows, setWorkflows] = useState<SangforWorkflow[]>([])
+  const [liveConnected, setLiveConnected] = useState(false)
+  const [pendingApprovalId, setPendingApprovalId] = useState<string | null>(null)
+  const [executeBusy, setExecuteBusy] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function loadSangforData() {
+      try {
+        const [healthRes, workflowsRes, eventsRes] = await Promise.all([
+          fetch('/api/sangfor/health', { cache: 'no-store' }),
+          fetch('/api/sangfor/workflows', { cache: 'no-store' }),
+          fetch('/api/sangfor/events', { cache: 'no-store' }),
+        ])
+
+        if (healthRes.ok) {
+          setLiveConnected(true)
+        }
+
+        if (workflowsRes.ok) {
+          const data = await workflowsRes.json()
+          const list = Array.isArray(data) ? data : data.workflows ?? []
+          setWorkflows(list)
+        }
+
+        if (eventsRes.ok) {
+          const data = await eventsRes.json()
+          const list: SecurityEvent[] = Array.isArray(data) ? data : data.events ?? []
+          if (list.length > 0) {
+            setEvents(list)
+          }
+        }
+      } catch {
+        setLiveConnected(false)
+        setDevices(mockDevices)
+        setEvents(mockEvents)
+      }
+    }
+
+    void loadSangforData()
+  }, [])
+
+  async function executeWorkflow(workflowId: string) {
+    setExecuteBusy(workflowId)
+    try {
+      const res = await fetch(`/api/sangfor/workflows/${workflowId}/execute`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          approvalId: pendingApprovalId ?? undefined,
+          requestedBy: 'portal-user',
+          payload: {},
+        }),
+      })
+      const data = await res.json()
+      if (res.status === 409 && data.approval?.id) {
+        setPendingApprovalId(data.approval.id)
+        const approveRes = await fetch('/api/approvals', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            approvalId: data.approval.id,
+            status: 'approved',
+            resolvedBy: 'portal-user',
+            resolution: 'approved via sangfor page',
+          }),
+        })
+        if (approveRes.ok) {
+          setPendingApprovalId(data.approval.id)
+          await executeWorkflow(workflowId)
+        }
+        return
+      }
+      if (res.ok) {
+        setPendingApprovalId(null)
+        alert('워크플로우 실행이 완료되었습니다.')
+      }
+    } finally {
+      setExecuteBusy(null)
+    }
+  }
 
   const getStatusStyle = (status: Device['status']) => {
     switch (status) {
@@ -71,9 +160,9 @@ export default function SangforPage() {
     }
   }
 
-  const onlineDevices = mockDevices.filter(d => d.status === 'online').length
-  const warningDevices = mockDevices.filter(d => d.status === 'warning').length
-  const offlineDevices = mockDevices.filter(d => d.status === 'offline').length
+  const onlineDevices = devices.filter(d => d.status === 'online').length
+  const warningDevices = devices.filter(d => d.status === 'warning').length
+  const offlineDevices = devices.filter(d => d.status === 'offline').length
 
   return (
     <div style={{ padding: '32px', minHeight: '100%', backgroundColor: '#f9fafb' }}>
@@ -83,14 +172,14 @@ export default function SangforPage() {
           🛡️ Sangfor 보안 관리
         </h1>
         <p style={{ fontSize: '15px', color: '#6b7280', margin: 0 }}>
-          네트워크 보안 어플라이언스 모니터링 및 관리
+          네트워크 보안 어플라이언스 모니터링 및 관리 {liveConnected ? '(live)' : '(mock fallback)'}
         </p>
       </div>
 
       {/* Overview Cards */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '28px' }}>
         {[
-          { label: '총 디바이스', value: mockDevices.length, icon: '🖥️', color: '#dbeafe' },
+          { label: '총 디바이스', value: devices.length, icon: '🖥️', color: '#dbeafe' },
           { label: '온라인', value: onlineDevices, icon: '✅', color: '#d1fae5' },
           { label: '경고', value: warningDevices, icon: '⚠️', color: '#fef3c7' },
           { label: '오프라인', value: offlineDevices, icon: '❌', color: '#fee2e2' },
@@ -131,6 +220,7 @@ export default function SangforPage() {
           { key: 'devices' as TabKey, label: '디바이스 현황', icon: '🖥️' },
           { key: 'security' as TabKey, label: '보안 이벤트', icon: '🛡️' },
           { key: 'topology' as TabKey, label: '네트워크 토폴로지', icon: '🔗' },
+          { key: 'workflows' as TabKey, label: '워크플로우', icon: '⚙️' },
         ]).map((tab) => (
           <button
             key={tab.key}
@@ -158,7 +248,7 @@ export default function SangforPage() {
       {activeTab === 'devices' && (
         <div style={{ display: 'grid', gridTemplateColumns: selectedDevice ? '1fr 380px' : '1fr', gap: '24px' }}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {mockDevices.map((device) => {
+            {devices.map((device) => {
               const statusStyle = getStatusStyle(device.status)
               return (
                 <div
@@ -273,19 +363,19 @@ export default function SangforPage() {
             <div style={{ display: 'flex', gap: '24px' }}>
               <div>
                 <span style={{ fontSize: '13px', color: '#6b7280' }}>총 이벤트: </span>
-                <span style={{ fontSize: '14px', fontWeight: '600', color: '#111827' }}>{mockEvents.length}</span>
+                <span style={{ fontSize: '14px', fontWeight: '600', color: '#111827' }}>{events.length}</span>
               </div>
               <div>
                 <span style={{ fontSize: '13px', color: '#dc2626' }}>🔴 높음: </span>
-                <span style={{ fontSize: '14px', fontWeight: '600', color: '#dc2626' }}>{mockEvents.filter(e => e.severity === 'high').length}</span>
+                <span style={{ fontSize: '14px', fontWeight: '600', color: '#dc2626' }}>{events.filter(e => e.severity === 'high').length}</span>
               </div>
               <div>
                 <span style={{ fontSize: '13px', color: '#d97706' }}>🟡 중간: </span>
-                <span style={{ fontSize: '14px', fontWeight: '600', color: '#d97706' }}>{mockEvents.filter(e => e.severity === 'medium').length}</span>
+                <span style={{ fontSize: '14px', fontWeight: '600', color: '#d97706' }}>{events.filter(e => e.severity === 'medium').length}</span>
               </div>
             </div>
           </div>
-          {mockEvents.map((event) => {
+          {events.map((event) => {
             const sevStyle = getSeverityStyle(event.severity)
             return (
               <div key={event.id} style={{
@@ -340,7 +430,7 @@ export default function SangforPage() {
             maxWidth: '600px',
             margin: '0 auto',
           }}>
-            {mockDevices.map((device) => {
+            {devices.map((device) => {
               const statusStyle = getStatusStyle(device.status)
               return (
                 <div key={device.id} style={{
@@ -368,6 +458,60 @@ export default function SangforPage() {
               )
             })}
           </div>
+        </div>
+      )}
+
+      {activeTab === 'workflows' && (
+        <div style={{
+          backgroundColor: 'white',
+          borderRadius: '12px',
+          boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
+          border: '1px solid #e5e7eb',
+          padding: '24px',
+        }}>
+          <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#111827', margin: '0 0 16px 0' }}>
+            Sangfor 워크플로우
+          </h3>
+          {workflows.length === 0 ? (
+            <p style={{ fontSize: '14px', color: '#6b7280' }}>연결된 워크플로우가 없습니다. sangfor-mcp-workflow 서버를 확인하세요.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {workflows.map((workflow) => (
+                <div key={workflow.id} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '16px',
+                  borderRadius: '10px',
+                  border: '1px solid #e5e7eb',
+                }}>
+                  <div>
+                    <p style={{ fontSize: '15px', fontWeight: '600', color: '#111827', margin: 0 }}>
+                      {workflow.name ?? workflow.title ?? workflow.id}
+                    </p>
+                    <p style={{ fontSize: '12px', color: '#6b7280', margin: '4px 0 0 0' }}>
+                      {workflow.status ?? 'unknown'}
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => void executeWorkflow(workflow.id)}
+                    disabled={executeBusy === workflow.id}
+                    style={{
+                      padding: '8px 16px',
+                      borderRadius: '8px',
+                      border: 'none',
+                      backgroundColor: '#111827',
+                      color: 'white',
+                      cursor: executeBusy === workflow.id ? 'wait' : 'pointer',
+                      fontSize: '13px',
+                    }}
+                  >
+                    {executeBusy === workflow.id ? '실행 중...' : '실행'}
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

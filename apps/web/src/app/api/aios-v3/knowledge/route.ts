@@ -1,57 +1,47 @@
 import { NextResponse } from 'next/server'
-
-const F_AIOS_V3_URL = process.env.F_AIOS_V3_URL || 'http://localhost:3200'
+import { getFaiosV3Url } from '../../../../lib/integrations/upstream-urls'
+import { proxyUpstreamJson, upstreamErrorResponse, upstreamProxyResponse } from '../../../../lib/integrations/upstream-proxy'
+import { createGatedHandler } from '../../../../lib/integrations/approval-middleware'
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
     const query = searchParams.get('q') || ''
+    const path = query
+      ? `/api/knowledge/search?q=${encodeURIComponent(query)}`
+      : '/api/knowledge'
 
-    const url = query
-      ? `${F_AIOS_V3_URL}/api/knowledge/search?q=${encodeURIComponent(query)}`
-      : `${F_AIOS_V3_URL}/api/knowledge`
-
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
+    const result = await proxyUpstreamJson({
+      baseUrl: getFaiosV3Url(),
+      path,
     })
-
-    if (!response.ok) {
-      throw new Error(`F-aios-v3 API error: ${response.status}`)
-    }
-
-    const data = await response.json()
-    return NextResponse.json(data)
+    return upstreamProxyResponse(result)
   } catch (error) {
-    console.error('F-aios-v3 knowledge error:', error)
-    return NextResponse.json(
-      { error: '지식 그래프를 가져올 수 없습니다.' },
-      { status: 500 }
-    )
+    return upstreamErrorResponse('F-aios-v3 knowledge error', error, 500)
   }
 }
 
-export async function POST(request: Request) {
-  try {
-    const body = await request.json()
+export const POST = createGatedHandler(
+  'data-mutation',
+  'faios-v3-knowledge-create',
+  'F-aios-v3 지식 베이스 생성',
+  async (request) => {
+    try {
+      const body = await request.json()
+      const result = await proxyUpstreamJson({
+        baseUrl: getFaiosV3Url(),
+        path: '/api/knowledge',
+        method: 'POST',
+        body,
+      })
 
-    const response = await fetch(`${F_AIOS_V3_URL}/api/knowledge`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    })
+      if (!result.ok) {
+        return NextResponse.json(result.data, { status: result.status })
+      }
 
-    if (!response.ok) {
-      throw new Error(`F-aios-v3 API error: ${response.status}`)
+      return NextResponse.json(result.data)
+    } catch (error) {
+      return upstreamErrorResponse('F-aios-v3 knowledge create error', error, 500)
     }
-
-    const data = await response.json()
-    return NextResponse.json(data)
-  } catch (error) {
-    console.error('F-aios-v3 knowledge create error:', error)
-    return NextResponse.json(
-      { error: '지식 그래프 생성에 실패했습니다.' },
-      { status: 500 }
-    )
   }
-}
+)

@@ -47,7 +47,9 @@ export class AnthropicClientAdapter implements LLMClient {
       messages: chatMessages,
     });
 
-    const textBlock = response.content.find((b) => b.type === 'text');
+    const textBlock = response.content.find(
+      (block): block is Extract<(typeof response.content)[number], { type: 'text' }> => block.type === 'text'
+    );
     return {
       content: textBlock?.text || '',
       model: response.model,

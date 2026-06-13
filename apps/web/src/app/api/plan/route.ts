@@ -1,61 +1,69 @@
 import { NextResponse } from 'next/server'
+import { proxyAiosV1Json } from '../../../lib/integrations/aios-v1-proxy'
+import { getAiosV1Url } from '../../../lib/integrations/upstream-urls'
+import { createGatedHandler } from '../../../lib/integrations/approval-middleware'
 
-const AIOS_V1_URL = process.env.AIOS_V1_URL || 'http://localhost:3200'
+const FALLBACK_PLAN = {
+  status: 'completed' as const,
+  timestamp: new Date().toISOString(),
+  phases: [
+    {
+      id: 1,
+      name: 'Foundation',
+      duration: '1-2 weeks',
+      tasks: ['Setup monorepo', 'Configure tools', 'Create base structure'],
+    },
+    {
+      id: 2,
+      name: 'Core Development',
+      duration: '2-3 weeks',
+      tasks: ['Implement domain models', 'Create services', 'Build API'],
+    },
+    {
+      id: 3,
+      name: 'Integration',
+      duration: '1-2 weeks',
+      tasks: ['Connect APIs', 'Test integration', 'Deploy'],
+    },
+  ],
+  message: '계획을 위해 AIOS v1을 확인하세요.',
+  aiosV1Url: getAiosV1Url(),
+}
 
-export async function POST(request: Request) {
-  try {
-    const body = await request.json()
-    const { projectId, requirements } = body
+export const POST = createGatedHandler(
+  'deploy',
+  'plan-create',
+  '개발 계획 수립',
+  async (request) => {
+    let projectId: string | undefined
+    let requirements: unknown
 
-    // AIOS v1에서 실제 계획 데이터 가져오기
-    const response = await fetch(`${AIOS_V1_URL}/api/plan`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ projectId, requirements }),
-    })
-
-    if (!response.ok) {
-      // AIOS v1에 plan API가 없는 경우 기본 계획 반환
-      const plan = {
-        projectId,
-        status: 'completed',
-        timestamp: new Date().toISOString(),
-        phases: [
-          {
-            id: 1,
-            name: 'Foundation',
-            duration: '1-2 weeks',
-            tasks: ['Setup monorepo', 'Configure tools', 'Create base structure']
-          },
-          {
-            id: 2,
-            name: 'Core Development',
-            duration: '2-3 weeks',
-            tasks: ['Implement domain models', 'Create services', 'Build API']
-          },
-          {
-            id: 3,
-            name: 'Integration',
-            duration: '1-2 weeks',
-            tasks: ['Connect APIs', 'Test integration', 'Deploy']
-          }
-        ],
-        message: '계획을 위해 AIOS v1을 확인하세요.',
-        aiosV1Url: AIOS_V1_URL
-      }
-      return NextResponse.json({ plan })
+    try {
+      const body = await request.json()
+      projectId = body.projectId
+      requirements = body.requirements
+    } catch {
+      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
     }
 
-    const data = await response.json()
-    return NextResponse.json(data)
-  } catch (error) {
-    console.error('Plan error:', error)
-    return NextResponse.json(
-      { error: '계획 수립에 실패했습니다.' },
-      { status: 500 }
-    )
+    try {
+      const result = await proxyAiosV1Json({
+        path: '/api/plan',
+        method: 'POST',
+        body: { projectId, requirements },
+      })
+
+      if (result.ok) {
+        return NextResponse.json(result.data, { status: result.status })
+      }
+
+      return NextResponse.json({ plan: { ...FALLBACK_PLAN, projectId } })
+    } catch (error) {
+      console.error('Plan error:', error)
+      return NextResponse.json({ plan: { ...FALLBACK_PLAN, projectId } })
+    }
   }
-}
+)
 
 export async function GET(request: Request) {
   try {
@@ -66,26 +74,27 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Project ID required' }, { status: 400 })
     }
 
-    const response = await fetch(`${AIOS_V1_URL}/api/plan?projectId=${projectId}`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
+    const result = await proxyAiosV1Json({
+      path: '/api/plan',
+      query: searchParams,
     })
 
-    if (!response.ok) {
-      return NextResponse.json({
-        projectId,
-        status: 'not_found',
-        message: '계획을 찾을 수 없습니다.'
-      })
+    if (result.ok) {
+      return NextResponse.json(result.data, { status: result.status })
     }
 
-    const data = await response.json()
-    return NextResponse.json(data)
+    return NextResponse.json({
+      projectId,
+      status: 'not_found',
+      message: '계획을 찾을 수 없습니다.',
+    })
   } catch (error) {
     console.error('Plan GET error:', error)
-    return NextResponse.json(
-      { error: '계획을 가져올 수 없습니다.' },
-      { status: 500 }
-    )
+    const { searchParams } = new URL(request.url)
+    return NextResponse.json({
+      projectId: searchParams.get('projectId'),
+      status: 'not_found',
+      message: '계획을 찾을 수 없습니다.',
+    })
   }
 }

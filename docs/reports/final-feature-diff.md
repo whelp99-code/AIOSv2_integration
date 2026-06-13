@@ -1,5 +1,7 @@
 # Final Feature Diff
 
+> **Note (2026-06-13):** This report covers **monorepo Phase 1–6 structural goals** only. For **integration product status** (5 upstream + portal + connectors), see the canonical doc: [`product-integration-blueprint-status.md`](product-integration-blueprint-status.md). Structural complete ≠ product integration complete.
+
 ## Comparison: Original Blueprint vs Implementation
 
 ### Original Blueprint Goals

@@ -32,7 +32,7 @@ AIOS v2 Integration is a **modular monolith monorepo** that unifies 5 separate p
 ## Tech Stack
 
 | Layer | Technology |
-|-------|-----------|
+|-------|------------|
 | Monorepo | Turborepo + pnpm |
 | Frontend | Next.js 16, shadcn/ui, Tailwind CSS |
 | API | tRPC, Express |
@@ -77,9 +77,9 @@ pnpm dev
 ```
 AIOSv2_integration/
 ├─ apps/                    # Applications
-│  ├─ web/                  # Next.js UI (:3100)
+│  ├─ web/                  # Next.js UI (:3110)
 │  ├─ api/                  # Express API (:3200)
-│  └─ voice/                # JARVIS Voice (:3300)
+│  └─ voice/                # JARVIS Voice (:3310)
 ├─ packages/                # Shared packages
 │  ├─ domain/               # Domain layer (DDD)
 │  ├─ application/          # Application layer
@@ -115,11 +115,11 @@ pnpm typecheck
 
 | Service | Port | Description |
 |---------|------|-------------|
-| Web UI | 3100 | Next.js |
+| Web UI | 3110 | Next.js |
 | API Server | 3200 | Express/tRPC |
 | LightRAG | 3300 | FastAPI |
 | Dashboard | 3400 | Static HTML |
-| JARVIS | 3500 | Python |
+| JARVIS | 3310 | Python |
 | LM Studio | 1234 | External |
 
 ## Documentation

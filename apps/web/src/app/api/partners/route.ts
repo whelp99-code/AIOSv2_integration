@@ -1,50 +1,5 @@
-import { NextResponse } from 'next/server'
+import { createAiosV1ProxyHandler } from '@/lib/integrations/aios-v1-proxy-handler';
+import { GateRequirement } from '@aios/proxy-core';
 
-const AIOS_V1_URL = process.env.AIOS_V1_URL || 'http://localhost:3200'
-
-export async function GET() {
-  try {
-    const response = await fetch(`${AIOS_V1_URL}/api/partners`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
-    })
-
-    if (!response.ok) {
-      throw new Error(`AIOS v1 API error: ${response.status}`)
-    }
-
-    const data = await response.json()
-    return NextResponse.json(data)
-  } catch (error) {
-    console.error('Partners proxy error:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch partners' },
-      { status: 500 }
-    )
-  }
-}
-
-export async function POST(request: Request) {
-  try {
-    const body = await request.json()
-    
-    const response = await fetch(`${AIOS_V1_URL}/api/partners`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    })
-
-    if (!response.ok) {
-      throw new Error(`AIOS v1 API error: ${response.status}`)
-    }
-
-    const data = await response.json()
-    return NextResponse.json(data)
-  } catch (error) {
-    console.error('Partner create error:', error)
-    return NextResponse.json(
-      { error: 'Failed to create partner' },
-      { status: 500 }
-    )
-  }
-}
+export const GET = createAiosV1ProxyHandler('/api/partners', 'none');
+export const POST = createAiosV1ProxyHandler('/api/partners', 'data-mutation');

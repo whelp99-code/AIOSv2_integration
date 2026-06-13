@@ -1,5 +1,7 @@
 # AIOSv2 Integration - 진짜 통합 구현 계획
 
+> **Note (2026-06-13):** The timeline table at the bottom of this plan (Phase 1–4 “미시작”) is **outdated**. cursor-opencode Phases 3–5 completed much of the proxy/dashboard work. Current per-product status: [`docs/reports/product-integration-blueprint-status.md`](../docs/reports/product-integration-blueprint-status.md).
+
 > **For Hermes:** 이 계획은 AIOSv2 Integration을 진짜 통합 플랫폼으로 만드는 구현 계획입니다.
 
 **Goal:** 기존 AIOS v1의 30개 API를 AIOSv2에서 프록시하여 실제 동작하는 통합 플랫폼 구축

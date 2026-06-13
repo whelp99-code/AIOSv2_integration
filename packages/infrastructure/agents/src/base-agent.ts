@@ -4,7 +4,7 @@
  */
 
 import type { AgentConfig, AgentResult, AgentStep, AgentTool } from './types';
-import type { LLMClient, LLMMessage } from '../../llm/src/types';
+import type { LLMClient, LLMMessage } from '@aios/infrastructure/llm';
 
 export abstract class BaseAgent {
   protected config: AgentConfig;

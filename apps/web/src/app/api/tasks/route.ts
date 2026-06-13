@@ -1,58 +1,36 @@
 import { NextResponse } from 'next/server'
-
-const AIOS_V1_URL = process.env.AIOS_V1_URL || 'http://localhost:3200'
+import { proxyAiosV1Json } from '../../../lib/integrations/aios-v1-proxy'
+import { upstreamErrorResponse, upstreamProxyResponse } from '../../../lib/integrations/upstream-proxy'
+import { createGatedHandler } from '../../../lib/integrations/approval-middleware'
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
-    const status = searchParams.get('status')
-    
-    let url = `${AIOS_V1_URL}/api/tasks`
-    if (status) {
-      url += `?status=${encodeURIComponent(status)}`
-    }
-    
-    const response = await fetch(url, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
+    const result = await proxyAiosV1Json({
+      path: '/api/tasks',
+      query: searchParams.get('status') ? searchParams : undefined,
     })
-
-    if (!response.ok) {
-      throw new Error(`AIOS v1 API error: ${response.status}`)
-    }
-
-    const data = await response.json()
-    return NextResponse.json(data)
+    return upstreamProxyResponse(result)
   } catch (error) {
-    console.error('Tasks proxy error:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch tasks' },
-      { status: 500 }
-    )
+    return upstreamErrorResponse('Tasks proxy error', error)
   }
 }
 
-export async function POST(request: Request) {
-  try {
-    const body = await request.json()
-    
-    const response = await fetch(`${AIOS_V1_URL}/api/tasks`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    })
-
-    if (!response.ok) {
-      throw new Error(`AIOS v1 API error: ${response.status}`)
+export const POST = createGatedHandler(
+  'data-mutation',
+  'task-create',
+  '작업 생성',
+  async (request) => {
+    try {
+      const body = await request.json()
+      const result = await proxyAiosV1Json({
+        path: '/api/tasks',
+        method: 'POST',
+        body,
+      })
+      return upstreamProxyResponse(result)
+    } catch (error) {
+      return upstreamErrorResponse('Task create error', error)
     }
-
-    const data = await response.json()
-    return NextResponse.json(data)
-  } catch (error) {
-    console.error('Task create error:', error)
-    return NextResponse.json(
-      { error: 'Failed to create task' },
-      { status: 500 }
-    )
   }
-}
+)

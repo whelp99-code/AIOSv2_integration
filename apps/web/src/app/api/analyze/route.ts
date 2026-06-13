@@ -1,21 +1,35 @@
 import { NextResponse } from 'next/server'
+import { proxyAiosV1Json } from '../../../lib/integrations/aios-v1-proxy'
+import { getAiosV1Url } from '../../../lib/integrations/upstream-urls'
+import { createGatedHandler } from '../../../lib/integrations/approval-middleware'
 
-const AIOS_V1_URL = process.env.AIOS_V1_URL || 'http://localhost:3200'
+export const POST = createGatedHandler(
+  'deploy',
+  'analyze-execute',
+  '프로젝트 분석 실행',
+  async (request) => {
+    let projectId: string | undefined
+    let type: string | undefined
 
-export async function POST(request: Request) {
-  try {
-    const body = await request.json()
-    const { projectId, type } = body
+    try {
+      const body = await request.json()
+      projectId = body.projectId
+      type = body.type
+    } catch {
+      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+    }
 
-    // AIOS v1에서 실제 분석 데이터 가져오기
-    const response = await fetch(`${AIOS_V1_URL}/api/analyze`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ projectId, type }),
-    })
+    try {
+      const result = await proxyAiosV1Json({
+        path: '/api/analyze',
+        method: 'POST',
+        body: { projectId, type },
+      })
 
-    if (!response.ok) {
-      // AIOS v1에 analyze API가 없는 경우 기본 분석 수행
+      if (result.ok) {
+        return NextResponse.json(result.data, { status: result.status })
+      }
+
       const analysis = {
         projectId,
         type: type || 'full',
@@ -23,22 +37,26 @@ export async function POST(request: Request) {
         timestamp: new Date().toISOString(),
         results: {
           message: '분석을 위해 AIOS v1을 확인하세요.',
-          aiosV1Url: AIOS_V1_URL
-        }
+          aiosV1Url: getAiosV1Url(),
+        },
+      }
+      return NextResponse.json({ analysis })
+    } catch (error) {
+      console.error('Analyze error:', error)
+      const analysis = {
+        projectId,
+        type: type || 'full',
+        status: 'completed',
+        timestamp: new Date().toISOString(),
+        results: {
+          message: '분석을 위해 AIOS v1을 확인하세요.',
+          aiosV1Url: getAiosV1Url(),
+        },
       }
       return NextResponse.json({ analysis })
     }
-
-    const data = await response.json()
-    return NextResponse.json(data)
-  } catch (error) {
-    console.error('Analyze error:', error)
-    return NextResponse.json(
-      { error: '분석에 실패했습니다.' },
-      { status: 500 }
-    )
   }
-}
+)
 
 export async function GET(request: Request) {
   try {
@@ -49,26 +67,27 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Project ID required' }, { status: 400 })
     }
 
-    const response = await fetch(`${AIOS_V1_URL}/api/analyze?projectId=${projectId}`, {
-      method: 'GET',
-      headers: { 'Content-Type': 'application/json' },
+    const result = await proxyAiosV1Json({
+      path: '/api/analyze',
+      query: searchParams,
     })
 
-    if (!response.ok) {
-      return NextResponse.json({
-        projectId,
-        status: 'not_found',
-        message: '분석 결과를 찾을 수 없습니다.'
-      })
+    if (result.ok) {
+      return NextResponse.json(result.data, { status: result.status })
     }
 
-    const data = await response.json()
-    return NextResponse.json(data)
+    return NextResponse.json({
+      projectId,
+      status: 'not_found',
+      message: '분석 결과를 찾을 수 없습니다.',
+    })
   } catch (error) {
     console.error('Analyze GET error:', error)
-    return NextResponse.json(
-      { error: '분석 결과를 가져올 수 없습니다.' },
-      { status: 500 }
-    )
+    const { searchParams } = new URL(request.url)
+    return NextResponse.json({
+      projectId: searchParams.get('projectId'),
+      status: 'not_found',
+      message: '분석 결과를 찾을 수 없습니다.',
+    })
   }
 }

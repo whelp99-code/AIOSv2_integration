@@ -41,10 +41,12 @@ interface Workflow {
   status?: string
 }
 
-interface FaiosHealth {
-  status?: string
-  service?: string
-  uptime?: number
+type IntegrationReachability = 'ok' | 'degraded' | 'unreachable' | 'planned'
+
+interface IntegrationProjectHealth {
+  id: string
+  name: string
+  status: IntegrationReachability
 }
 
 interface StatsCardProps {
@@ -112,20 +114,20 @@ export function Dashboard() {
   const [customers, setCustomers] = useState<Customer[]>([])
   const [partners, setPartners] = useState<Partner[]>([])
   const [workflows, setWorkflows] = useState<Workflow[]>([])
-  const [faiosHealth, setFaiosHealth] = useState<FaiosHealth | null>(null)
+  const [integrationProjects, setIntegrationProjects] = useState<IntegrationProjectHealth[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchData() {
       try {
-        const [statusRes, mailsRes, customersRes, partnersRes, workflowsRes, faiosRes] = await Promise.all([
+        const [statusRes, mailsRes, customersRes, partnersRes, workflowsRes, integrationsRes] = await Promise.all([
           fetch('/api/proxy/outlook/status'),
           fetch('/api/proxy/outlook/messages'),
           fetch('/api/customers'),
           fetch('/api/partners'),
           fetch('/api/workflows'),
-          fetch('/api/aios-v3/health')
+          fetch('/api/integrations/health')
         ])
 
         if (statusRes.ok) {
@@ -153,9 +155,9 @@ export function Dashboard() {
           setWorkflows(workflowsData.workflows || [])
         }
 
-        if (faiosRes.ok) {
-          const faiosData = await faiosRes.json()
-          setFaiosHealth(faiosData)
+        if (integrationsRes.ok) {
+          const integrationsData = await integrationsRes.json()
+          setIntegrationProjects(integrationsData.projects || [])
         }
         
         setLoading(false)
@@ -180,8 +182,23 @@ export function Dashboard() {
   const unreadCount = mails.filter(m => !m.isRead).length
   const totalCount = mails.length
   const recentMails = mails.slice(0, 15)
+  const faiosHealth = integrationProjects.find((project) => project.id === 'f-aios-v3-core')
 
-  const stats = [
+  function integrationStatusLabel(status: IntegrationReachability): string {
+    if (status === 'ok') return '✅ 연결됨'
+    if (status === 'degraded') return '⚠️ 저하됨'
+    if (status === 'planned') return '📋 계획됨'
+    return '❌ 미연결'
+  }
+
+  function integrationStatusColor(status: IntegrationReachability): string {
+    if (status === 'ok') return '#059669'
+    if (status === 'degraded') return '#d97706'
+    if (status === 'planned') return '#4f46e5'
+    return '#dc2626'
+  }
+
+  const stats: StatsCardProps[] = [
     { 
       title: '전체 메일', 
       value: totalCount, 
@@ -213,7 +230,7 @@ export function Dashboard() {
       title: '워크플로우', 
       value: workflows.length, 
       change: faiosHealth?.status === 'ok' ? 'F-aios-v3 연결됨' : '연결 안됨',
-      trend: faiosHealth?.status === 'ok' ? 'up' : 'down', 
+      trend: faiosHealth?.status === 'ok' ? 'up' as const : 'down' as const,
       icon: '⚡', 
       color: '#e0e7ff',
       loading
@@ -367,16 +384,18 @@ export function Dashboard() {
                   {outlookStatus?.connected ? '✅ 연결됨' : '❌ 연결 안됨'}
                 </span>
               </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: '14px', color: '#6b7280' }}>F-aios-v3</span>
-                <span style={{ 
-                  fontSize: '14px', 
-                  color: faiosHealth?.status === 'ok' ? '#059669' : '#dc2626',
-                  fontWeight: '500'
-                }}>
-                  {faiosHealth?.status === 'ok' ? '✅ 연결됨' : '❌ 연결 안됨'}
-                </span>
-              </div>
+              {integrationProjects.map((project) => (
+                <div key={project.id} style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: '14px', color: '#6b7280' }}>{project.name}</span>
+                  <span style={{
+                    fontSize: '14px',
+                    color: integrationStatusColor(project.status),
+                    fontWeight: '500',
+                  }}>
+                    {integrationStatusLabel(project.status)}
+                  </span>
+                </div>
+              ))}
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ fontSize: '14px', color: '#6b7280' }}>AI 프로바이더</span>
                 <span style={{ fontSize: '14px', color: '#111827' }}>

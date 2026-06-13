@@ -41,7 +41,11 @@ export interface AutoApprovalCondition {
 export interface ApprovalRequest {
   id: string;
   type: ApprovalType;
+  sessionId: string;
+  assignmentId: string;
   requester: string;
+  requestedBy: string;
+  actionType: ApprovalActionType;
   target: string;
   context: Record<string, unknown>;
   status: ApprovalStatus;
@@ -57,7 +61,19 @@ export type ApprovalType =
   | 'pr-create'
   | 'pr-merge'
   | 'deployment'
-  | 'data-access';
+  | 'data-access'
+  | 'destructive-action';
+
+export type ApprovalActionType =
+  | 'delete'
+  | 'send'
+  | 'deploy'
+  | 'external-share'
+  | 'data-mutation'
+  | 'config-change'
+  | 'device-control'
+  | 'financial'
+  | 'user-management';
 
 export type ApprovalStatus = 
   | 'pending'

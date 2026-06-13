@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "lastUpdatedAt": "2026-06-13T02:10:00.000Z",
+  "approvals": [
+    {
+      "id": "approval-seed-collaboration",
+      "type": "file-change",
+      "sessionId": "cursor-opencode-main-session",
+      "assignmentId": "assignment-bootstrap-plan",
+      "requester": "cursor",
+      "requestedBy": "cursor",
+      "actionType": "external-share",
+      "target": ".aios/context/collaboration-state.json",
+      "context": {
+        "action": "modify",
+        "reason": "session registry update"
+      },
+      "status": "approved",
+      "createdAt": "2026-06-13T00:00:00.000Z",
+      "resolvedAt": "2026-06-12T16:38:33.108Z",
+      "resolvedBy": "current-user",
+      "resolution": "approve 처리되었습니다."
+    },
+    {
+      "id": "approval-seed-deploy",
+      "type": "deployment",
+      "sessionId": "cursor-opencode-main-session",
+      "assignmentId": "assignment-bootstrap-plan",
+      "requester": "opencode",
+      "requestedBy": "opencode",
+      "actionType": "deploy",
+      "target": "staging environment",
+      "context": {
+        "environment": "staging",
+        "version": "0.1.0"
+      },
+      "status": "approved",
+      "createdAt": "2026-06-12T22:00:00.000Z",
+      "resolvedAt": "2026-06-12T22:30:00.000Z",
+      "resolvedBy": "admin",
+      "resolution": "Approved for staging deployment"
+    }
+  ]
+}

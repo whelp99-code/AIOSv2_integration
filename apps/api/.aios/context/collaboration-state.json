@@ -1,0 +1,307 @@
+{
+  "schemaVersion": 1,
+  "workspaceRoot": "/Users/jmpark/Documents/Playground/AIOSv2_integration/apps/api",
+  "lastUpdatedAt": "2026-06-12T17:03:17.025Z",
+  "projects": [
+    {
+      "name": "AIOS v1",
+      "path": "/Users/jmpark/Documents/Playground/AIOSv2_integration/apps/api/../AIOS v1",
+      "description": "메일 수집, 고객/프로젝트 intake, upstream 소스",
+      "integrationRole": "upstream source",
+      "status": "active"
+    },
+    {
+      "name": "F-aios-v3-core",
+      "path": "/Users/jmpark/Documents/Playground/AIOSv2_integration/apps/api/../F - aios-v3-core",
+      "description": "워크플로우 엔진과 모니터링 연동",
+      "integrationRole": "workflow engine",
+      "status": "active"
+    },
+    {
+      "name": "sangfor-mcp-workflow",
+      "path": "/Users/jmpark/Documents/Playground/AIOSv2_integration/apps/api/../sangfor-mcp-workflow",
+      "description": "MCP 통합과 보안 정책",
+      "integrationRole": "mcp workflow",
+      "status": "active"
+    },
+    {
+      "name": "vibe-coding-os",
+      "path": "/Users/jmpark/Documents/Playground/AIOSv2_integration/apps/api/../vibe-coding-os",
+      "description": "학습 시스템, RAG, agent framework",
+      "integrationRole": "knowledge and agent framework",
+      "status": "active"
+    },
+    {
+      "name": "whelp99-code-sangfor-engineer-mcp",
+      "path": "/Users/jmpark/Documents/Playground/AIOSv2_integration/apps/api/../whelp99-code-sangfor-engineer-mcp",
+      "description": "추가 MCP/도구 연동 대상",
+      "integrationRole": "mcp extension",
+      "status": "planned"
+    }
+  ],
+  "sessions": [
+    {
+      "id": "cursor-opencode-main-session",
+      "title": "Cursor + opencode multi-session collaboration",
+      "objective": "Cursor와 opencode가 같은 상태를 읽고 서로 넘겨받으며 AIOS v1, F-aios-v3-core, sangfor-mcp-workflow, vibe-coding-os, whelp99-code-sangfor-engineer-mcp 연동을 진행한다.",
+      "status": "in-progress",
+      "owner": "cursor",
+      "participants": [
+        {
+          "tool": "cursor",
+          "role": "orchestrator",
+          "displayName": "Cursor",
+          "active": true,
+          "capabilities": [
+            "planning",
+            "review",
+            "navigation",
+            "verification"
+          ]
+        },
+        {
+          "tool": "opencode",
+          "role": "implementer",
+          "displayName": "opencode",
+          "active": true,
+          "capabilities": [
+            "implementation",
+            "refactor",
+            "testing",
+            "patching"
+          ]
+        },
+        {
+          "tool": "codex",
+          "role": "reviewer",
+          "displayName": "Codex",
+          "active": true,
+          "capabilities": [
+            "review",
+            "refactor-suggestion",
+            "cleanup"
+          ]
+        }
+      ],
+      "assignments": [
+        {
+          "id": "assignment-bootstrap-plan",
+          "title": "공통 연동 계획 구체화",
+          "description": "세션별 역할과 승인 게이트, 상태 저장소를 공유 규약으로 고정한다.",
+          "assignedTo": "cursor",
+          "role": "orchestrator",
+          "targetFiles": [
+            ".aios/context/collaboration-state.json",
+            "docs/reports/cursor-opencode-collaboration.md"
+          ],
+          "requiredApprovals": [
+            "external-sharing",
+            "deployment"
+          ],
+          "status": "done",
+          "createdAt": "2026-06-12T17:02:44.738Z",
+          "updatedAt": "2026-06-12T17:02:44.738Z",
+          "metadata": {
+            "phase": "planning"
+          }
+        },
+        {
+          "id": "assignment-1781283764740-m4edtiwm",
+          "title": "멀티 프로젝트 연동 작업 분해",
+          "description": "AIOS v1, F-aios-v3-core, sangfor-mcp-workflow, vibe-coding-os, whelp99-code-sangfor-engineer-mcp 연동 단계를 assignment로 분해한다.",
+          "assignedTo": "cursor",
+          "role": "orchestrator",
+          "targetFiles": [
+            "docs/reports/cursor-opencode-collaboration.md",
+            ".aios/context/collaboration-state.json"
+          ],
+          "requiredApprovals": [],
+          "status": "done",
+          "createdAt": "2026-06-12T17:02:44.740Z",
+          "updatedAt": "2026-06-12T17:02:44.741Z",
+          "metadata": {
+            "phase": "decomposition",
+            "trigger": "contract-runner",
+            "startedAt": "2026-06-12T17:02:44.740Z",
+            "completedAt": "2026-06-12T17:02:44.741Z",
+            "decompositionCount": 3
+          }
+        },
+        {
+          "id": "assignment-1781283764742-6ejhf0zd",
+          "title": "F-aios-v3-core health proxy 검증",
+          "description": "apps/web collaboration 및 aios-v3 health proxy 경로를 검증한다.",
+          "assignedTo": "opencode",
+          "role": "implementer",
+          "targetFiles": [
+            "apps/web/src/app/api/aios-v3/health/route.ts",
+            "tests/integration.test.ts"
+          ],
+          "requiredApprovals": [],
+          "status": "done",
+          "createdAt": "2026-06-12T17:02:44.742Z",
+          "updatedAt": "2026-06-12T17:03:09.746Z",
+          "metadata": {
+            "trigger": "cursor-decomposition",
+            "phase": "implementation",
+            "jobId": "opencode-job-1781283789745",
+            "summary": "**FAIL** — No `test` script defined in `package.json` and no test files or test config found in the project.",
+            "completedAt": "2026-06-12T17:03:09.745Z"
+          }
+        },
+        {
+          "id": "assignment-1781283764743-lggpcwic",
+          "title": "workflow 패키지 typecheck 복구",
+          "description": "@aios/application/workflow에 @types/node 의존성을 정리하고 typecheck를 통과시킨다.",
+          "assignedTo": "opencode",
+          "role": "implementer",
+          "targetFiles": [
+            "packages/application/workflow/tsconfig.json",
+            "packages/application/workflow/package.json"
+          ],
+          "requiredApprovals": [],
+          "status": "queued",
+          "createdAt": "2026-06-12T17:02:44.743Z",
+          "updatedAt": "2026-06-12T17:02:44.743Z",
+          "metadata": {
+            "trigger": "cursor-decomposition",
+            "phase": "implementation"
+          }
+        },
+        {
+          "id": "assignment-1781283764743-6xvby1vr",
+          "title": "collaboration evidence 자동화 점검",
+          "description": "docs/evidence/<session-id>.md 생성 경로와 resume API 흐름을 점검한다.",
+          "assignedTo": "opencode",
+          "role": "implementer",
+          "targetFiles": [
+            "packages/infrastructure/src/collaboration/evidence-writer.ts",
+            "apps/web/src/app/api/collaboration/execute/route.ts"
+          ],
+          "requiredApprovals": [],
+          "status": "queued",
+          "createdAt": "2026-06-12T17:02:44.743Z",
+          "updatedAt": "2026-06-12T17:02:44.743Z",
+          "metadata": {
+            "trigger": "cursor-decomposition",
+            "phase": "implementation"
+          }
+        },
+        {
+          "id": "assignment-1781283764744-ypuh0dhu",
+          "title": "Codex 보조 리뷰",
+          "description": "구현 결과를 리뷰하고 리팩토링 제안만 남긴다. 직접 구현은 하지 않는다.",
+          "assignedTo": "codex",
+          "role": "reviewer",
+          "targetFiles": [
+            "docs/evidence/cursor-opencode-main-session.md"
+          ],
+          "requiredApprovals": [],
+          "status": "queued",
+          "createdAt": "2026-06-12T17:02:44.744Z",
+          "updatedAt": "2026-06-12T17:02:44.744Z",
+          "metadata": {
+            "trigger": "cursor-decomposition",
+            "phase": "review"
+          }
+        }
+      ],
+      "handoffs": [
+        {
+          "id": "handoff-cursor-to-opencode",
+          "from": "cursor",
+          "to": "opencode",
+          "reason": "구체 구현 반영",
+          "summary": "Cursor가 협업 규약과 작업 분해를 잡고, opencode가 실제 구현과 테스트를 진행한다.",
+          "createdAt": "2026-06-12T17:02:44.738Z",
+          "metadata": {
+            "sharedState": true
+          }
+        },
+        {
+          "id": "handoff-1781283764742-ktjfrny9",
+          "from": "cursor",
+          "to": "opencode",
+          "reason": "contract-execution",
+          "summary": "Cursor가 연동 작업을 분해했고, opencode가 구현/검증 assignment를 수행한다.",
+          "createdAt": "2026-06-12T17:02:44.742Z",
+          "metadata": {
+            "assignmentIds": [
+              "F-aios-v3-core health proxy 검증",
+              "workflow 패키지 typecheck 복구",
+              "collaboration evidence 자동화 점검"
+            ]
+          }
+        }
+      ],
+      "artifacts": [
+        {
+          "type": "plan",
+          "path": "docs/reports/cursor-opencode-collaboration.md",
+          "description": "Integration decomposition plan",
+          "createdAt": "2026-06-12T17:02:44.741Z",
+          "metadata": {
+            "assignments": [
+              {
+                "title": "F-aios-v3-core health proxy 검증",
+                "description": "apps/web collaboration 및 aios-v3 health proxy 경로를 검증한다.",
+                "targetFiles": [
+                  "apps/web/src/app/api/aios-v3/health/route.ts",
+                  "tests/integration.test.ts"
+                ]
+              },
+              {
+                "title": "workflow 패키지 typecheck 복구",
+                "description": "@aios/application/workflow에 @types/node 의존성을 정리하고 typecheck를 통과시킨다.",
+                "targetFiles": [
+                  "packages/application/workflow/tsconfig.json",
+                  "packages/application/workflow/package.json"
+                ]
+              },
+              {
+                "title": "collaboration evidence 자동화 점검",
+                "description": "docs/evidence/<session-id>.md 생성 경로와 resume API 흐름을 점검한다.",
+                "targetFiles": [
+                  "packages/infrastructure/src/collaboration/evidence-writer.ts",
+                  "apps/web/src/app/api/collaboration/execute/route.ts"
+                ]
+              }
+            ],
+            "plannedBy": "cursor"
+          }
+        },
+        {
+          "type": "test-result",
+          "path": "",
+          "description": "opencode verification: F-aios-v3-core health proxy 검증",
+          "createdAt": "2026-06-12T17:03:09.746Z",
+          "metadata": {
+            "assignmentId": "assignment-1781283764742-6ejhf0zd",
+            "status": "completed",
+            "result": "**FAIL** — No `test` script defined in `package.json` and no test files or test config found in the project."
+          }
+        },
+        {
+          "type": "review",
+          "path": "",
+          "description": "Cursor orchestration summary",
+          "createdAt": "2026-06-12T17:03:17.025Z",
+          "metadata": {
+            "summary": "Error: Authentication required. Please run 'agent login' first, or set CURSOR_API_KEY environment variable."
+          }
+        }
+      ],
+      "createdAt": "2026-06-12T17:02:44.738Z",
+      "updatedAt": "2026-06-12T17:03:17.025Z",
+      "metadata": {
+        "activeProjects": [
+          "AIOS v1",
+          "F-aios-v3-core",
+          "sangfor-mcp-workflow",
+          "vibe-coding-os",
+          "whelp99-code-sangfor-engineer-mcp"
+        ]
+      }
+    }
+  ]
+}

@@ -9,6 +9,7 @@
     "esModuleInterop": true,
     "module": "ESNext",
     "moduleResolution": "bundler",
+    "types": ["node"],
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "preserve",
@@ -21,7 +22,9 @@
       "@aios/application/*": ["./packages/application/*/src"],
       "@aios/infrastructure/*": ["./packages/infrastructure/*/src"],
       "@aios/shared/*": ["./packages/shared/*/src"],
-      "@aios/ui/*": ["./packages/ui/*/src"]
+      "@aios/ui/*": ["./packages/ui/*/src"],
+      "@aios/config": ["./packages/config/src"],
+      "@aios/health": ["./packages/health/src"]
     }
   },
   "exclude": ["node_modules", "dist", ".next", "build"]

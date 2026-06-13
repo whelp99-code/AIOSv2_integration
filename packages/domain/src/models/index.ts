@@ -56,6 +56,7 @@ export type {
   AutoApprovalCondition, 
   ApprovalRequest, 
   ApprovalType, 
+  ApprovalActionType,
   ApprovalStatus, 
   ApprovalDecision 
 } from './approval-policy';
@@ -81,3 +82,25 @@ export type {
   WorkflowProgress 
 } from './workflow-state';
 export { WORKFLOW_TRANSITIONS } from './workflow-state';
+
+// Collaboration Session models
+export type {
+  CollaborationTool,
+  CollaborationRole,
+  CollaborationSessionStatus,
+  CollaborationParticipant,
+  CollaborationAssignment,
+  CollaborationHandoff,
+  CollaborationArtifact,
+  CollaborationSession,
+  CollaborationWorkspaceProject,
+  CollaborationWorkspaceState,
+  CollaborationSessionCreateRequest,
+  CollaborationSessionUpdateRequest,
+  CollaborationAssignmentCreateRequest,
+  CollaborationHandoffCreateRequest,
+} from './collaboration-session';
+export {
+  createDefaultCollaborationParticipants,
+  createCollaborationWorkspaceProjects,
+} from './collaboration-defaults';

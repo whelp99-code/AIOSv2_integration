@@ -1,5 +1,7 @@
 'use client'
 
+export const dynamic = 'force-dynamic'
+
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 
@@ -39,12 +41,95 @@ export default function SettingsPage() {
   const [language, setLanguage] = useState('ko')
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
 
+  type IntegrationReachability = 'ok' | 'degraded' | 'unreachable' | 'planned'
+  interface IntegrationProjectHealth {
+    id: string
+    name: string
+    status: IntegrationReachability
+  }
+  const [integrationHealth, setIntegrationHealth] = useState<IntegrationProjectHealth[]>([])
+  const [outlookConnected, setOutlookConnected] = useState(false)
+  const [githubConnected, setGithubConnected] = useState<boolean | null>(null)
+  const [slackConnected, setSlackConnected] = useState<boolean | null>(null)
+  const [integrationsLoading, setIntegrationsLoading] = useState(false)
+
   useEffect(() => {
     if (session?.user) {
       setDisplayName(session.user.name || '')
       setEmail(session.user.email || '')
     }
   }, [session])
+
+  useEffect(() => {
+    if (activeSection !== 'integrations') return
+
+    async function loadIntegrationHealth() {
+      setIntegrationsLoading(true)
+      try {
+        const [healthRes, outlookRes, githubRes, slackRes] = await Promise.all([
+          fetch('/api/integrations/health', { cache: 'no-store' }),
+          fetch('/api/proxy/outlook/status', { cache: 'no-store' }),
+          fetch('/api/github', { cache: 'no-store' }),
+          fetch('/api/slack/status', { cache: 'no-store' }),
+        ])
+
+        if (healthRes.ok) {
+          const data = await healthRes.json()
+          setIntegrationHealth(data.projects ?? [])
+        } else {
+          setIntegrationHealth([])
+        }
+
+        if (outlookRes.ok) {
+          const outlookData = await outlookRes.json()
+          setOutlookConnected(Boolean(outlookData.connected))
+        } else {
+          setOutlookConnected(false)
+        }
+
+        if (githubRes.ok) {
+          const githubData = await githubRes.json()
+          setGithubConnected(Boolean(githubData.connected))
+        } else {
+          setGithubConnected(false)
+        }
+
+        if (slackRes.ok) {
+          const slackData = await slackRes.json()
+          setSlackConnected(Boolean(slackData.connected))
+        } else {
+          setSlackConnected(false)
+        }
+      } catch {
+        setIntegrationHealth([])
+        setOutlookConnected(false)
+        setGithubConnected(false)
+        setSlackConnected(false)
+      } finally {
+        setIntegrationsLoading(false)
+      }
+    }
+
+    void loadIntegrationHealth()
+  }, [activeSection])
+
+  function getProjectStatus(id: string): IntegrationReachability | null {
+    return integrationHealth.find((project) => project.id === id)?.status ?? null
+  }
+
+  function statusLabel(status: IntegrationReachability | null): string {
+    if (status === 'ok') return '✅ 연결됨'
+    if (status === 'degraded') return '⚠️ 저하됨'
+    if (status === 'planned') return '📋 계획됨'
+    return '미연결'
+  }
+
+  function statusColors(status: IntegrationReachability | null) {
+    if (status === 'ok') return { bg: '#d1fae5', color: '#059669' }
+    if (status === 'degraded') return { bg: '#fef3c7', color: '#d97706' }
+    if (status === 'planned') return { bg: '#e0e7ff', color: '#4f46e5' }
+    return { bg: '#f3f4f6', color: '#6b7280' }
+  }
 
   const handleSave = async () => {
     setSaving(true)
@@ -316,15 +401,22 @@ export default function SettingsPage() {
             <p style={{ fontSize: '15px', color: '#6b7280', margin: '0 0 32px 0' }}>외부 서비스 연동을 관리합니다.</p>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {integrationsLoading && (
+                <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>연동 상태를 불러오는 중...</p>
+              )}
               {[
-                { name: 'Microsoft Outlook', desc: '이메일 연동', icon: '📧', connected: true, color: '#0078d4' },
-                { name: 'AIOS v1', desc: '태스크 및 고객 관리', icon: '🤖', connected: true, color: '#6366f1' },
-                { name: 'F-aios-v3', desc: 'AI 엔진 연동', icon: '⚡', connected: true, color: '#059669' },
-                { name: 'Sangfor', desc: '보안 어플라이언스 관리', icon: '🛡️', connected: false, color: '#dc2626' },
-                { name: 'GitHub', desc: '코드 저장소 연동', icon: '🐙', connected: false, color: '#111827' },
-                { name: 'Slack', desc: '팀 커뮤니케이션', icon: '💬', connected: false, color: '#4a154b' },
-              ].map((integration) => (
-                <div key={integration.name} style={{
+                { key: 'outlook', name: 'Microsoft Outlook', desc: '이메일 연동', icon: '📧', status: outlookConnected ? 'ok' as const : null },
+                { key: 'aios-v1', name: 'AIOS v1', desc: '태스크 및 고객 관리', icon: '🤖', status: getProjectStatus('aios-v1') },
+                { key: 'f-aios-v3-core', name: 'F-aios-v3', desc: 'AI 엔진 연동', icon: '⚡', status: getProjectStatus('f-aios-v3-core') },
+                { key: 'sangfor-mcp-workflow', name: 'Sangfor', desc: '보안 어플라이언스 관리', icon: '🛡️', status: getProjectStatus('sangfor-mcp-workflow') },
+                { key: 'vibe-coding-os', name: 'vibe-coding-os', desc: '지식 및 에이전트 프레임워크', icon: '🧠', status: getProjectStatus('vibe-coding-os') },
+                { key: 'whelp99', name: 'whelp99 MCP', desc: 'MCP 확장 (filesystem probe)', icon: '🔧', status: getProjectStatus('whelp99-code-sangfor-engineer-mcp') },
+                { key: 'github', name: 'GitHub', desc: '코드 저장소 연동', icon: '🐙', status: githubConnected === null ? null : githubConnected ? 'ok' as const : 'unreachable' as const },
+                { key: 'slack', name: 'Slack', desc: '팀 커뮤니케이션', icon: '💬', status: slackConnected === null ? null : slackConnected ? 'ok' as const : 'unreachable' as const },
+              ].map((integration) => {
+                const colors = statusColors(integration.status)
+                return (
+                <div key={integration.key} style={{
                   backgroundColor: 'white',
                   borderRadius: '10px',
                   padding: '20px 24px',
@@ -353,14 +445,14 @@ export default function SettingsPage() {
                   <div style={{
                     padding: '6px 14px',
                     borderRadius: '16px',
-                    backgroundColor: integration.connected ? '#d1fae5' : '#f3f4f6',
+                    backgroundColor: colors.bg,
                   }}>
                     <span style={{
                       fontSize: '13px',
                       fontWeight: '500',
-                      color: integration.connected ? '#059669' : '#6b7280',
+                      color: colors.color,
                     }}>
-                      {integration.connected ? '✅ 연결됨' : '미연결'}
+                      {statusLabel(integration.status)}
                     </span>
                   </div>
                   <button style={{
@@ -372,10 +464,10 @@ export default function SettingsPage() {
                     backgroundColor: 'white',
                     color: '#374151',
                   }}>
-                    {integration.connected ? '관리' : '연결'}
+                    {integration.status === 'ok' ? '관리' : '연결'}
                   </button>
                 </div>
-              ))}
+              )})}
             </div>
           </div>
         )}

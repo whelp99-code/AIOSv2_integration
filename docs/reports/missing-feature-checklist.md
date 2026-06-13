@@ -1,5 +1,7 @@
 # Missing Feature Checklist
 
+> **Note (2026-06-13):** Several items below (UI pages, integration tests, CI) are **partially implemented** since this checklist was written. For current per-product integration status, see [`product-integration-blueprint-status.md`](product-integration-blueprint-status.md). This file remains the v2.0.1 backlog tracker.
+
 ## Overview
 This document tracks features that were identified during development but deferred to v2.0.1.
 
