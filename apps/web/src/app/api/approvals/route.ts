@@ -1,10 +1,7 @@
 import { NextResponse } from 'next/server'
-import type { ApprovalActionType, ApprovalStatus } from '@aios/domain'
+import type { ApprovalStatus } from '@aios/domain'
+import { isApprovalActionType } from '@aios/domain'
 import { getCollaborationServices } from '../../../lib/collaboration/server'
-
-function isApprovalActionType(value: unknown): value is ApprovalActionType {
-  return value === 'delete' || value === 'send' || value === 'deploy' || value === 'external-share'
-}
 
 function isResolutionStatus(value: unknown): value is Extract<ApprovalStatus, 'approved' | 'rejected' | 'deferred'> {
   return value === 'approved' || value === 'rejected' || value === 'deferred'

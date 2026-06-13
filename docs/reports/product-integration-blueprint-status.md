@@ -3,7 +3,7 @@
 > **Last updated:** 2026-06-13  
 > **Session:** `cursor-opencode-main-session`  
 > **Integration phase:** 5 completed (cursor-opencode)  
-> **Verification:** 32 web API routes, whelp99/slack on `apps/api`, 25 tests passing
+> **Verification (2026-06-13):** 32 web API routes, whelp99/slack on `apps/api`, 25 tests passing, `pnpm lint` + `pnpm typecheck` + web build passing. Codex fix-directive blockers resolved; repo-wide `pnpm format:check` still fails on legacy files.
 
 **Canonical document** for integration-scope products. Supersedes stale timeline/checklist entries in older reports (see [Stale Doc Index](#stale-doc-index)).
 

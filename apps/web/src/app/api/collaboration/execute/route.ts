@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import type { AgentType, ApprovalActionType, ApprovalRequest, CollaborationAssignment } from '@aios/domain'
+import type { AgentType, ApprovalRequest, CollaborationAssignment } from '@aios/domain'
+import { normalizeApprovalActionType } from '@aios/domain'
 import {
   createCursorRuntime,
   createOpencodeRuntime,
@@ -7,13 +8,6 @@ import {
 import { getCollaborationServices } from '../../../../lib/collaboration/server'
 
 type CollaborationExecuteTool = 'cursor' | 'opencode'
-
-function normalizeActionType(value: unknown): ApprovalActionType {
-  if (value === 'delete' || value === 'send' || value === 'deploy' || value === 'external-share') {
-    return value
-  }
-  return 'deploy'
-}
 
 function getRuntime(tool: CollaborationExecuteTool) {
   return tool === 'opencode'
@@ -43,7 +37,7 @@ async function createApprovalRequests(input: {
   const approvals: ApprovalRequest[] = []
 
   for (const action of input.actionTypes) {
-    const actionType = normalizeActionType(action)
+    const actionType = normalizeApprovalActionType(action)
     const approval = await approvalStore.create({
       type: 'destructive-action',
       sessionId: input.sessionId,

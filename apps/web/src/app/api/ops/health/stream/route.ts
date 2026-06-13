@@ -1,18 +1,61 @@
-import { getRegistry, createHealthStream } from '@aios/health'
-import { PORT_REGISTRY, getUrl } from '@aios/config/ports'
+import { getRegistry, createHealthStream } from "@aios/health";
+import { PORT_REGISTRY, getUrl } from "@aios/config/ports";
 
-const SERVICE_CONFIGS: Record<string, { baseUrl: string; livenessPath: string; readinessPath: string; critical: boolean }> = {
-  'aios-v1': { baseUrl: getUrl('AIOS_V1'), livenessPath: '/health/liveness', readinessPath: '/health/readiness', critical: true },
-  'f-aios-v3': { baseUrl: getUrl('F_AIOS_V3'), livenessPath: '/health/liveness', readinessPath: '/health/readiness', critical: true },
-  'sangfor-mcp': { baseUrl: getUrl('SANGFOR_MCP'), livenessPath: '/health', readinessPath: '/health/ready', critical: true },
-  'vibe-coding-os': { baseUrl: getUrl('VIBE_CODING_OS'), livenessPath: '/health', readinessPath: '/health/ready', critical: false },
-  'mail-intelligence': { baseUrl: getUrl('MAIL_INTELLIGENCE'), livenessPath: '/health/live', readinessPath: '/health/ready', critical: true },
-  'aios-v2-web': { baseUrl: getUrl('AIOS_V2_WEB'), livenessPath: '/api/health/live', readinessPath: '/api/health/ready', critical: false },
-  'lm-studio': { baseUrl: getUrl('LM_STUDIO'), livenessPath: '/v1/models', readinessPath: '/v1/models', critical: false },
-}
+const SERVICE_CONFIGS: Record<
+  string,
+  {
+    baseUrl: string;
+    livenessPath: string;
+    readinessPath: string;
+    critical: boolean;
+  }
+> = {
+  "aios-v1": {
+    baseUrl: getUrl("AIOS_V1"),
+    livenessPath: "/health/liveness",
+    readinessPath: "/health/readiness",
+    critical: true,
+  },
+  "f-aios-v3": {
+    baseUrl: getUrl("F_AIOS_V3"),
+    livenessPath: "/health/liveness",
+    readinessPath: "/health/readiness",
+    critical: true,
+  },
+  "sangfor-mcp": {
+    baseUrl: getUrl("SANGFOR_MCP"),
+    livenessPath: "/health",
+    readinessPath: "/health/ready",
+    critical: true,
+  },
+  "vibe-coding-os": {
+    baseUrl: getUrl("VIBE_CODING_OS"),
+    livenessPath: "/health",
+    readinessPath: "/health/ready",
+    critical: false,
+  },
+  "mail-intelligence": {
+    baseUrl: getUrl("MAIL_INTELLIGENCE"),
+    livenessPath: "/health/live",
+    readinessPath: "/health/ready",
+    critical: true,
+  },
+  "aios-v2-web": {
+    baseUrl: getUrl("AIOS_V2_WEB"),
+    livenessPath: "/api/health/live",
+    readinessPath: "/api/health/ready",
+    critical: false,
+  },
+  "lm-studio": {
+    baseUrl: getUrl("LM_STUDIO"),
+    livenessPath: "/v1/models",
+    readinessPath: "/v1/models",
+    critical: false,
+  },
+};
 
 export async function GET() {
-  const registry = getRegistry()
+  const registry = getRegistry();
 
   // 모든 서비스 등록
   for (const [name, config] of Object.entries(SERVICE_CONFIGS)) {
@@ -25,21 +68,23 @@ export async function GET() {
         timeoutMs: 3000,
         intervalMs: 10000,
         critical: config.critical,
-      })
-    } catch {}
+      });
+    } catch {
+      // already registered
+    }
   }
 
   // 주기적 체크 시작
-  registry.startPeriodicChecks()
+  registry.startPeriodicChecks();
 
   // SSE 스트림 생성
-  const stream = createHealthStream()
+  const stream = createHealthStream();
 
   return new Response(stream, {
     headers: {
-      'Content-Type': 'text/event-stream',
-      'Cache-Control': 'no-cache',
-      'Connection': 'keep-alive',
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
     },
-  })
+  });
 }

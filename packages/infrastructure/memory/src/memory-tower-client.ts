@@ -1,11 +1,11 @@
-import { spawn } from 'node:child_process';
-import { homedir } from 'node:os';
-import { join } from 'node:path';
+import { spawn } from "node:child_process";
+import { homedir } from "node:os";
+import { join } from "node:path";
 
 type JsonRpcId = number;
 
 interface JsonRpcRequest {
-  jsonrpc: '2.0';
+  jsonrpc: "2.0";
   id: JsonRpcId;
   method: string;
   params?: Record<string, unknown>;
@@ -18,7 +18,7 @@ interface JsonRpcError {
 }
 
 interface JsonRpcResponse {
-  jsonrpc: '2.0';
+  jsonrpc: "2.0";
   id: JsonRpcId;
   result?: {
     content?: Array<{
@@ -72,18 +72,23 @@ export class MemoryTowerClient {
   private readonly ragServerPath: string;
 
   constructor(config: MemoryTowerClientConfig = {}) {
-    this.userId = config.userId ?? 'jmpark';
-    this.agentId = config.agentId ?? 'codex';
-    this.pythonCommand = config.pythonCommand ?? 'python3';
+    this.userId = config.userId ?? "jmpark";
+    this.agentId = config.agentId ?? "codex";
+    this.pythonCommand = config.pythonCommand ?? "python3";
     this.timeoutMs = config.timeoutMs ?? 30_000;
     this.mem0ServerPath =
-      config.mem0ServerPath ?? join(homedir(), '.hermes', 'mcp-servers', 'mem0', 'server.py');
+      config.mem0ServerPath ??
+      join(homedir(), ".hermes", "mcp-servers", "mem0", "server.py");
     this.ragServerPath =
-      config.ragServerPath ?? join(homedir(), '.hermes', 'mcp-servers', 'rag', 'server.py');
+      config.ragServerPath ??
+      join(homedir(), ".hermes", "mcp-servers", "rag", "server.py");
   }
 
-  async addMemory(content: string, metadata: Record<string, unknown> = {}): Promise<MemoryTowerToolResult> {
-    return this.callTool(this.mem0ServerPath, 'memory_add', {
+  async addMemory(
+    content: string,
+    metadata: Record<string, unknown> = {},
+  ): Promise<MemoryTowerToolResult> {
+    return this.callTool(this.mem0ServerPath, "memory_add", {
       content,
       user_id: this.userId,
       agent_id: this.agentId,
@@ -92,50 +97,69 @@ export class MemoryTowerClient {
   }
 
   async searchMemory(query: string, limit = 5): Promise<MemoryTowerRecord[]> {
-    const result = await this.callTool(this.mem0ServerPath, 'memory_search', {
+    const result = await this.callTool(this.mem0ServerPath, "memory_search", {
       query,
       user_id: this.userId,
       agent_id: this.agentId,
       limit,
     });
 
-    return normalizeListResult<MemoryTowerRecord>(result, ['memories', 'results']);
+    return normalizeListResult<MemoryTowerRecord>(result, [
+      "memories",
+      "results",
+    ]);
   }
 
   async listMemories(limit = 50): Promise<MemoryTowerRecord[]> {
-    const result = await this.callTool(this.mem0ServerPath, 'memory_list', {
+    const result = await this.callTool(this.mem0ServerPath, "memory_list", {
       user_id: this.userId,
       limit,
     });
 
-    return normalizeListResult<MemoryTowerRecord>(result, ['memories', 'results']);
+    return normalizeListResult<MemoryTowerRecord>(result, [
+      "memories",
+      "results",
+    ]);
   }
 
-  async addKnowledge(title: string, content: string, source = 'codex'): Promise<MemoryTowerToolResult> {
-    return this.callTool(this.ragServerPath, 'knowledge_add', {
+  async addKnowledge(
+    title: string,
+    content: string,
+    source = "codex",
+  ): Promise<MemoryTowerToolResult> {
+    return this.callTool(this.ragServerPath, "knowledge_add", {
       title,
       content,
       source,
     });
   }
 
-  async searchKnowledge(query: string, limit = 5): Promise<MemoryTowerDocument[]> {
-    const result = await this.callTool(this.ragServerPath, 'knowledge_search', {
+  async searchKnowledge(
+    query: string,
+    limit = 5,
+  ): Promise<MemoryTowerDocument[]> {
+    const result = await this.callTool(this.ragServerPath, "knowledge_search", {
       query,
       limit,
     });
 
-    return normalizeListResult<MemoryTowerDocument>(result, ['results', 'documents']);
+    return normalizeListResult<MemoryTowerDocument>(result, [
+      "results",
+      "documents",
+    ]);
   }
 
   async ingestFile(filePath: string): Promise<MemoryTowerToolResult> {
-    return this.callTool(this.ragServerPath, 'knowledge_ingest_file', {
+    return this.callTool(this.ragServerPath, "knowledge_ingest_file", {
       file_path: filePath,
     });
   }
 
-  async ingestDirectory(dirPath: string, pattern = '*.md'): Promise<MemoryTowerToolResult> {
-    return this.callTool(this.ragServerPath, 'knowledge_ingest_directory', {
+  async ingestDirectory(
+    dirPath: string,
+    pattern = "*.md",
+  ): Promise<MemoryTowerToolResult> {
+    return this.callTool(this.ragServerPath, "knowledge_ingest_directory", {
       dir_path: dirPath,
       pattern,
     });
@@ -148,22 +172,22 @@ export class MemoryTowerClient {
   ): Promise<MemoryTowerToolResult> {
     const requests: JsonRpcRequest[] = [
       {
-        jsonrpc: '2.0',
+        jsonrpc: "2.0",
         id: 0,
-        method: 'initialize',
+        method: "initialize",
         params: {
-          protocolVersion: '2024-11-05',
+          protocolVersion: "2024-11-05",
           capabilities: {},
           clientInfo: {
-            name: 'aios-memory-tower-client',
-            version: '1.0.0',
+            name: "aios-memory-tower-client",
+            version: "1.0.0",
           },
         },
       },
       {
-        jsonrpc: '2.0',
+        jsonrpc: "2.0",
         id: 1,
-        method: 'tools/call',
+        method: "tools/call",
         params: {
           name: toolName,
           arguments: argumentsPayload,
@@ -174,7 +198,9 @@ export class MemoryTowerClient {
     const response = await this.runServer(serverPath, requests);
 
     if (response.error) {
-      throw new Error(`MCP error (${response.error.code}): ${response.error.message}`);
+      throw new Error(
+        `MCP error (${response.error.code}): ${response.error.message}`,
+      );
     }
 
     const text = response.result?.content?.[0]?.text;
@@ -185,41 +211,53 @@ export class MemoryTowerClient {
     try {
       return JSON.parse(text) as MemoryTowerToolResult;
     } catch (error) {
-      throw new Error(`Failed to parse MCP content payload: ${String(error)}`);
+      const message = error instanceof Error ? error.message : String(error);
+      throw new Error(`Failed to parse MCP content payload: ${message}`, {
+        cause: error,
+      });
     }
   }
 
-  private runServer(serverPath: string, requests: JsonRpcRequest[]): Promise<JsonRpcResponse> {
+  private runServer(
+    serverPath: string,
+    requests: JsonRpcRequest[],
+  ): Promise<JsonRpcResponse> {
     return new Promise((resolve, reject) => {
       const child = spawn(this.pythonCommand, [serverPath], {
-        stdio: ['pipe', 'pipe', 'pipe'],
+        stdio: ["pipe", "pipe", "pipe"],
       });
 
-      let stdout = '';
-      let stderr = '';
+      let stdout = "";
+      let stderr = "";
       const timeout = setTimeout(() => {
         child.kill();
-        reject(new Error(`MCP server timeout after ${this.timeoutMs}ms: ${serverPath}`));
+        reject(
+          new Error(
+            `MCP server timeout after ${this.timeoutMs}ms: ${serverPath}`,
+          ),
+        );
       }, this.timeoutMs);
 
-      child.stdout.on('data', (chunk: Buffer | string) => {
+      child.stdout.on("data", (chunk: Buffer | string) => {
         stdout += chunk.toString();
       });
 
-      child.stderr.on('data', (chunk: Buffer | string) => {
+      child.stderr.on("data", (chunk: Buffer | string) => {
         stderr += chunk.toString();
       });
 
-      child.on('error', (error) => {
+      child.on("error", (error) => {
         clearTimeout(timeout);
         reject(error);
       });
 
-      child.on('close', (code) => {
+      child.on("close", (code) => {
         clearTimeout(timeout);
 
         if (code !== 0) {
-          reject(new Error(`MCP server exited with code ${code}: ${stderr.trim()}`));
+          reject(
+            new Error(`MCP server exited with code ${code}: ${stderr.trim()}`),
+          );
           return;
         }
 
@@ -227,7 +265,7 @@ export class MemoryTowerClient {
         resolve(response);
       });
 
-      const payload = `${requests.map((request) => JSON.stringify(request)).join('\n')}\n`;
+      const payload = `${requests.map((request) => JSON.stringify(request)).join("\n")}\n`;
       child.stdin.write(payload);
       child.stdin.end();
     });
@@ -236,12 +274,12 @@ export class MemoryTowerClient {
 
 function parseLastJsonRpcResponse(output: string): JsonRpcResponse {
   const lines = output
-    .split('\n')
+    .split("\n")
     .map((line) => line.trim())
     .filter(Boolean);
 
   if (lines.length === 0) {
-    throw new Error('MCP server returned no output');
+    throw new Error("MCP server returned no output");
   }
 
   for (let index = lines.length - 1; index >= 0; index -= 1) {
@@ -252,7 +290,9 @@ function parseLastJsonRpcResponse(output: string): JsonRpcResponse {
     }
   }
 
-  throw new Error('MCP server output did not contain a valid JSON-RPC response');
+  throw new Error(
+    "MCP server output did not contain a valid JSON-RPC response",
+  );
 }
 
 function normalizeListResult<T extends Record<string, unknown>>(

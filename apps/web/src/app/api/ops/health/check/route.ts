@@ -1,55 +1,104 @@
-import { NextResponse } from 'next/server'
-import { getRegistry } from '@aios/health'
-import { PORT_REGISTRY, getUrl } from '@aios/config/ports'
+import { NextResponse } from "next/server";
+import { getRegistry } from "@aios/health";
+import { PORT_REGISTRY, getUrl } from "@aios/config/ports";
 
-const SERVICE_CONFIGS: Record<string, { baseUrl: string; livenessPath: string; readinessPath: string; critical: boolean }> = {
-  'aios-v1': { baseUrl: getUrl('AIOS_V1'), livenessPath: '/health/liveness', readinessPath: '/health/readiness', critical: true },
-  'f-aios-v3': { baseUrl: getUrl('F_AIOS_V3'), livenessPath: '/health/liveness', readinessPath: '/health/readiness', critical: true },
-  'sangfor-mcp': { baseUrl: getUrl('SANGFOR_MCP'), livenessPath: '/health', readinessPath: '/health/ready', critical: true },
-  'vibe-coding-os': { baseUrl: getUrl('VIBE_CODING_OS'), livenessPath: '/health', readinessPath: '/health/ready', critical: false },
-  'mail-intelligence': { baseUrl: getUrl('MAIL_INTELLIGENCE'), livenessPath: '/health/live', readinessPath: '/health/ready', critical: true },
-  'aios-v2-web': { baseUrl: getUrl('AIOS_V2_WEB'), livenessPath: '/api/health/live', readinessPath: '/api/health/ready', critical: false },
-  'lm-studio': { baseUrl: getUrl('LM_STUDIO'), livenessPath: '/v1/models', readinessPath: '/v1/models', critical: false },
-}
+const SERVICE_CONFIGS: Record<
+  string,
+  {
+    baseUrl: string;
+    livenessPath: string;
+    readinessPath: string;
+    critical: boolean;
+  }
+> = {
+  "aios-v1": {
+    baseUrl: getUrl("AIOS_V1"),
+    livenessPath: "/health/liveness",
+    readinessPath: "/health/readiness",
+    critical: true,
+  },
+  "f-aios-v3": {
+    baseUrl: getUrl("F_AIOS_V3"),
+    livenessPath: "/health/liveness",
+    readinessPath: "/health/readiness",
+    critical: true,
+  },
+  "sangfor-mcp": {
+    baseUrl: getUrl("SANGFOR_MCP"),
+    livenessPath: "/health",
+    readinessPath: "/health/ready",
+    critical: true,
+  },
+  "vibe-coding-os": {
+    baseUrl: getUrl("VIBE_CODING_OS"),
+    livenessPath: "/health",
+    readinessPath: "/health/ready",
+    critical: false,
+  },
+  "mail-intelligence": {
+    baseUrl: getUrl("MAIL_INTELLIGENCE"),
+    livenessPath: "/health/live",
+    readinessPath: "/health/ready",
+    critical: true,
+  },
+  "aios-v2-web": {
+    baseUrl: getUrl("AIOS_V2_WEB"),
+    livenessPath: "/api/health/live",
+    readinessPath: "/api/health/ready",
+    critical: false,
+  },
+  "lm-studio": {
+    baseUrl: getUrl("LM_STUDIO"),
+    livenessPath: "/v1/models",
+    readinessPath: "/v1/models",
+    critical: false,
+  },
+};
 
 const DISPLAY_NAMES: Record<string, string> = {
-  'aios-v1': 'AIOS v1 (메인 엔진)',
-  'f-aios-v3': 'F-aios-v3',
-  'sangfor-mcp': 'Sangfor MCP',
-  'vibe-coding-os': 'Vibe Coding OS',
-  'mail-intelligence': 'Mail Intelligence',
-  'aios-v2-web': 'AIOS v2 Portal',
-  'lm-studio': 'LM Studio (로컬 LLM)',
-}
+  "aios-v1": "AIOS v1 (메인 엔진)",
+  "f-aios-v3": "F-aios-v3",
+  "sangfor-mcp": "Sangfor MCP",
+  "vibe-coding-os": "Vibe Coding OS",
+  "mail-intelligence": "Mail Intelligence",
+  "aios-v2-web": "AIOS v2 Portal",
+  "lm-studio": "LM Studio (로컬 LLM)",
+};
 
 function getPort(service: string): number {
   const portMap: Record<string, keyof typeof PORT_REGISTRY> = {
-    'aios-v1': 'AIOS_V1',
-    'f-aios-v3': 'F_AIOS_V3',
-    'sangfor-mcp': 'SANGFOR_MCP',
-    'vibe-coding-os': 'VIBE_CODING_OS',
-    'mail-intelligence': 'MAIL_INTELLIGENCE',
-    'aios-v2-web': 'AIOS_V2_WEB',
-    'lm-studio': 'LM_STUDIO',
-  }
-  return PORT_REGISTRY[portMap[service]] || 0
+    "aios-v1": "AIOS_V1",
+    "f-aios-v3": "F_AIOS_V3",
+    "sangfor-mcp": "SANGFOR_MCP",
+    "vibe-coding-os": "VIBE_CODING_OS",
+    "mail-intelligence": "MAIL_INTELLIGENCE",
+    "aios-v2-web": "AIOS_V2_WEB",
+    "lm-studio": "LM_STUDIO",
+  };
+  return PORT_REGISTRY[portMap[service]] || 0;
 }
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url)
-  const name = searchParams.get('name')
+  const { searchParams } = new URL(request.url);
+  const name = searchParams.get("name");
 
   if (!name) {
-    return NextResponse.json({ error: 'name parameter is required' }, { status: 400 })
+    return NextResponse.json(
+      { error: "name parameter is required" },
+      { status: 400 },
+    );
   }
 
-  const config = SERVICE_CONFIGS[name]
+  const config = SERVICE_CONFIGS[name];
   if (!config) {
-    return NextResponse.json({ error: `Unknown service: ${name}` }, { status: 404 })
+    return NextResponse.json(
+      { error: `Unknown service: ${name}` },
+      { status: 404 },
+    );
   }
 
-  const registry = getRegistry()
-  
+  const registry = getRegistry();
+
   try {
     registry.register({
       name,
@@ -59,16 +108,16 @@ export async function GET(request: Request) {
       timeoutMs: 3000,
       intervalMs: 30000,
       critical: config.critical,
-    })
-  } catch {}
-
-  const liveness = await registry.checkLiveness(name)
-  let readiness = liveness
-  if (liveness.status === 'healthy') {
-    readiness = await registry.checkReadiness(name)
-  } else {
-    readiness = { ...liveness, status: 'unreachable' as const }
+    });
+  } catch {
+    // already registered
   }
+
+  const liveness = await registry.checkLiveness(name);
+  const readiness =
+    liveness.status === "healthy"
+      ? await registry.checkReadiness(name)
+      : { ...liveness, status: "unreachable" as const };
 
   return NextResponse.json({
     name,
@@ -80,5 +129,5 @@ export async function GET(request: Request) {
     lastChecked: liveness.lastChecked,
     baseUrl: config.baseUrl,
     critical: config.critical,
-  })
+  });
 }

@@ -49,7 +49,48 @@ Cursor와 opencode가 같은 상태를 읽고 서로 넘겨받으며 AIOS v1, F-
 - assignment-bootstrap-plan | deploy | approved | staging environment
 
 ## failures and retry result
-- none
+- Codex review (commit `0c90b6e`, 2026-06-13): `pnpm test`, `pnpm lint`, `pnpm format:check` failed — recorded as **Codex review found blockers**
+- Fix directive (`docs/reports/cursor-to-opencode-fix-directive.md`) applied in Cursor session — see verification below
+
+## fix-directive verification (2026-06-13)
+
+Baseline (before fix, commit `0c90b6e`):
+
+| Command | Result |
+|---------|--------|
+| `pnpm test` | FAIL — vitest `@/` alias + phase5-smoke collect error |
+| `pnpm lint` | FAIL — 16 errors |
+| `pnpm format:check` | FAIL — 280 legacy files |
+| `pnpm typecheck` | PASS |
+| `pnpm --filter @aios/web build` | PASS (NFT warning) |
+
+After fix:
+
+| Command | Result |
+|---------|--------|
+| `pnpm test` | PASS — 25/25 (4 files) |
+| `pnpm lint` | PASS |
+| `pnpm typecheck` | PASS — 51/51 turbo tasks |
+| `pnpm --filter @aios/web build` | PASS (NFT warning) |
+| `pnpm --filter @aios/infrastructure test` | PASS — 7/7 |
+| `pnpm --filter @aios/application test` | PASS — 2/2 |
+| `pnpm --filter @aios/infrastructure/memory test` | PASS — 2/2 |
+| `pnpm format:check` | FAIL — 280 legacy files unchanged; Phase 5/6 touched files formatted locally |
+
+### Tasks completed (fix directive)
+
+1. Vitest `@` alias + `createAiosV1ProxyHandler` optional context
+2. Approval middleware body re-wrap (`requestWithJsonBody`)
+3. Unified `ApprovalActionType` guards (`APPROVAL_ACTION_TYPES`, `isApprovalActionType`, `normalizeApprovalActionType`)
+4. AIOS v1 proxy adapter — `AIOS_V1_URL` only, no `getConfig()` dependency
+5. Ops SSE — `ReadableStream<Uint8Array>` with `data: {...}\n\n`
+6. Settings/Dashboard — parse integration health JSON even when `!res.ok`
+7. Removed `dynamic` export from `settings/page.tsx` (kept in `settings/layout.tsx`)
+8. Added `POST /api/sangfor/compliance/roadmap`
+9. Lint fixes (empty catch, `cause` on rethrow, eslint ignores for config/scripts)
+10. Added `approval-file-store.test.ts` for action type preservation
 
 ## remaining work
-- none
+- `pnpm format:check` repo-wide still fails on pre-existing 280 files — not in fix-directive completion scope; touched files formatted
+- Codex diff review of fix-directive patch set (pending)
+- Cross-repo production deploy verification (unchanged from Phase 6)

@@ -117,7 +117,8 @@ Phase 6 목표: 전체 제품 빌드/테스트 통과 달성
 | 제품 | 명령 | 결과 | 상세 |
 |------|------|------|------|
 | AIOS v1 | - | N/A | 테스트 스크립트 미실행 |
-| AIOSv2 | `pnpm test` | ✅ 통과 | 25/25 tests (4 files) |
+| AIOSv2 | `pnpm test` | ✅ 통과 | 25/25 tests (4 files) — phase5-smoke 8/8 포함 |
+| AIOSv2 | `pnpm --filter @aios/infrastructure test` | ✅ 통과 | 7/7 (approval-file-store 포함) |
 | VibeCodingOS | - | N/A | test 스크립트 미정의 |
 | Sangfor MCP | `pnpm test` | ✅ 통과 | 44/44 tests (4 files) |
 
@@ -125,8 +126,11 @@ Phase 6 목표: 전체 제품 빌드/테스트 통과 달성
 
 | 항목 | AIOSv2 | VibeCodingOS | Sangfor MCP | AIOS v1 |
 |------|--------|--------------|-------------|---------|
+| `pnpm lint` | ✅ 통과 (2026-06-13 fix-directive) | - | - | - |
+| `pnpm typecheck` | ✅ 통과 | - | - | - |
 | TypeScript 에러 | 없음 | 없음 | 없음 | 없음 |
 | 빌드 경고 | NFT warning (minor) | 없음 | 없음 | 없음 |
+| `pnpm format:check` | ⚠️ 레거시 280파일 미포맷 | - | - | - |
 | 보안 이슈 | 미검출 | 미검출 | 미검출 | 미검출 |
 
 ---
@@ -137,13 +141,13 @@ Phase 6 목표: 전체 제품 빌드/테스트 통과 달성
 
 **문제**: settings 페이지 SSG 중 `useSession()` undefined 에러
 
-**해결**:
+**해결** (Phase 6 + fix-directive):
 ```typescript
-// apps/web/src/app/settings/page.tsx
+// apps/web/src/app/settings/layout.tsx — dynamic 유지
+export const dynamic = 'force-dynamic'
+
+// apps/web/src/app/settings/page.tsx — 'use client' only (dynamic 제거됨, 2026-06-13)
 'use client'
-
-export const dynamic = 'force-dynamic'  // 추가
-
 import { useSession } from 'next-auth/react'
 ```
 
@@ -183,20 +187,38 @@ import { useSession } from 'next-auth/react'
 2. `tsconfig.json` paths 설정 수정
 3. LM Studio 테스트 타임아웃/스킵 처리
 
+### 4.4 Codex fix-directive (commit `0c90b6e` 후속, 2026-06-13)
+
+지시서: [`cursor-to-opencode-fix-directive.md`](cursor-to-opencode-fix-directive.md)
+
+| Task | 내용 | 상태 |
+|------|------|------|
+| 1 | Vitest `@` alias + proxy handler context 기본값 | ✅ |
+| 2 | Approval middleware body double-read 수정 | ✅ |
+| 3 | `ApprovalActionType` 9종 정규화 통일 | ✅ |
+| 4 | AIOS v1 adapter `getConfig()` 의존 제거 | ✅ |
+| 5 | Ops SSE `data: ...\n\n` 포맷 | ✅ |
+| 6 | degraded integration health UI | ✅ |
+| 7 | `settings/page.tsx` dynamic export 제거 | ✅ |
+| 8 | `POST /api/sangfor/compliance/roadmap` | ✅ |
+| 9 | evidence/문서 검증 결과 정정 | ✅ |
+| 10 | lint + touched-file format | ✅ (`format:check` 레거시 제외) |
+
 ---
 
-## 5. 교차 검증 결과 (Codex Red Team)
+## 5. 교차 검증 결과 (Codex Red Team + fix-directive 재검증)
 
 | 검증 항목 | 결과 |
 |-----------|------|
-| AIOSv2 빌드 | ✅ 28/28 tasks 통과 |
-| AIOSv2 테스트 | ✅ 25/25 통과 |
+| AIOSv2 `pnpm test` | ✅ 25/25 통과 |
+| AIOSv2 `pnpm lint` | ✅ 통과 (fix-directive 후) |
+| AIOSv2 `pnpm typecheck` | ✅ 51/51 tasks |
+| AIOSv2 빌드 | ✅ 통과 (NFT warning) |
+| AIOSv2 infrastructure/application/memory tests | ✅ 11/11 |
 | VibeCodingOS 빌드 | ✅ 통과 |
-| Sangfor MCP 빌드 | ✅ 통과 |
-| Sangfor MCP 테스트 | ✅ 44/44 통과 |
+| Sangfor MCP 빌드/테스트 | ✅ 44/44 |
 | AIOS v1 빌드 | ✅ 통과 |
-| 코드 품질 | ✅ TypeScript 에러 없음 |
-| 보안 이슈 | ✅ 미검출 |
+| `pnpm format:check` (repo-wide) | ⚠️ 레거시 280파일 — fix 범위 외 |
 | 회귀(regression) | ✅ 없음 |
 
 ---

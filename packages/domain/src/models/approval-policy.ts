@@ -20,11 +20,11 @@ export interface ApprovalRule {
   priority: number;
 }
 
-export type ApprovalAction = 
-  | 'auto-approve'
-  | 'require-review'
-  | 'block'
-  | 'defer';
+export type ApprovalAction =
+  | "auto-approve"
+  | "require-review"
+  | "block"
+  | "defer";
 
 export interface AutoApprovalConfig {
   enabled: boolean;
@@ -33,7 +33,7 @@ export interface AutoApprovalConfig {
 }
 
 export interface AutoApprovalCondition {
-  type: 'file-pattern' | 'commit-message' | 'branch-name' | 'custom';
+  type: "file-pattern" | "commit-message" | "branch-name" | "custom";
   pattern: string;
   description: string;
 }
@@ -55,31 +55,54 @@ export interface ApprovalRequest {
   resolution?: string;
 }
 
-export type ApprovalType = 
-  | 'file-change'
-  | 'commit'
-  | 'pr-create'
-  | 'pr-merge'
-  | 'deployment'
-  | 'data-access'
-  | 'destructive-action';
+export type ApprovalType =
+  | "file-change"
+  | "commit"
+  | "pr-create"
+  | "pr-merge"
+  | "deployment"
+  | "data-access"
+  | "destructive-action";
 
 export type ApprovalActionType =
-  | 'delete'
-  | 'send'
-  | 'deploy'
-  | 'external-share'
-  | 'data-mutation'
-  | 'config-change'
-  | 'device-control'
-  | 'financial'
-  | 'user-management';
+  | "delete"
+  | "send"
+  | "deploy"
+  | "external-share"
+  | "data-mutation"
+  | "config-change"
+  | "device-control"
+  | "financial"
+  | "user-management";
 
-export type ApprovalStatus = 
-  | 'pending'
-  | 'approved'
-  | 'rejected'
-  | 'deferred';
+export type ApprovalStatus = "pending" | "approved" | "rejected" | "deferred";
+
+export const APPROVAL_ACTION_TYPES = [
+  "delete",
+  "send",
+  "deploy",
+  "external-share",
+  "data-mutation",
+  "config-change",
+  "device-control",
+  "financial",
+  "user-management",
+] as const satisfies readonly ApprovalActionType[];
+
+export function isApprovalActionType(
+  value: unknown,
+): value is ApprovalActionType {
+  return (
+    typeof value === "string" &&
+    (APPROVAL_ACTION_TYPES as readonly string[]).includes(value)
+  );
+}
+
+export function normalizeApprovalActionType(
+  value: unknown,
+): ApprovalActionType {
+  return isApprovalActionType(value) ? value : "deploy";
+}
 
 export interface ApprovalDecision {
   requestId: string;
@@ -91,11 +114,11 @@ export interface ApprovalDecision {
 
 // Auto-approval exclusions
 export const AUTO_APPROVAL_EXCLUSIONS = [
-  'operational-deployment',
-  'database-migration',
-  'data-deletion',
-  'secret-exposure',
-  'external-api-billing',
-  'main-branch-push',
-  'user-data-destruction'
+  "operational-deployment",
+  "database-migration",
+  "data-deletion",
+  "secret-exposure",
+  "external-api-billing",
+  "main-branch-push",
+  "user-data-destruction",
 ] as const;

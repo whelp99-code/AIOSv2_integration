@@ -7,6 +7,7 @@ import { mkdir, readFile, rename, writeFile } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import { dirname, join } from 'node:path';
 import type { ApprovalActionType, ApprovalRequest, ApprovalStatus } from '@aios/domain';
+import { normalizeApprovalActionType } from '@aios/domain';
 
 export interface ApprovalFileStoreConfig {
   filePath?: string;
@@ -136,9 +137,4 @@ function createDefaultApprovalState(): ApprovalQueueState {
   };
 }
 
-export function normalizeApprovalActionType(value: unknown): ApprovalActionType {
-  if (value === 'delete' || value === 'send' || value === 'deploy' || value === 'external-share') {
-    return value;
-  }
-  return 'deploy';
-}
+export { normalizeApprovalActionType };

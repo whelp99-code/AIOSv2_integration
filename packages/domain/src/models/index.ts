@@ -60,7 +60,7 @@ export type {
   ApprovalStatus, 
   ApprovalDecision 
 } from './approval-policy';
-export { AUTO_APPROVAL_EXCLUSIONS } from './approval-policy';
+export { AUTO_APPROVAL_EXCLUSIONS, APPROVAL_ACTION_TYPES, isApprovalActionType, normalizeApprovalActionType } from './approval-policy';
 
 // Deferred Item models
 export type { 
