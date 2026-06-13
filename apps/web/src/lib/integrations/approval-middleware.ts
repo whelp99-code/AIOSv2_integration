@@ -17,11 +17,17 @@ function requestWithJsonBody(req: Request, body: unknown): Request {
   if (!headers.has("Content-Type")) {
     headers.set("Content-Type", "application/json");
   }
-  return new Request(req.url, {
+
+  const init: RequestInit = {
     method: req.method,
     headers,
-    body: JSON.stringify(body ?? {}),
-  });
+  };
+
+  if (req.method !== "GET" && req.method !== "HEAD") {
+    init.body = JSON.stringify(body ?? {});
+  }
+
+  return new Request(req.url, init);
 }
 
 export interface ApprovalGateConfig {

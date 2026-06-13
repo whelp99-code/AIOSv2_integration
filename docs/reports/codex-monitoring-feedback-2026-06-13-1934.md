@@ -143,9 +143,9 @@ Relevant file:
 Root cause:
 
 ```ts
-const resolvedParams = await (context?.params ?? Promise.resolve({}))
+const resolvedParams = await (context?.params ?? Promise.resolve({}));
 for (const [key, value] of Object.entries(resolvedParams)) {
-  fullPath = fullPath.replace(`[${key}]`, value)
+  fullPath = fullPath.replace(`[${key}]`, value);
 }
 ```
 
@@ -169,9 +169,9 @@ Still failing with previous lint errors, including:
 Current code:
 
 ```ts
-const resolvedParams = await (context?.params ?? Promise.resolve({}))
+const resolvedParams = await (context?.params ?? Promise.resolve({}));
 for (const [key, value] of Object.entries(resolvedParams)) {
-  fullPath = fullPath.replace(`[${key}]`, value)
+  fullPath = fullPath.replace(`[${key}]`, value);
 }
 ```
 
@@ -182,11 +182,11 @@ Use an explicit `Record<string, string>` fallback/type.
 Suggested shape:
 
 ```ts
-const resolvedParams: Record<string, string> =
-  await (context?.params ?? Promise.resolve({} as Record<string, string>))
+const resolvedParams: Record<string, string> = await (context?.params ??
+  Promise.resolve({} as Record<string, string>));
 
 for (const [key, value] of Object.entries(resolvedParams)) {
-  fullPath = fullPath.replace(`[${key}]`, value)
+  fullPath = fullPath.replace(`[${key}]`, value);
 }
 ```
 
@@ -199,7 +199,7 @@ Acceptance:
 Current code:
 
 ```ts
-import { INTEGRATION_TARGETS } from '@aios/shared';
+import { INTEGRATION_TARGETS } from "@aios/shared";
 ```
 
 But `packages/proxy-core/package.json` dependencies do not include `@aios/shared`.
@@ -215,7 +215,7 @@ Required fix, choose one:
 2. Or avoid importing `@aios/shared` from `proxy-core` and use local fallback:
 
 ```ts
-const baseUrl = process.env.AIOS_V1_URL?.trim() || 'http://localhost:3101'
+const baseUrl = process.env.AIOS_V1_URL?.trim() || "http://localhost:3101";
 ```
 
 Recommendation:
@@ -249,10 +249,10 @@ Example direction:
 
 ```ts
 async function getUserId(): Promise<string> {
-  if (process.env.NODE_ENV === 'test') return 'test-user'
-  const { auth } = await import('@/lib/auth')
-  const session = await auth()
-  return session?.user?.id ?? 'anonymous'
+  if (process.env.NODE_ENV === "test") return "test-user";
+  const { auth } = await import("@/lib/auth");
+  const session = await auth();
+  return session?.user?.id ?? "anonymous";
 }
 ```
 

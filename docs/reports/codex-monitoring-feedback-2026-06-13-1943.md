@@ -43,22 +43,22 @@ Notable modified/untracked files:
 
 ### Passed
 
-| Command | Result |
-| --- | --- |
-| `pnpm test` | PASS - 25/25 tests, 4 files |
-| `pnpm lint` | PASS |
-| `pnpm typecheck` | PASS - 51/51 turbo tasks |
-| `pnpm --filter @aios/web build` | PASS with existing Turbopack/NFT warning |
-| `pnpm --filter @aios/infrastructure test` | PASS - 7/7 |
-| `pnpm --filter @aios/application test` | PASS - 2/2 |
-| `pnpm --filter @aios/infrastructure/memory test` | PASS - 2/2 |
-| `git diff --check` | PASS |
+| Command                                          | Result                                   |
+| ------------------------------------------------ | ---------------------------------------- |
+| `pnpm test`                                      | PASS - 25/25 tests, 4 files              |
+| `pnpm lint`                                      | PASS                                     |
+| `pnpm typecheck`                                 | PASS - 51/51 turbo tasks                 |
+| `pnpm --filter @aios/web build`                  | PASS with existing Turbopack/NFT warning |
+| `pnpm --filter @aios/infrastructure test`        | PASS - 7/7                               |
+| `pnpm --filter @aios/application test`           | PASS - 2/2                               |
+| `pnpm --filter @aios/infrastructure/memory test` | PASS - 2/2                               |
+| `git diff --check`                               | PASS                                     |
 
 ### Failed
 
-| Command | Result |
-| --- | --- |
-| `pnpm format:check` | FAIL - repo-wide legacy formatting issues remain |
+| Command                          | Result                                                  |
+| -------------------------------- | ------------------------------------------------------- |
+| `pnpm format:check`              | FAIL - repo-wide legacy formatting issues remain        |
 | changed-file-only Prettier check | FAIL - 10 changed/untracked files still need formatting |
 
 ## Important Correction To Cursor Report

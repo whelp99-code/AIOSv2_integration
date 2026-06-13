@@ -3,7 +3,7 @@
 > **Last updated:** 2026-06-13  
 > **Session:** `cursor-opencode-main-session`  
 > **Integration phase:** 5 completed (cursor-opencode)  
-> **Verification (2026-06-13):** 32 web API routes, whelp99/slack on `apps/api`, 25 tests passing, `pnpm lint` + `pnpm typecheck` + web build passing. Codex fix-directive blockers resolved; repo-wide `pnpm format:check` still fails on legacy files.
+> **Verification (2026-06-13):** 32 web API routes, whelp99/slack on `apps/api`, 26 tests passing (`approval-gate` GET dev regression included), `pnpm lint` + `pnpm typecheck` + web build PASS (NFT warning). Repo-wide `pnpm format:check` legacy FAIL; changed-file-only Prettier PASS.
 
 **Canonical document** for integration-scope products. Supersedes stale timeline/checklist entries in older reports (see [Stale Doc Index](#stale-doc-index)).
 
@@ -11,12 +11,12 @@
 
 ## Blueprint References
 
-| Layer | Document | Scope |
-|-------|----------|-------|
-| Product vision | [`.hermes/plans/2026-06-11_010000-aios-brainstorming.md`](../../.hermes/plans/2026-06-11_010000-aios-brainstorming.md) | 5 capabilities: mail, knowledge, agents, code, self-evolution |
-| Real integration | [`.hermes/plans/2026-06-11_020000-real-integration-plan.md`](../../.hermes/plans/2026-06-11_020000-real-integration-plan.md) | ~30 AIOS v1 API proxies, auth, dashboard |
-| Execution phases | [`cursor-opencode-collaboration.md`](cursor-opencode-collaboration.md), [`phase5-handoff.md`](phase5-handoff.md) | Phases 1–5: health, proxy, gates, live UI, deep integration |
-| Registry | [`packages/shared/src/constants/integrations.ts`](../../packages/shared/src/constants/integrations.ts) | 5 upstream targets + env keys |
+| Layer            | Document                                                                                                                     | Scope                                                         |
+| ---------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| Product vision   | [`.hermes/plans/2026-06-11_010000-aios-brainstorming.md`](../../.hermes/plans/2026-06-11_010000-aios-brainstorming.md)       | 5 capabilities: mail, knowledge, agents, code, self-evolution |
+| Real integration | [`.hermes/plans/2026-06-11_020000-real-integration-plan.md`](../../.hermes/plans/2026-06-11_020000-real-integration-plan.md) | ~30 AIOS v1 API proxies, auth, dashboard                      |
+| Execution phases | [`cursor-opencode-collaboration.md`](cursor-opencode-collaboration.md), [`phase5-handoff.md`](phase5-handoff.md)             | Phases 1–5: health, proxy, gates, live UI, deep integration   |
+| Registry         | [`packages/shared/src/constants/integrations.ts`](../../packages/shared/src/constants/integrations.ts)                       | 5 upstream targets + env keys                                 |
 
 ---
 
@@ -24,12 +24,12 @@
 
 Each product is scored on four axes (each 0–100%, combined into overall **Progress**):
 
-| Axis | Meaning |
-|------|---------|
-| **Health** | Probe via `/api/integrations/health` or dedicated health route |
-| **Proxy** | Portal API routes proxying upstream (vs Hermes/blueprint planned surface) |
-| **UI** | User-facing pages showing live data (not hardcoded/mock) |
-| **Gate** | Approval gate on dangerous writes (`deploy`, `external-share`, etc.) |
+| Axis       | Meaning                                                                   |
+| ---------- | ------------------------------------------------------------------------- |
+| **Health** | Probe via `/api/integrations/health` or dedicated health route            |
+| **Proxy**  | Portal API routes proxying upstream (vs Hermes/blueprint planned surface) |
+| **UI**     | User-facing pages showing live data (not hardcoded/mock)                  |
+| **Gate**   | Approval gate on dangerous writes (`deploy`, `external-share`, etc.)      |
 
 **Progress** = weighted average: Health 15%, Proxy 35%, UI 30%, Gate 20% (Gate N/A → excluded from average for that product).
 
@@ -37,18 +37,18 @@ Each product is scored on four axes (each 0–100%, combined into overall **Prog
 
 ## Summary Dashboard
 
-| Product | Progress | Health | Proxy | UI | Gate | Next Priority |
-|---------|----------|--------|-------|-----|------|---------------|
-| AIOSv2 Portal (Hub) | 55% | 90% | 70% | 50% | 60% | Unified Ops Console |
-| AIOS v1 | 42% | 100% | 37% | 50% | 0% | mail-intelligence proxies |
-| F-aios-v3-core | 22% | 100% | 15% | 10% | 0% | workflows UI source clarity |
-| sangfor-mcp-workflow | 38% | 100% | 24% | 45% | 50% | device read proxy |
-| vibe-coding-os | 28% | 100% | 30% | 0% | 50% | projects UI |
-| whelp99 MCP | 12% | 40% | 0% | 15% | 0% | MCP HTTP bridge |
-| Outlook / Mail | 38% | 50% | 25% | 70% | 0% | v1 mail-import proxy |
-| GitHub | 22% | 30% | 20% | 25% | 0% | Real API / Octokit |
-| Slack | 12% | 30% | 0% | 25% | 0% | send proxy + gate |
-| Collaboration Runtime | 62% | — | 80% | 45% | 90% | UI phase dispatch |
+| Product               | Progress | Health | Proxy | UI  | Gate | Next Priority               |
+| --------------------- | -------- | ------ | ----- | --- | ---- | --------------------------- |
+| AIOSv2 Portal (Hub)   | 55%      | 90%    | 70%   | 50% | 60%  | Unified Ops Console         |
+| AIOS v1               | 42%      | 100%   | 37%   | 50% | 0%   | mail-intelligence proxies   |
+| F-aios-v3-core        | 22%      | 100%   | 15%   | 10% | 0%   | workflows UI source clarity |
+| sangfor-mcp-workflow  | 38%      | 100%   | 24%   | 45% | 50%  | device read proxy           |
+| vibe-coding-os        | 28%      | 100%   | 30%   | 0%  | 50%  | projects UI                 |
+| whelp99 MCP           | 12%      | 40%    | 0%    | 15% | 0%   | MCP HTTP bridge             |
+| Outlook / Mail        | 38%      | 50%    | 25%   | 70% | 0%   | v1 mail-import proxy        |
+| GitHub                | 22%      | 30%    | 20%   | 25% | 0%   | Real API / Octokit          |
+| Slack                 | 12%      | 30%    | 0%    | 25% | 0%   | send proxy + gate           |
+| Collaboration Runtime | 62%      | —      | 80%   | 45% | 90%  | UI phase dispatch           |
 
 **Integration-scope weighted average:** ~35% (product vision) / ~58% (Hermes real-integration plan) / Phase 1–5 **complete**.
 
@@ -76,11 +76,11 @@ Each product is scored on four axes (each 0–100%, combined into overall **Prog
 
 ### 개선사항
 
-| Priority | Item |
-|----------|------|
-| **P0** | Single Ops view: integrations health + pending approvals + opencode dispatch |
-| **P1** | Wire Kanban to `/api/tasks` or domain workflow service |
-| **P2** | Shared auth/session with upstream services; remove duplicate env config |
+| Priority | Item                                                                         |
+| -------- | ---------------------------------------------------------------------------- |
+| **P0**   | Single Ops view: integrations health + pending approvals + opencode dispatch |
+| **P1**   | Wire Kanban to `/api/tasks` or domain workflow service                       |
+| **P2**   | Shared auth/session with upstream services; remove duplicate env config      |
 
 ---
 
@@ -95,19 +95,19 @@ Each product is scored on four axes (each 0–100%, combined into overall **Prog
 - Health probe via integrations registry
 - **11 proxy routes** via [`proxyAiosV1Json`](../../apps/web/src/lib/integrations/aios-v1-proxy.ts):
 
-| Portal route | Upstream |
-|--------------|----------|
-| `/api/customers` | `/api/customers` |
-| `/api/tasks` | `/api/tasks` |
-| `/api/partners` | `/api/partners` |
-| `/api/knowledge` | `/api/knowledge`, `/api/knowledge/search` |
-| `/api/workflows` | `/api/tasks` (mapped) |
-| `/api/automation` | `/api/actions` |
-| `/api/github` | `/api/connectors` |
-| `/api/plan` | `/api/plan` |
-| `/api/analyze` | `/api/analyze` |
-| `/api/commands` | `/api/commands` |
-| `/api/risk` | `/api/risk` |
+| Portal route      | Upstream                                  |
+| ----------------- | ----------------------------------------- |
+| `/api/customers`  | `/api/customers`                          |
+| `/api/tasks`      | `/api/tasks`                              |
+| `/api/partners`   | `/api/partners`                           |
+| `/api/knowledge`  | `/api/knowledge`, `/api/knowledge/search` |
+| `/api/workflows`  | `/api/tasks` (mapped)                     |
+| `/api/automation` | `/api/actions`                            |
+| `/api/github`     | `/api/connectors`                         |
+| `/api/plan`       | `/api/plan`                               |
+| `/api/analyze`    | `/api/analyze`                            |
+| `/api/commands`   | `/api/commands`                           |
+| `/api/risk`       | `/api/risk`                               |
 
 - UI: dashboard (customers, partners, workflows), workflows page
 - Fallback UX when upstream unreachable (plan/analyze/commands/risk)
@@ -116,27 +116,27 @@ Each product is scored on four axes (each 0–100%, combined into overall **Prog
 
 Hermes plan ~30 APIs — major gaps:
 
-| Missing proxy | Hermes reference |
-|---------------|------------------|
-| `/api/mail-import` | Task 1.3 |
-| `/api/mail-candidates` | mailApi |
-| `/api/mail-insight-threads` | mailApi |
-| `/api/customers/[id]` GET/PUT/DELETE | customerApi |
-| `/api/partners/[id]` | partnerApi |
-| `/api/workflows/[id]/execute` (native v1) | workflowApi |
-| `/api/knowledge/documents` | knowledgeApi |
-| `/api/automation/workflows` | automationApi (path mismatch vs `/api/actions`) |
+| Missing proxy                             | Hermes reference                                |
+| ----------------------------------------- | ----------------------------------------------- |
+| `/api/mail-import`                        | Task 1.3                                        |
+| `/api/mail-candidates`                    | mailApi                                         |
+| `/api/mail-insight-threads`               | mailApi                                         |
+| `/api/customers/[id]` GET/PUT/DELETE      | customerApi                                     |
+| `/api/partners/[id]`                      | partnerApi                                      |
+| `/api/workflows/[id]/execute` (native v1) | workflowApi                                     |
+| `/api/knowledge/documents`                | knowledgeApi                                    |
+| `/api/automation/workflows`               | automationApi (path mismatch vs `/api/actions`) |
 
 - No approval gates on AIOS v1 write routes
 - Mail intelligence not exposed through v1 proxy (Outlook path is separate)
 
 ### 개선사항
 
-| Priority | Item |
-|----------|------|
-| **P0** | Batch mail-intelligence proxies (import, candidates, threads) |
-| **P1** | `customers/[id]`, `partners/[id]` CRUD routes |
-| **P2** | Approval policy on v1 POST/PUT/DELETE; align automation paths with Hermes |
+| Priority | Item                                                                      |
+| -------- | ------------------------------------------------------------------------- |
+| **P0**   | Batch mail-intelligence proxies (import, candidates, threads)             |
+| **P1**   | `customers/[id]`, `partners/[id]` CRUD routes                             |
+| **P2**   | Approval policy on v1 POST/PUT/DELETE; align automation paths with Hermes |
 
 ---
 
@@ -163,11 +163,11 @@ Hermes plan ~30 APIs — major gaps:
 
 ### 개선사항
 
-| Priority | Item |
-|----------|------|
-| **P0** | Clarify workflows UI data source (v1 vs v3) or add F-aios-v3 workflows tab |
-| **P1** | Proxy map for orchestrator, monitoring, lightrag endpoints |
-| **P2** | Package-level integration matrix in docs + settings |
+| Priority | Item                                                                       |
+| -------- | -------------------------------------------------------------------------- |
+| **P0**   | Clarify workflows UI data source (v1 vs v3) or add F-aios-v3 workflows tab |
+| **P1**   | Proxy map for orchestrator, monitoring, lightrag endpoints                 |
+| **P2**   | Package-level integration matrix in docs + settings                        |
 
 ---
 
@@ -179,13 +179,13 @@ Hermes plan ~30 APIs — major gaps:
 
 ### 진행 (Done)
 
-| Portal route | Upstream | Gate |
-|--------------|----------|------|
-| `/api/sangfor/health` | `/api/system/health` | — |
-| `/api/sangfor/workflows` | `/api/workflows` | — |
-| `/api/sangfor/dashboard` | `/api/dashboard/stats` | — |
-| `/api/sangfor/events` | `/api/events` | — |
-| `/api/sangfor/compliance/trend` | `/api/compliance/trend` | — |
+| Portal route                          | Upstream                     | Gate       |
+| ------------------------------------- | ---------------------------- | ---------- |
+| `/api/sangfor/health`                 | `/api/system/health`         | —          |
+| `/api/sangfor/workflows`              | `/api/workflows`             | —          |
+| `/api/sangfor/dashboard`              | `/api/dashboard/stats`       | —          |
+| `/api/sangfor/events`                 | `/api/events`                | —          |
+| `/api/sangfor/compliance/trend`       | `/api/compliance/trend`      | —          |
 | `/api/sangfor/workflows/[id]/execute` | `/api/workflows/:id/execute` | **deploy** |
 
 - UI [`/sangfor`](../../apps/web/src/app/sangfor/page.tsx): workflows tab live; security tab events live with mock fallback; execute + approval flow
@@ -202,11 +202,11 @@ Upstream operator-console has ~25+ routes; not proxied:
 
 ### 개선사항
 
-| Priority | Item |
-|----------|------|
-| **P0** | Device read proxy + optional live devices tab |
-| **P1** | Compliance POST routes with `external-share` or `deploy` gate |
-| **P2** | Remove mock fallback when upstream healthy; templates/learning proxy |
+| Priority | Item                                                                 |
+| -------- | -------------------------------------------------------------------- |
+| **P0**   | Device read proxy + optional live devices tab                        |
+| **P1**   | Compliance POST routes with `external-share` or `deploy` gate        |
+| **P2**   | Remove mock fallback when upstream healthy; templates/learning proxy |
 
 ---
 
@@ -218,10 +218,10 @@ Upstream operator-console has ~25+ routes; not proxied:
 
 ### 진행 (Done)
 
-| Portal route | Upstream | Gate |
-|--------------|----------|------|
-| `/api/vibe-coding/health` | `/api/health` | — |
-| `/api/vibe-coding/projects` | `/api/projects` | — |
+| Portal route                  | Upstream          | Gate               |
+| ----------------------------- | ----------------- | ------------------ |
+| `/api/vibe-coding/health`     | `/api/health`     | —                  |
+| `/api/vibe-coding/projects`   | `/api/projects`   | —                  |
 | `/api/vibe-coding/rag/ingest` | `/api/rag/ingest` | **external-share** |
 
 - Approval + resume tested in [`tests/integration.test.ts`](../../tests/integration.test.ts)
@@ -235,11 +235,11 @@ Upstream operator-console has ~25+ routes; not proxied:
 
 ### 개선사항
 
-| Priority | Item |
-|----------|------|
-| **P0** | Dashboard widget or `/vibe-coding` page for projects list |
-| **P1** | RAG ingest UI with 409 → approve → retry flow |
-| **P2** | Agent execution and learning schedule proxies |
+| Priority | Item                                                      |
+| -------- | --------------------------------------------------------- |
+| **P0**   | Dashboard widget or `/vibe-coding` page for projects list |
+| **P1**   | RAG ingest UI with 409 → approve → retry flow             |
+| **P2**   | Agent execution and learning schedule proxies             |
 
 ---
 
@@ -264,11 +264,11 @@ Upstream operator-console has ~25+ routes; not proxied:
 
 ### 개선사항
 
-| Priority | Item |
-|----------|------|
-| **P0** | Update readinessNote; document Phase 6 bridge scope |
-| **P1** | MCP HTTP bridge design + health upgrade from `planned` to live |
-| **P2** | Tool proxy routes with approval gate |
+| Priority | Item                                                           |
+| -------- | -------------------------------------------------------------- |
+| **P0**   | Update readinessNote; document Phase 6 bridge scope            |
+| **P1**   | MCP HTTP bridge design + health upgrade from `planned` to live |
+| **P2**   | Tool proxy routes with approval gate                           |
 
 ---
 
@@ -278,9 +278,9 @@ Upstream operator-console has ~25+ routes; not proxied:
 
 ### 진행 (Done)
 
-| Portal route | Upstream |
-|--------------|----------|
-| `/api/proxy/outlook/status` | Mail intelligence service |
+| Portal route                  | Upstream                  |
+| ----------------------------- | ------------------------- |
+| `/api/proxy/outlook/status`   | Mail intelligence service |
 | `/api/proxy/outlook/messages` | Mail intelligence service |
 
 - UI: [`/mail`](../../apps/web/src/app/mail/page.tsx), dashboard mail widget
@@ -294,11 +294,11 @@ Upstream operator-console has ~25+ routes; not proxied:
 
 ### 개선사항
 
-| Priority | Item |
-|----------|------|
-| **P0** | v1 mail API proxy batch (import, candidates, threads) |
-| **P1** | Unified mail page tabs: Outlook + v1 candidates |
-| **P2** | Candidate approve/reject with approval gate |
+| Priority | Item                                                  |
+| -------- | ----------------------------------------------------- |
+| **P0**   | v1 mail API proxy batch (import, candidates, threads) |
+| **P1**   | Unified mail page tabs: Outlook + v1 candidates       |
+| **P2**   | Candidate approve/reject with approval gate           |
 
 ---
 
@@ -320,10 +320,10 @@ Upstream operator-console has ~25+ routes; not proxied:
 
 ### 개선사항
 
-| Priority | Item |
-|----------|------|
-| **P1** | Octokit or direct GitHub API behind `/api/github` |
-| **P2** | Wire domain PR automation models to portal UI |
+| Priority | Item                                              |
+| -------- | ------------------------------------------------- |
+| **P1**   | Octokit or direct GitHub API behind `/api/github` |
+| **P2**   | Wire domain PR automation models to portal UI     |
 
 ---
 
@@ -344,10 +344,10 @@ Upstream operator-console has ~25+ routes; not proxied:
 
 ### 개선사항
 
-| Priority | Item |
-|----------|------|
-| **P1** | `POST /api/slack/send` with **send** approval gate |
-| **P2** | Notification templates; link to automation workflows |
+| Priority | Item                                                 |
+| -------- | ---------------------------------------------------- |
+| **P1**   | `POST /api/slack/send` with **send** approval gate   |
+| **P2**   | Notification templates; link to automation workflows |
 
 ---
 
@@ -375,11 +375,11 @@ Upstream operator-console has ~25+ routes; not proxied:
 
 ### 개선사항
 
-| Priority | Item |
-|----------|------|
-| **P0** | Collaboration UI: “Dispatch Phase N to opencode” wired to dispatch script/API |
-| **P1** | Codex review trigger; assignment progress polling |
-| **P2** | Auto phase continue + evidence refresh on opencode completion |
+| Priority | Item                                                                          |
+| -------- | ----------------------------------------------------------------------------- |
+| **P0**   | Collaboration UI: “Dispatch Phase N to opencode” wired to dispatch script/API |
+| **P1**   | Codex review trigger; assignment progress polling                             |
+| **P2**   | Auto phase continue + evidence refresh on opencode completion                 |
 
 ---
 
@@ -387,15 +387,15 @@ Upstream operator-console has ~25+ routes; not proxied:
 
 Consolidated from [`phase5-handoff.md`](phase5-handoff.md) and this audit:
 
-| ID | Gap | Products affected |
-|----|-----|-------------------|
-| G1 | Unified Ops Console | Portal, Collaboration |
-| G2 | AIOS v1 mail API batch (~19 routes) | AIOS v1, Outlook/Mail |
-| G3 | F-aios-v3 deep proxy map | F-aios-v3 |
-| G4 | sangfor device/compliance POST + UI mock removal | sangfor |
-| G5 | whelp99 MCP HTTP bridge | whelp99 |
-| G6 | Slack send proxy + gate | Slack |
-| G7 | Blueprint doc sync (stale banners) | All (docs) |
+| ID  | Gap                                              | Products affected     |
+| --- | ------------------------------------------------ | --------------------- |
+| G1  | Unified Ops Console                              | Portal, Collaboration |
+| G2  | AIOS v1 mail API batch (~19 routes)              | AIOS v1, Outlook/Mail |
+| G3  | F-aios-v3 deep proxy map                         | F-aios-v3             |
+| G4  | sangfor device/compliance POST + UI mock removal | sangfor               |
+| G5  | whelp99 MCP HTTP bridge                          | whelp99               |
+| G6  | Slack send proxy + gate                          | Slack                 |
+| G7  | Blueprint doc sync (stale banners)               | All (docs)            |
 
 ```mermaid
 flowchart TB
@@ -443,12 +443,12 @@ flowchart TB
 
 These documents are **historical** or **partially outdated**. Use **this file** as the source of truth for integration product status.
 
-| Document | Stale aspect | Use instead |
-|----------|--------------|-------------|
-| [`final-feature-diff.md`](final-feature-diff.md) | “Development Complete” = monorepo structure, not integration | This doc |
-| [`missing-feature-checklist.md`](missing-feature-checklist.md) | UI/tests marked missing but partially implemented | This doc + checklist for v2.0.1 backlog |
-| [`.hermes/...-real-integration-plan.md`](../../.hermes/plans/2026-06-11_020000-real-integration-plan.md) | Timeline all “미시작”; Phases 3–5 done | This doc |
-| [`phase5-handoff.md`](phase5-handoff.md) | Task checklist may lag opencode completion | evidence + this doc |
+| Document                                                                                                 | Stale aspect                                                 | Use instead                             |
+| -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ | --------------------------------------- |
+| [`final-feature-diff.md`](final-feature-diff.md)                                                         | “Development Complete” = monorepo structure, not integration | This doc                                |
+| [`missing-feature-checklist.md`](missing-feature-checklist.md)                                           | UI/tests marked missing but partially implemented            | This doc + checklist for v2.0.1 backlog |
+| [`.hermes/...-real-integration-plan.md`](../../.hermes/plans/2026-06-11_020000-real-integration-plan.md) | Timeline all “미시작”; Phases 3–5 done                       | This doc                                |
+| [`phase5-handoff.md`](phase5-handoff.md)                                                                 | Task checklist may lag opencode completion                   | evidence + this doc                     |
 
 ---
 

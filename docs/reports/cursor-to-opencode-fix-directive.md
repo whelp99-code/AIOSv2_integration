@@ -95,15 +95,15 @@ Cannot find package '@/lib/integrations/aios-v1-proxy-handler'
 도메인 타입에는 아래 action이 있다.
 
 ```ts
-'delete'
-'send'
-'deploy'
-'external-share'
-'data-mutation'
-'config-change'
-'device-control'
-'financial'
-'user-management'
+"delete";
+"send";
+"deploy";
+"external-share";
+"data-mutation";
+"config-change";
+"device-control";
+"financial";
+"user-management";
 ```
 
 하지만 일부 normalize/type guard는 4개만 인정하고 나머지를 `deploy`로 바꾼다.
