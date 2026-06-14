@@ -10,11 +10,12 @@
 - **원격 브랜치**: `origin/phase-b-5/implementation`
 - **타겟 브랜치**: `main` (PR 머지 대기)
 - **상태**: ✅ 성공
+- **PR 링크**: https://github.com/whelp99-code/AIOSv2_integration/pull/new/phase-b-5/implementation
 
 ```text
-remote: Resolving deltas: 100%(100%/100%), done.
 remote:
-remote: Create a pull request for 'phase-b-5/implementation' on GitHub.
+remote: Create a pull request for 'phase-b-5/implementation' on GitHub by visiting:
+remote:      https://github.com/whelp99-code/AIOSv2_integration/pull/new/phase-b-5/implementation
 remote:
 To https://github.com/whelp99-code/AIOSv2_integration.git
  * [new branch]      phase-b-5/implementation -> phase-b-5/implementation
