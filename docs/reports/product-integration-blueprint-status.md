@@ -144,7 +144,7 @@ Hermes plan ~30 APIs — remaining gaps:
 
 **Blueprint goal:** Workflow engine, knowledge graph, orchestrator, evolution, monitoring — 15 packages ([brainstorming § F-aios-v3](../../.hermes/plans/2026-06-11_010000-aios-brainstorming.md)).
 
-**Env:** `F_AIOS_V3_URL` (default `http://localhost:3200`)
+**Env:** `F_AIOS_V3_URL` (default `http://localhost:3201`)
 
 ### 진행 (Done)
 

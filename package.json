@@ -33,7 +33,8 @@
     "integration:stack": "node scripts/start-integration-stack.mjs start",
     "integration:stack:stop": "node scripts/start-integration-stack.mjs stop",
     "integration:stack:wait": "node scripts/start-integration-stack.mjs wait-health",
-    "integration:live-smoke": "node scripts/live-approval-smoke.mjs"
+    "integration:live-smoke": "node scripts/live-approval-smoke.mjs",
+    "integration:ports": "node scripts/verify-port-registry.mjs"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.0",

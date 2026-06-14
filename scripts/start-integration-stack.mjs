@@ -137,9 +137,16 @@ function startDockerDeps() {
   }
 }
 
+function freeIntegrationPorts() {
+  for (const port of [3010, 3101, 3201, 3500, 3502, 4000, 3600, 3110]) {
+    freePort(port);
+  }
+}
+
 function preStartHook(service) {
   if (service.preStart === "vibe") {
     freePort(4000);
+    freePort(4100); // CFO-AI legacy default
   }
 }
 
@@ -206,6 +213,7 @@ const action = process.argv[2] ?? "start";
 
 if (action === "start") {
   startDockerDeps();
+  freeIntegrationPorts();
   for (const s of SERVICES) startOne(s);
 } else if (action === "stop") {
   for (const s of [...SERVICES].reverse()) stopOne(s);

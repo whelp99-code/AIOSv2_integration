@@ -32,6 +32,10 @@ export const PORT_REGISTRY = {
 
   // whelp99 MCP HTTP bridge (stdio MCP wrapper)
   WHELP99_MCP_BRIDGE: 3600,
+  WHELP99_OPERATOR_CONSOLE: 3502, // sangfor-mcp-workflow(3500)와 분리
+
+  // Non-integration (Playground sibling — vibe 4000 충돌 방지)
+  CFO_AI_API: 4100,
 
   // External
   LM_STUDIO: 1234,
@@ -47,11 +51,7 @@ export function validatePorts(): { valid: boolean; conflicts: string[] } {
   for (const [name, port] of Object.entries(PORT_REGISTRY) as [PortName, number][]) {
     const existing = used.get(port);
     if (existing) {
-      // 의도적 중복 허용 없음 (WHELP99 bridge는 3600 전용)
-      if (!(name === 'WHELP99_MCP_BRIDGE' && existing.includes('F_AIOS_V3')) &&
-          !(existing.includes('WHELP99_MCP_BRIDGE') && name === 'F_AIOS_V3')) {
-        conflicts.push(`Port ${port}: ${existing.join(', ')} vs ${name}`);
-      }
+      conflicts.push(`Port ${port}: ${existing.join(', ')} vs ${name}`);
     } else {
       used.set(port, [name]);
     }

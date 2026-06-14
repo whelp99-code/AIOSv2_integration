@@ -3,6 +3,9 @@
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 
+const MAIL_INTELLIGENCE_URL =
+  process.env.NEXT_PUBLIC_MAIL_INTELLIGENCE_URL ?? "http://localhost:3010";
+
 interface MailMessage {
   id: string;
   subject: string;
@@ -361,7 +364,7 @@ export function Dashboard() {
               📧 실제 메일 목록 ({totalCount}건)
             </h3>
             <a
-              href="http://localhost:10200"
+              href={MAIL_INTELLIGENCE_URL}
               target="_blank"
               rel="noopener noreferrer"
               style={{
@@ -723,7 +726,7 @@ export function Dashboard() {
                   }}
                   onClick={() => {
                     if (item.action === "import") {
-                      window.open("http://localhost:10200", "_blank");
+                      window.open(MAIL_INTELLIGENCE_URL, "_blank");
                     }
                   }}
                 >

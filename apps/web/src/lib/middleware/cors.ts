@@ -3,7 +3,7 @@
  * 환경변수 기반 CORS 정책
  */
 
-const ALLOWED_ORIGINS = (process.env.CORS_ORIGINS || 'http://localhost:3100')
+const ALLOWED_ORIGINS = (process.env.CORS_ORIGINS || 'http://localhost:3110')
   .split(',')
   .map(o => o.trim());
 
