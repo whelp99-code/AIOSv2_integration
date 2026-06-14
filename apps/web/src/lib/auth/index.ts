@@ -7,7 +7,13 @@ export const {
   signIn,
   signOut,
 } = NextAuth({
-  secret: process.env.NEXTAUTH_SECRET || 'aiosv2-dev-secret-2024',
+  secret: (() => {
+    const s = process.env.NEXTAUTH_SECRET;
+    if (!s || s.length < 32) {
+      throw new Error('NEXTAUTH_SECRET must be set and at least 32 chars');
+    }
+    return s;
+  })(),
   providers: [
     GithubProvider({
       clientId: process.env.GITHUB_ID ?? '',

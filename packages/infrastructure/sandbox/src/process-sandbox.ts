@@ -12,6 +12,13 @@ import type { Sandbox, SandboxConfig, SandboxResult } from './types';
 
 const execAsync = promisify(execCb);
 
+/** 쉘 메타문자 검증 — command injection 방지 */
+function isShellSafe(value: string): boolean {
+  // 세미콜론, 파이프, 앰퍼샌드, 백틱, 리다이렉트, 줄바꿈 차단
+  // 괄호/달러는 허용 (Node.js -e 코드에서 필요)
+  return !/[;&|`><\n\r]/.test(value);
+}
+
 export class ProcessSandbox implements Sandbox {
   private config: SandboxConfig;
   private tempDir: string | null = null;
@@ -26,6 +33,38 @@ export class ProcessSandbox implements Sandbox {
 
   async execute(command: string, args: string[] = []): Promise<SandboxResult> {
     const startTime = Date.now();
+
+    // 입력 검증: command와 args에 쉘 메타문자 차단
+    if (!isShellSafe(command)) {
+      return {
+        exitCode: -1,
+        stdout: '',
+        stderr: `Blocked: command contains unsafe characters: ${command}`,
+        duration: 0,
+      };
+    }
+    for (const arg of args) {
+      if (!isShellSafe(arg)) {
+        return {
+          exitCode: -1,
+          stdout: '',
+          stderr: `Blocked: argument contains unsafe characters: ${arg}`,
+          duration: 0,
+        };
+      }
+    }
+
+    // allowedCommands 체크
+    const baseCommand = command.split('/').pop() || command;
+    if (!this.config.allowedCommands!.includes(baseCommand)) {
+      return {
+        exitCode: -1,
+        stdout: '',
+        stderr: `Blocked: command not in allowlist: ${baseCommand}. Allowed: ${this.config.allowedCommands!.join(', ')}`,
+        duration: 0,
+      };
+    }
+
     const fullCommand = [command, ...args].map((a) => JSON.stringify(a)).join(' ');
 
     try {

@@ -9,6 +9,13 @@ import type { Sandbox, SandboxConfig, SandboxResult } from './types';
 
 const execAsync = promisify(execCb);
 
+/** 쉘 메타문자 검증 — command injection 방지 */
+function isShellSafe(value: string): boolean {
+  // 세미콜론, 파이프, 앰퍼샌드, 백틱, 리다이렉트, 줄바꿈 차단
+  // 괄호/달러는 허용 (Node.js -e 코드에서 필요)
+  return !/[;&|`><\n\r]/.test(value);
+}
+
 export interface DockerSandboxConfig extends SandboxConfig {
   image?: string;
   containerName?: string;
@@ -76,6 +83,26 @@ export class DockerSandbox implements Sandbox {
       await this.start();
     }
 
+    // 입력 검증
+    if (!isShellSafe(command)) {
+      return { exitCode: -1, stdout: '', stderr: `Blocked: unsafe command: ${command}`, duration: 0 };
+    }
+    for (const arg of args) {
+      if (!isShellSafe(arg)) {
+        return { exitCode: -1, stdout: '', stderr: `Blocked: unsafe argument: ${arg}`, duration: 0 };
+      }
+    }
+
+    // allowedCommands 체크
+    const baseCommand = command.split('/').pop() || command;
+    if (!this.config.allowedCommands.includes(baseCommand)) {
+      return {
+        exitCode: -1, stdout: '',
+        stderr: `Blocked: command not in allowlist: ${baseCommand}. Allowed: ${this.config.allowedCommands.join(', ')}`,
+        duration: 0,
+      };
+    }
+
     const startTime = Date.now();
     const fullCommand = ['exec', this.config.containerName!, command, ...args];
 
@@ -105,6 +132,11 @@ export class DockerSandbox implements Sandbox {
   async writeFile(filePath: string, content: string): Promise<void> {
     if (!this.isRunning) {
       await this.start();
+    }
+
+    // Path traversal 방지
+    if (filePath.includes('..') || !isShellSafe(filePath)) {
+      throw new Error(`Blocked: unsafe filePath: ${filePath}`);
     }
 
     const encoded = Buffer.from(content).toString('base64');

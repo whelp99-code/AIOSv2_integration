@@ -11,11 +11,20 @@ export class LocalStorageProvider implements StorageProvider {
   private basePath: string;
 
   constructor(basePath = './uploads') {
-    this.basePath = basePath;
+    this.basePath = path.resolve(basePath);
+  }
+
+  /** Path traversal 방지 — basePath를 벗어나는 경로 차단 */
+  private safePath(filePath: string): string {
+    const resolved = path.resolve(this.basePath, filePath);
+    if (!resolved.startsWith(this.basePath + path.sep) && resolved !== this.basePath) {
+      throw new Error(`Path traversal blocked: ${filePath} resolves outside basePath`);
+    }
+    return resolved;
   }
 
   async upload(filePath: string, content: Buffer, mimeType: string): Promise<StorageFile> {
-    const fullPath = path.join(this.basePath, filePath);
+    const fullPath = this.safePath(filePath);
     await fs.mkdir(path.dirname(fullPath), { recursive: true });
     await fs.writeFile(fullPath, content);
 
@@ -30,18 +39,18 @@ export class LocalStorageProvider implements StorageProvider {
   }
 
   async download(filePath: string): Promise<Buffer> {
-    const fullPath = path.join(this.basePath, filePath);
+    const fullPath = this.safePath(filePath);
     return fs.readFile(fullPath);
   }
 
   async delete(filePath: string): Promise<void> {
-    const fullPath = path.join(this.basePath, filePath);
+    const fullPath = this.safePath(filePath);
     await fs.unlink(fullPath);
   }
 
   async list(prefix?: string): Promise<StorageFile[]> {
     try {
-      const dir = prefix ? path.join(this.basePath, prefix) : this.basePath;
+      const dir = prefix ? this.safePath(prefix) : this.basePath;
       const entries = await fs.readdir(dir, { withFileTypes: true });
       return entries
         .filter((e) => e.isFile())

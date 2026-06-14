@@ -180,18 +180,23 @@ export class AiosV1ProxyAdapter extends BaseProxyAdapter {
     req: ProxyRequest,
     gateType: ApprovalGateType,
   ): Promise<GateDecision> {
-    // TODO: 실제 승인 큐 연동 (@aios/proxy-core IApprovalGate)
-    // 현재는 경고 로그만 남기고 허용 (개발 단계)
+    // 승인 게이트 평가 (모든 환경)
+    const env = process.env.NODE_ENV || 'development';
+    const approvalRequired = process.env.FEATURE_APPROVAL_GATE === '1' || env === 'production';
+
+    if (!approvalRequired) {
+      console.warn(
+        `[ApprovalGate] ${gateType} check for ${req.method} ${req.path} - FEATURE_APPROVAL_GATE not enabled`,
+      );
+      return { approved: true };
+    }
+
+    // 프로덕션: 승인 큐 확인 (구현 시 IApprovalGate.evaluate() 호출)
+    // 현재는 안전하게 거부 (승인 큐 미구현 시)
     console.warn(
-      `[ApprovalGate] ${gateType} check for ${req.method} ${req.path} - auto-approved in dev`,
+      `[ApprovalGate] ${gateType} check for ${req.method} ${req.path} - APPROVAL REQUIRED but queue not implemented`,
     );
-
-    // 실제 구현 시:
-    // 1. ApprovalContext 생성 (userId, product, action, resource, payload, riskLevel)
-    // 2. IApprovalGate.evaluate() 호출
-    // 3. 승인 대기 시 202 Accepted 반환, 폴링 URL 제공
-
-    return { approved: true };
+    return { approved: false, reason: 'Approval queue not implemented. Set FEATURE_APPROVAL_GATE=0 to bypass.' };
   }
 
   /** 19개 라우트 매핑 헬퍼 - Next.js route.ts에서 사용 */

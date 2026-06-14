@@ -61,15 +61,7 @@ async function checkGateAndRespond(
 ): Promise<GateCheckResult> {
   if (gate === "none") return { allowed: true };
 
-  // 개발 환경에서는 자동 승인 (테스트 용이성)
-  if (process.env.NODE_ENV !== "production") {
-    console.warn(
-      `[Gate] ${gate} check for ${proxyReq.method} ${proxyReq.path} - user: ${userId} (DEV MODE: auto-approved)`,
-    );
-    return { allowed: true };
-  }
-
-  // 프로덕션: 실제 승인 게이트 연동
+  // 실제 승인 게이트 연동 (모든 환경)
   const approvalId =
     proxyReq.body &&
     typeof proxyReq.body === "object" &&

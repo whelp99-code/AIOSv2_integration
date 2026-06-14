@@ -123,13 +123,34 @@ export class AutoApprovalResolver implements IAutoApprovalResolver {
   }
   
   async evaluateRules(request: ApprovalRequest, rules: ApprovalRule[]): Promise<boolean> {
-    // 규칙 평가 로직
+    // 규칙 평가 로직 — 조건을 실제로 평가
+    const env = process.env.NODE_ENV || 'development';
+    const approvalGateEnabled = process.env.FEATURE_APPROVAL_GATE === '1' || env === 'production';
+
+    // 프로덕션 또는 FEATURE_APPROVAL_GATE=1이면 자동 승인 안 함
+    if (approvalGateEnabled) {
+      return false;
+    }
+
+    // 개발 환경에서만 정책 기반 자동 승인
     for (const rule of rules) {
-      if (rule.action === 'auto-approve') {
+      if (rule.action === 'auto-approve' && this.matchCondition(request, rule.condition)) {
         return true;
       }
     }
     return false;
+  }
+
+  /** 조건 매칭 (간이 평가기) */
+  private matchCondition(request: ApprovalRequest, condition: string): boolean {
+    // type === "file-change" && action === "create" 같은 조건 파싱
+    const typeMatch = condition.match(/type === "([^"]+)"/);
+    const actionMatch = condition.match(/action === "([^"]+)"/);
+
+    if (typeMatch && request.type !== typeMatch[1]) return false;
+    if (actionMatch && request.context?.action !== actionMatch[1]) return false;
+
+    return true;
   }
   
   private isExcluded(request: ApprovalRequest, exclusions: string[]): boolean {
