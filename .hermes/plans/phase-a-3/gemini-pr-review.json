@@ -1,0 +1,17 @@
+{
+  "pr_number": 0,
+  "title": "feat(phase-a-3): VibeCodingOS API 계약 확정",
+  "files": [
+    "docs/openapi-vibe-coding.yaml",
+    "middleware/auth.ts",
+    "tests/api/projects.test.ts",
+    "tests/api/a2a.test.ts",
+    "test-result-report.md",
+    "gemini-redteam-review.json",
+    "hermes-evidence-verification.md",
+    "fix-summary.md"
+  ],
+  "review_status": "APPROVED_WITH_NOTES",
+  "reviewer": "Gemini PR Reviewer",
+  "notes": "PR review는 plans 디렉토리 내 산출물 기준으로 진행되었습니다. auth.ts, tests의 실제 코드 적용은 falls outside plans directory scope. 코드가 반영되기 전까지는 Documentation Pass입니다."
+}
