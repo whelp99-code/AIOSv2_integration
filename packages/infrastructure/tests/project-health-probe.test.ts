@@ -18,6 +18,39 @@ describe('project-health-probe', () => {
     expect(result.upstream).toBe('http://f-aios-v3.test');
   });
 
+  it('marks HTTP integrations as degraded when health body reports healthy with 503', async () => {
+    const target = getIntegrationTarget('vibe-coding-os');
+    const result = await probeIntegrationTarget(target, {
+      env: { VIBE_CODING_OS_URL: 'http://vibe.test' },
+      fetchImpl: async () =>
+        new Response(JSON.stringify({ ok: false, status: 'degraded', time: 'now' }), {
+          status: 503,
+          headers: { 'Content-Type': 'application/json' },
+        }),
+    });
+
+    expect(result.status).toBe('degraded');
+  });
+
+  it('probes whelp99 HTTP bridge when WHELP99_MCP_HTTP_URL is configured', async () => {
+    const target = getIntegrationTarget('whelp99-code-sangfor-engineer-mcp');
+    const result = await probeIntegrationTarget(target, {
+      env: {
+        WHELP99_MCP_PATH: '/tmp/whelp99',
+        WHELP99_MCP_HTTP_URL: 'http://whelp99-bridge.test',
+      },
+      fetchImpl: async (input) => {
+        expect(String(input)).toBe('http://whelp99-bridge.test/health');
+        return new Response(JSON.stringify({ status: 'ok', bridge: 'whelp99-mcp-http-bridge' }), {
+          status: 200,
+        });
+      },
+    });
+
+    expect(result.status).toBe('ok');
+    expect(result.probeMode).toBe('http');
+  });
+
   it('returns aggregated report for all integration targets', async () => {
     const report = await probeAllIntegrations({
       env: {

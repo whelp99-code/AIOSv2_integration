@@ -29,7 +29,11 @@
     "collaboration:dispatch-opencode-phase6": "pnpm --filter @aios/api exec tsx ../../scripts/dispatch-opencode-phase6.ts",
     "collaboration:dispatch-opencode-fix": "pnpm --filter @aios/api exec tsx ../../scripts/dispatch-opencode-fix-directive.ts",
     "collaboration:dispatch-opencode-phase7": "pnpm --filter @aios/api exec tsx ../../scripts/dispatch-opencode-phase7-remediation.ts",
-    "collaboration:dispatch-cursor-agent": "pnpm --filter @aios/api exec tsx ../../scripts/dispatch-cursor-agent.ts"
+    "collaboration:dispatch-cursor-agent": "pnpm --filter @aios/api exec tsx ../../scripts/dispatch-cursor-agent.ts",
+    "integration:stack": "node scripts/start-integration-stack.mjs start",
+    "integration:stack:stop": "node scripts/start-integration-stack.mjs stop",
+    "integration:stack:wait": "node scripts/start-integration-stack.mjs wait-health",
+    "integration:live-smoke": "node scripts/live-approval-smoke.mjs"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.0",

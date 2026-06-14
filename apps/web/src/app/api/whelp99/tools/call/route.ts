@@ -50,7 +50,7 @@ export async function POST(request: Request) {
         Accept: "application/json",
       },
       body: JSON.stringify(payload),
-      signal: AbortSignal.timeout(10_000),
+      signal: AbortSignal.timeout(30_000),
     });
 
     const data = await response.json();

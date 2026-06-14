@@ -30,8 +30,8 @@ export const PORT_REGISTRY = {
   // Mail Intelligence
   MAIL_INTELLIGENCE: 3010,  // 10200 → 3010 표준 포트대 (Codex AC-004: Azure AD redirect_uri 갱신 필요)
 
-  // whelp99 MCP Bridge (API 앱 내 마운트)
-  WHELP99_MCP_BRIDGE: 3201, // F-aios-v3와 동일 포트 사용 - 별도 경로로 라우팅
+  // whelp99 MCP HTTP bridge (stdio MCP wrapper)
+  WHELP99_MCP_BRIDGE: 3600,
 
   // External
   LM_STUDIO: 1234,
@@ -47,7 +47,7 @@ export function validatePorts(): { valid: boolean; conflicts: string[] } {
   for (const [name, port] of Object.entries(PORT_REGISTRY) as [PortName, number][]) {
     const existing = used.get(port);
     if (existing) {
-      // 의도적 중복 허용: WHELP99_MCP_BRIDGE는 API 앱(3201)에 마운트됨
+      // 의도적 중복 허용 없음 (WHELP99 bridge는 3600 전용)
       if (!(name === 'WHELP99_MCP_BRIDGE' && existing.includes('F_AIOS_V3')) &&
           !(existing.includes('WHELP99_MCP_BRIDGE') && name === 'F_AIOS_V3')) {
         conflicts.push(`Port ${port}: ${existing.join(', ')} vs ${name}`);
@@ -77,5 +77,6 @@ export function getEnvDefaults(): Record<string, string> {
     MAIL_INTELLIGENCE_URL: getUrl('MAIL_INTELLIGENCE'),
     LM_STUDIO_URL: getUrl('LM_STUDIO'),
     WHELP99_MCP_PATH: '../whelp99-code-sangfor-engineer-mcp',
+    WHELP99_MCP_HTTP_URL: getUrl('WHELP99_MCP_BRIDGE'),
   };
 }

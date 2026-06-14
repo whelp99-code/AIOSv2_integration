@@ -53,6 +53,43 @@ export async function probeIntegrationTarget(
     const relativePath = upstream || `../${target.name}`;
     const resolvedPath = upstream.startsWith('/') ? upstream : join(workspaceRoot, relativePath);
     const exists = existsSync(resolvedPath);
+    const httpBridgeUrl = env.WHELP99_MCP_HTTP_URL?.replace(/\/$/, '');
+
+    if (httpBridgeUrl && target.id === 'whelp99-code-sangfor-engineer-mcp') {
+      try {
+        const response = await fetchImpl(`${httpBridgeUrl}/health`, {
+          method: 'GET',
+          headers: { Accept: 'application/json' },
+          signal: AbortSignal.timeout(options.timeoutMs ?? 5000),
+        });
+        const payload = await parseJsonSafe(response);
+        const reachability = resolveReachability(response, payload);
+
+        return {
+          id: target.id,
+          name: target.name,
+          integrationRole: target.integrationRole,
+          upstream: httpBridgeUrl,
+          status: reachability,
+          probeMode: 'http',
+          details:
+            reachability === 'planned'
+              ? 'HTTP bridge reachable; filesystem path also detected.'
+              : undefined,
+          payload,
+        };
+      } catch (error) {
+        return {
+          id: target.id,
+          name: target.name,
+          integrationRole: target.integrationRole,
+          upstream: resolvedPath,
+          status: exists ? 'planned' : 'unreachable',
+          probeMode: target.probeMode,
+          details: error instanceof Error ? error.message : String(error),
+        };
+      }
+    }
 
     return {
       id: target.id,
@@ -75,28 +112,16 @@ export async function probeIntegrationTarget(
     });
 
     const payload = await parseJsonSafe(response);
-    const statusValue = typeof payload?.status === 'string' ? payload.status : undefined;
-
-    if (!response.ok) {
-      return {
-        id: target.id,
-        name: target.name,
-        integrationRole: target.integrationRole,
-        upstream,
-        status: statusValue === 'degraded' ? 'degraded' : 'unreachable',
-        probeMode: target.probeMode,
-        details: `HTTP ${response.status}`,
-        payload,
-      };
-    }
+    const reachability = resolveReachability(response, payload);
 
     return {
       id: target.id,
       name: target.name,
       integrationRole: target.integrationRole,
       upstream,
-      status: statusValue === 'degraded' ? 'degraded' : 'ok',
+      status: reachability,
       probeMode: target.probeMode,
+      details: reachability === 'unreachable' ? `HTTP ${response.status}` : undefined,
       payload,
     };
   } catch (error) {
@@ -145,4 +170,28 @@ async function parseJsonSafe(response: Response): Promise<Record<string, unknown
   } catch {
     return undefined;
   }
+}
+
+function resolveReachability(
+  response: Response,
+  payload?: Record<string, unknown>,
+): IntegrationReachability {
+  const statusValue =
+    typeof payload?.status === 'string' ? payload.status.toLowerCase() : undefined;
+
+  if (response.ok) {
+    if (statusValue === 'degraded') return 'degraded';
+    if (statusValue === 'healthy' || statusValue === 'ok') return 'ok';
+    return 'ok';
+  }
+
+  if (statusValue === 'degraded' || statusValue === 'healthy') {
+    return 'degraded';
+  }
+
+  if (payload?.ok === false) {
+    return 'degraded';
+  }
+
+  return 'unreachable';
 }

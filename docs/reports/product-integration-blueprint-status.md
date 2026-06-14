@@ -3,7 +3,7 @@
 > **Last updated:** 2026-06-14  
 > **Session:** `cursor-opencode-main-session`  
 > **Integration phase:** 7 completed (opencode + Cursor Agent + Codex)  
-> **Verification (2026-06-14):** 67 web API routes, connector routes on `apps/web`, 394 tests passing, `pnpm lint` + `pnpm typecheck` + `pnpm build` PASS. `/ops` and `/vibe-coding` HTTP smoke PASS; `/api/integrations/health` returns structured 503 when upstreams are down.
+> **Verification (2026-06-14):** 67 web API routes, connector routes on `apps/web`, **394 tests passing**, `pnpm lint` + `pnpm typecheck` + `pnpm build` PASS. Phase 8 live stack: [`phase-8-live-upstream-verification.md`](../evidence/phase-8-live-upstream-verification.md), [`phase-8-live-approval-smoke.md`](../evidence/phase-8-live-approval-smoke.md).
 
 **Canonical document** for integration-scope products. Supersedes stale timeline/checklist entries in older reports (see [Stale Doc Index](#stale-doc-index)).
 
@@ -42,12 +42,12 @@ Each product is scored on four axes (each 0–100%, combined into overall **Prog
 | AIOSv2 Portal (Hub)   | 78%      | 95%    | 90%   | 75% | 90%  | Browser/live UX smoke       |
 | AIOS v1               | 58%      | 100%   | 60%   | 50% | 50%  | unified mail hub UI         |
 | F-aios-v3-core        | 45%      | 100%   | 55%   | 10% | 50%  | workflows UI source clarity |
-| sangfor-mcp-workflow  | 62%      | 100%   | 70%   | 45% | 80%  | live device validation      |
-| vibe-coding-os        | 64%      | 100%   | 75%   | 60% | 80%  | live RAG search smoke       |
-| whelp99 MCP           | 45%      | 70%    | 55%   | 15% | 80%  | real MCP HTTP endpoint      |
+| sangfor-mcp-workflow  | 68%      | 100%   | 70%   | 45% | 80%  | live device validation      |
+| vibe-coding-os        | 58%      | 70%    | 75%   | 60% | 80%  | Docker Postgres for full ok |
+| whelp99 MCP           | 72%      | 100%   | 85%   | 15% | 90%  | expand safe tool live set   |
 | Outlook / Mail        | 55%      | 70%    | 60%   | 70% | 50%  | unified mail hub UI         |
 | GitHub                | 50%      | 50%    | 55%   | 25% | 80%  | token-backed live PR smoke  |
-| Slack                 | 45%      | 50%    | 55%   | 25% | 90%  | live send approval smoke    |
+| Slack                 | 48%      | 50%    | 55%   | 25% | 90%  | set `SLACK_WEBHOOK_URL` live |
 | Collaboration Runtime | 75%      | —      | 85%   | 60% | 95%  | job progress visibility     |
 
 **Integration-scope weighted average:** ~58% (product vision) / ~82% (Hermes real-integration plan) / Phase 1–7 build/test/evidence **complete**.
@@ -69,6 +69,7 @@ Each product is scored on four axes (each 0–100%, combined into overall **Prog
 - CI: [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml)
 - **67** Next.js API routes under [`apps/web/src/app/api/`](../../apps/web/src/app/api/)
 - Phase 7 evidence: [`phase-7-integrated-operational-verification.md`](../evidence/phase-7-integrated-operational-verification.md)
+- Phase 8 evidence: [`phase-8-live-upstream-verification.md`](../evidence/phase-8-live-upstream-verification.md), [`phase-8-live-approval-smoke.md`](../evidence/phase-8-live-approval-smoke.md)
 
 ### 미진 (Not done)
 
@@ -416,9 +417,9 @@ Consolidated from [`phase5-handoff.md`](phase5-handoff.md), Phase 7 evidence, an
 | G2  | AIOS v1 mail API batch                           | **Partial** — import/candidates/threads proxied | AIOS v1, Outlook/Mail |
 | G3  | F-aios-v3 deep proxy map                         | **Partial** — lightrag/orchestrator/monitoring added | F-aios-v3             |
 | G4  | sangfor device/compliance POST + UI mock removal | **Partial** — routes + gates done; live validation pending | sangfor               |
-| G5  | whelp99 MCP HTTP bridge live endpoint            | **Partial** — web bridge routes done | whelp99               |
-| G6  | Slack live send smoke                            | **Partial** — gate + route done; live send needs approval | Slack                 |
-| G7  | Browser/live UX smoke for major flows            | **Open**              | All                   |
+| G5  | whelp99 MCP HTTP bridge live endpoint            | **Done** — bridge :3600 + portal probe + live `sangfor.products` | whelp99               |
+| G6  | Slack live send smoke                            | **Partial** — gate PASS; live blocked on webhook env | Slack                 |
+| G7  | Browser/live UX smoke for major flows            | **Partial** — Phase 8 stack + integrations health live | All                   |
 
 ```mermaid
 flowchart TB
@@ -430,10 +431,11 @@ flowchart TB
     Connectors["whelp99 GitHub Slack"]
     Evidence["phase-0..7 evidence docs"]
   end
-  subgraph post7 [Post Phase7 Open]
-    LiveUX["G7 browser/live UX smoke"]
-    LiveUpstream["live upstream validation"]
+  subgraph post7 [Post Phase7]
+    LiveUX["G7 partial live stack"]
+    LiveUpstream["Phase 8 upstream verification"]
     MailHub["unified mail hub UI"]
+    SlackGH["Slack/GitHub prod credentials"]
   end
   phase1to7 --> post7
 ```
