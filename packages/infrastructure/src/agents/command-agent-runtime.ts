@@ -1,10 +1,16 @@
 /**
  * Command-backed Agent Runtime
- * Cursor/opencode CLI를 실제 실행 가능한 런타임으로 감싼다.
+ * Cursor Agent/opencode CLI를 실제 실행 가능한 런타임으로 감싼다.
  */
 
-import { spawn } from 'node:child_process';
-import type { AgentJob, AgentJobCreationRequest, AgentJobUpdateRequest, AgentType, JobOutput } from '@aios/domain';
+import { spawn } from "node:child_process";
+import type {
+  AgentJob,
+  AgentJobCreationRequest,
+  AgentJobUpdateRequest,
+  AgentType,
+  JobOutput,
+} from "@aios/domain";
 
 export interface CommandAgentRuntimeConfig {
   agentType: AgentType;
@@ -18,7 +24,7 @@ export interface CommandAgentRuntimeConfig {
 
 export interface CommandAgentStatus {
   agentType: AgentType;
-  status: 'idle' | 'busy' | 'error' | 'offline';
+  status: "idle" | "busy" | "error" | "offline";
   currentJob?: string;
   uptime: number;
   lastActivity: Date;
@@ -64,7 +70,7 @@ export class CommandAgentRuntime {
         id: `${this.agentType}-job-${Date.now()}`,
         taskId: request.taskId,
         agentType: this.agentType,
-        status: 'completed',
+        status: "completed",
         startedAt,
         completedAt: new Date(),
         input: request.input,
@@ -72,7 +78,7 @@ export class CommandAgentRuntime {
           result: stdout.trim(),
           artifacts: [
             {
-              type: 'comment',
+              type: "comment",
               content: stdout.trim(),
               metadata: {
                 stderr: stderr.trim(),
@@ -98,7 +104,7 @@ export class CommandAgentRuntime {
         id: `${this.agentType}-job-${Date.now()}`,
         taskId: request.taskId,
         agentType: this.agentType,
-        status: 'failed',
+        status: "failed",
         startedAt,
         completedAt: new Date(),
         input: request.input,
@@ -111,17 +117,23 @@ export class CommandAgentRuntime {
     }
   }
 
-  async updateJobStatus(jobId: string, request: AgentJobUpdateRequest): Promise<AgentJob> {
+  async updateJobStatus(
+    jobId: string,
+    request: AgentJobUpdateRequest,
+  ): Promise<AgentJob> {
     const output = request.output ?? createEmptyOutput();
     return {
       id: jobId,
-      taskId: '',
+      taskId: "",
       agentType: this.agentType,
-      status: request.status ?? 'pending',
+      status: request.status ?? "pending",
       startedAt: new Date(),
-      completedAt: request.status === 'completed' || request.status === 'failed' ? new Date() : undefined,
+      completedAt:
+        request.status === "completed" || request.status === "failed"
+          ? new Date()
+          : undefined,
       input: {
-        task: '',
+        task: "",
         context: {},
         constraints: [],
       },
@@ -139,7 +151,7 @@ export class CommandAgentRuntime {
     const available = await this.isAvailable();
     return {
       agentType: this.agentType,
-      status: available ? (this.currentJobId ? 'busy' : 'idle') : 'offline',
+      status: available ? (this.currentJobId ? "busy" : "idle") : "offline",
       currentJob: this.currentJobId,
       uptime: Date.now() - this.startedAt,
       lastActivity: this.lastActivity,
@@ -149,8 +161,8 @@ export class CommandAgentRuntime {
   async isAvailable(): Promise<boolean> {
     try {
       await runCommand({
-        command: 'sh',
-        args: ['-lc', `command -v ${shellEscape(this.config.command)}`],
+        command: "sh",
+        args: ["-lc", `command -v ${shellEscape(this.config.command)}`],
         timeoutMs: 5_000,
       });
       return true;
@@ -167,22 +179,30 @@ export class CommandAgentRuntime {
   }
 }
 
-export function createOpencodeRuntime(cwd = process.cwd()): CommandAgentRuntime {
+export function createOpencodeRuntime(
+  cwd = process.cwd(),
+): CommandAgentRuntime {
   return new CommandAgentRuntime({
-    agentType: 'opencode',
-    command: process.env.OPENCODE_COMMAND || 'opencode',
+    agentType: "opencode",
+    command: process.env.OPENCODE_COMMAND || "opencode",
     cwd,
-    argsBuilder: (request) => ['run', request.input.task],
+    argsBuilder: (request) => ["run", request.input.task],
   });
 }
 
 export function createCursorRuntime(cwd = process.cwd()): CommandAgentRuntime {
-  const command = process.env.CURSOR_AGENT_COMMAND || 'cursor-agent';
+  const command = process.env.CURSOR_AGENT_COMMAND || "agent";
   return new CommandAgentRuntime({
-    agentType: 'manual',
+    agentType: "manual",
     command,
     cwd,
-    argsBuilder: (request) => [request.input.task],
+    argsBuilder: (request) => [
+      "--print",
+      "--trust",
+      "--workspace",
+      cwd,
+      request.input.task,
+    ],
   });
 }
 
@@ -200,7 +220,12 @@ function runCommand(input: {
   cwd?: string;
   timeoutMs: number;
   env?: NodeJS.ProcessEnv;
-}): Promise<{ stdout: string; stderr: string; duration: number; exitCode: number }> {
+}): Promise<{
+  stdout: string;
+  stderr: string;
+  duration: number;
+  exitCode: number;
+}> {
   return new Promise((resolve, reject) => {
     const startedAt = Date.now();
     const child = spawn(input.command, input.args, {
@@ -209,33 +234,42 @@ function runCommand(input: {
         ...process.env,
         ...(input.env ?? {}),
       },
-      stdio: ['ignore', 'pipe', 'pipe'],
+      stdio: ["ignore", "pipe", "pipe"],
     });
 
-    let stdout = '';
-    let stderr = '';
+    let stdout = "";
+    let stderr = "";
     const timeout = setTimeout(() => {
-      child.kill('SIGTERM');
-      reject(new Error(`Command timed out after ${input.timeoutMs}ms: ${input.command}`));
+      child.kill("SIGTERM");
+      reject(
+        new Error(
+          `Command timed out after ${input.timeoutMs}ms: ${input.command}`,
+        ),
+      );
     }, input.timeoutMs);
 
-    child.stdout.on('data', (chunk: Buffer | string) => {
+    child.stdout.on("data", (chunk: Buffer | string) => {
       stdout += chunk.toString();
     });
 
-    child.stderr.on('data', (chunk: Buffer | string) => {
+    child.stderr.on("data", (chunk: Buffer | string) => {
       stderr += chunk.toString();
     });
 
-    child.on('error', (error) => {
+    child.on("error", (error) => {
       clearTimeout(timeout);
       reject(error);
     });
 
-    child.on('close', (code) => {
+    child.on("close", (code) => {
       clearTimeout(timeout);
       if (code !== 0) {
-        reject(new Error(stderr.trim() || `Command failed with exit code ${code}: ${input.command}`));
+        reject(
+          new Error(
+            stderr.trim() ||
+              `Command failed with exit code ${code}: ${input.command}`,
+          ),
+        );
         return;
       }
 

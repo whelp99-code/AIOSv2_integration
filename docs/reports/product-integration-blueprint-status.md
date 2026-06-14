@@ -1,9 +1,9 @@
 # Product Integration Blueprint Status
 
-> **Last updated:** 2026-06-13  
+> **Last updated:** 2026-06-14  
 > **Session:** `cursor-opencode-main-session`  
-> **Integration phase:** 5 completed (cursor-opencode)  
-> **Verification (2026-06-13):** 32 web API routes, whelp99/slack on `apps/api`, 26 tests passing (`approval-gate` GET dev regression included), `pnpm lint` + `pnpm typecheck` + web build PASS (NFT warning). Repo-wide `pnpm format:check` legacy FAIL; changed-file-only Prettier PASS.
+> **Integration phase:** 7 completed (opencode + Cursor Agent + Codex)  
+> **Verification (2026-06-14):** 67 web API routes, connector routes on `apps/web`, 394 tests passing, `pnpm lint` + `pnpm typecheck` + `pnpm build` PASS. `/ops` and `/vibe-coding` HTTP smoke PASS; `/api/integrations/health` returns structured 503 when upstreams are down.
 
 **Canonical document** for integration-scope products. Supersedes stale timeline/checklist entries in older reports (see [Stale Doc Index](#stale-doc-index)).
 
@@ -39,18 +39,18 @@ Each product is scored on four axes (each 0–100%, combined into overall **Prog
 
 | Product               | Progress | Health | Proxy | UI  | Gate | Next Priority               |
 | --------------------- | -------- | ------ | ----- | --- | ---- | --------------------------- |
-| AIOSv2 Portal (Hub)   | 55%      | 90%    | 70%   | 50% | 60%  | Unified Ops Console         |
-| AIOS v1               | 42%      | 100%   | 37%   | 50% | 0%   | mail-intelligence proxies   |
-| F-aios-v3-core        | 22%      | 100%   | 15%   | 10% | 0%   | workflows UI source clarity |
-| sangfor-mcp-workflow  | 38%      | 100%   | 24%   | 45% | 50%  | device read proxy           |
-| vibe-coding-os        | 28%      | 100%   | 30%   | 0%  | 50%  | projects UI                 |
-| whelp99 MCP           | 12%      | 40%    | 0%    | 15% | 0%   | MCP HTTP bridge             |
-| Outlook / Mail        | 38%      | 50%    | 25%   | 70% | 0%   | v1 mail-import proxy        |
-| GitHub                | 22%      | 30%    | 20%   | 25% | 0%   | Real API / Octokit          |
-| Slack                 | 12%      | 30%    | 0%    | 25% | 0%   | send proxy + gate           |
-| Collaboration Runtime | 62%      | —      | 80%   | 45% | 90%  | UI phase dispatch           |
+| AIOSv2 Portal (Hub)   | 78%      | 95%    | 90%   | 75% | 90%  | Browser/live UX smoke       |
+| AIOS v1               | 58%      | 100%   | 60%   | 50% | 50%  | unified mail hub UI         |
+| F-aios-v3-core        | 45%      | 100%   | 55%   | 10% | 50%  | workflows UI source clarity |
+| sangfor-mcp-workflow  | 62%      | 100%   | 70%   | 45% | 80%  | live device validation      |
+| vibe-coding-os        | 64%      | 100%   | 75%   | 60% | 80%  | live RAG search smoke       |
+| whelp99 MCP           | 45%      | 70%    | 55%   | 15% | 80%  | real MCP HTTP endpoint      |
+| Outlook / Mail        | 55%      | 70%    | 60%   | 70% | 50%  | unified mail hub UI         |
+| GitHub                | 50%      | 50%    | 55%   | 25% | 80%  | token-backed live PR smoke  |
+| Slack                 | 45%      | 50%    | 55%   | 25% | 90%  | live send approval smoke    |
+| Collaboration Runtime | 75%      | —      | 85%   | 60% | 95%  | job progress visibility     |
 
-**Integration-scope weighted average:** ~35% (product vision) / ~58% (Hermes real-integration plan) / Phase 1–5 **complete**.
+**Integration-scope weighted average:** ~58% (product vision) / ~82% (Hermes real-integration plan) / Phase 1–7 build/test/evidence **complete**.
 
 ---
 
@@ -247,28 +247,31 @@ Upstream operator-console has ~25+ routes; not proxied:
 
 **Blueprint goal:** Sangfor engineer MCP extension ([integrations registry](../../packages/shared/src/constants/integrations.ts)).
 
-**Env:** `WHELP99_MCP_PATH` (filesystem probe)
+**Env:** `WHELP99_MCP_PATH` (filesystem probe), `WHELP99_MCP_HTTP_URL` (web bridge)
 
 ### 진행 (Done)
 
 - Filesystem probe in [`project-health-probe.ts`](../../packages/infrastructure/src/integrations/project-health-probe.ts)
 - [`GET /api/whelp99/health`](../../apps/api/src/index.ts) on API app (probeIntegrationTarget)
+- Web bridge routes:
+  - [`GET /api/whelp99/health`](../../apps/web/src/app/api/whelp99/health/route.ts)
+  - [`GET /api/whelp99/tools`](../../apps/web/src/app/api/whelp99/tools/route.ts)
+  - [`POST /api/whelp99/tools/call`](../../apps/web/src/app/api/whelp99/tools/call/route.ts)
 - Settings integrations row (`planned` / `unreachable`)
-- Tests in [`tests/phase5-smoke.test.ts`](../../tests/phase5-smoke.test.ts)
+- Tests in [`tests/phase5-smoke.test.ts`](../../tests/phase5-smoke.test.ts) and [`tests/integration/phase6-connectors.test.ts`](../../tests/integration/phase6-connectors.test.ts)
 
 ### 미진 (Not done)
 
-- No HTTP/MCP stdio bridge — cannot invoke MCP tools from portal
-- [`readinessNote`](../../packages/shared/src/constants/integrations.ts) still references Phase 4/5 wording; no tool proxy routes
-- Not in web app API (API app only)
+- Real MCP HTTP service must be configured with `WHELP99_MCP_HTTP_URL`.
+- Portal UI does not yet expose a generic tool-call form.
 
 ### 개선사항
 
-| Priority | Item                                                           |
-| -------- | -------------------------------------------------------------- |
-| **P0**   | Update readinessNote; document Phase 6 bridge scope            |
-| **P1**   | MCP HTTP bridge design + health upgrade from `planned` to live |
-| **P2**   | Tool proxy routes with approval gate                           |
+| Priority | Item                                                 |
+| -------- | ---------------------------------------------------- |
+| **P1**   | Connect a real MCP HTTP endpoint and run live smoke  |
+| **P2**   | Add portal tool-call UI with approval queue handoff  |
+| **P3**   | Keep filesystem probe as fallback diagnostics source |
 
 ---
 
@@ -285,20 +288,23 @@ Upstream operator-console has ~25+ routes; not proxied:
 
 - UI: [`/mail`](../../apps/web/src/app/mail/page.tsx), dashboard mail widget
 - Settings: Outlook connected status
+- AIOS v1 mail routes:
+  - [`POST /api/mail-import`](../../apps/web/src/app/api/mail-import/route.ts)
+  - [`GET/POST /api/mail-candidates`](../../apps/web/src/app/api/mail-candidates/route.ts)
+  - [`GET/POST /api/mail-insight-threads`](../../apps/web/src/app/api/mail-insight-threads/route.ts)
+- Tests in [`tests/integration/aios-v1-mail-proxy.test.ts`](../../tests/integration/aios-v1-mail-proxy.test.ts)
 
 ### 미진 (Not done)
 
-- AIOS v1 mail-import, mail-candidates, mail-insight-threads — not proxied (see AIOS v1 §)
 - Single “mail hub” merging Outlook + v1 intelligence
-- Candidate approval workflow
+- Candidate approval workflow UI
 
 ### 개선사항
 
-| Priority | Item                                                  |
-| -------- | ----------------------------------------------------- |
-| **P0**   | v1 mail API proxy batch (import, candidates, threads) |
-| **P1**   | Unified mail page tabs: Outlook + v1 candidates       |
-| **P2**   | Candidate approve/reject with approval gate           |
+| Priority | Item                                            |
+| -------- | ----------------------------------------------- |
+| **P1**   | Unified mail page tabs: Outlook + v1 candidates |
+| **P2**   | Candidate approve/reject with approval gate UI  |
 
 ---
 
@@ -309,21 +315,25 @@ Upstream operator-console has ~25+ routes; not proxied:
 ### 진행 (Done)
 
 - [`/api/github`](../../apps/web/src/app/api/github/route.ts) → AIOS v1 `/api/connectors` (GitHub connector subset)
+- [`POST /api/github/branches`](../../apps/web/src/app/api/github/branches/route.ts) → GitHub REST branch creation with `external-share` gate
+- [`POST /api/github/pull-requests`](../../apps/web/src/app/api/github/pull-requests/route.ts) → GitHub REST PR creation with `external-share` gate
 - Settings: `connected` from API response
 - NextAuth GitHub provider ([`apps/web/src/lib/auth/index.ts`](../../apps/web/src/lib/auth/index.ts))
+- Tests in [`tests/integration/phase6-connectors.test.ts`](../../tests/integration/phase6-connectors.test.ts)
 
 ### 미진 (Not done)
 
-- Real Octokit / GitHub API — branch, commit, PR creation ([`packages/infrastructure/src/github/`](../../packages/infrastructure/src/github/) interfaces only)
+- Commit creation, merge, push, and tag operations are intentionally not implemented.
 - PR automation UI
 - Portal GitHub auth not linked to v1 connector tokens
 
 ### 개선사항
 
-| Priority | Item                                              |
-| -------- | ------------------------------------------------- |
-| **P1**   | Octokit or direct GitHub API behind `/api/github` |
-| **P2**   | Wire domain PR automation models to portal UI     |
+| Priority | Item                                             |
+| -------- | ------------------------------------------------ |
+| **P1**   | Token-backed live branch/PR smoke with approval  |
+| **P2**   | Wire domain PR automation models to portal UI    |
+| **P3**   | Add commit creation only after approval contract |
 
 ---
 
@@ -334,19 +344,20 @@ Upstream operator-console has ~25+ routes; not proxied:
 ### 진행 (Done)
 
 - [`/api/slack/status`](../../apps/web/src/app/api/slack/status/route.ts) (web) + [`apps/api/src/index.ts`](../../apps/api/src/index.ts) — env: `SLACK_WEBHOOK_URL`, `SLACK_BOT_TOKEN`
+- [`POST /api/slack/send`](../../apps/web/src/app/api/slack/send/route.ts) with `send` approval gate
 - Settings: connected / unreachable display
+- Tests in [`tests/integration/phase6-connectors.test.ts`](../../tests/integration/phase6-connectors.test.ts)
 
 ### 미진 (Not done)
 
-- Outbound message send proxy
 - Bot workflows, channel management
-- No `send` approval gate
+- Live webhook send smoke requires explicit approval.
 
 ### 개선사항
 
 | Priority | Item                                                 |
 | -------- | ---------------------------------------------------- |
-| **P1**   | `POST /api/slack/send` with **send** approval gate   |
+| **P1**   | Live webhook send smoke through approval flow        |
 | **P2**   | Notification templates; link to automation workflows |
 
 ---
@@ -362,8 +373,8 @@ Upstream operator-console has ~25+ routes; not proxied:
 - APIs: `/api/collaboration/sessions`, `/execute`, `/assignments/[id]/resume`, `/api/approvals`
 - UI: [`/collaboration`](../../apps/web/src/app/collaboration/page.tsx) — sessions, assignments, approvals, cursor/opencode trigger
 - Evidence: [`docs/evidence/cursor-opencode-main-session.md`](../evidence/cursor-opencode-main-session.md)
-- CLI: `pnpm collaboration:run`, `collaboration:continue`, `collaboration:dispatch-opencode`
-- Phases 1–5 assignments **done** (including opencode dispatch)
+- CLI: `pnpm collaboration:run`, `collaboration:continue`, `collaboration:dispatch-opencode`, `collaboration:dispatch-cursor-agent`
+- Phases 1–7 assignments **done** for build/test/evidence scope
 - Gated proxy integration with [`approval-gate.ts`](../../apps/web/src/lib/integrations/approval-gate.ts)
 
 ### 미진 (Not done)
@@ -393,9 +404,9 @@ Consolidated from [`phase5-handoff.md`](phase5-handoff.md) and this audit:
 | G2  | AIOS v1 mail API batch (~19 routes)              | AIOS v1, Outlook/Mail |
 | G3  | F-aios-v3 deep proxy map                         | F-aios-v3             |
 | G4  | sangfor device/compliance POST + UI mock removal | sangfor               |
-| G5  | whelp99 MCP HTTP bridge                          | whelp99               |
-| G6  | Slack send proxy + gate                          | Slack                 |
-| G7  | Blueprint doc sync (stale banners)               | All (docs)            |
+| G5  | whelp99 MCP HTTP bridge live endpoint            | whelp99               |
+| G6  | Slack live send smoke                            | Slack                 |
+| G7  | Browser/live UX smoke for major flows            | All                   |
 
 ```mermaid
 flowchart TB

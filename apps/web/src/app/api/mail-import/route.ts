@@ -1,4 +1,6 @@
-import { createAiosV1ProxyHandler } from '@/lib/integrations/aios-v1-proxy-handler';
-import { GateRequirement } from '@aios/proxy-core';
+import { createAiosV1ProxyHandler } from "@/lib/integrations/aios-v1-proxy-handler";
 
-export const POST = createAiosV1ProxyHandler('/api/mail/import', 'external-share');
+export const POST = createAiosV1ProxyHandler(
+  "/api/mail/import",
+  "external-share",
+);

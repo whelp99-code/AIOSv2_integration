@@ -13,6 +13,9 @@ export interface ApiErrorResponse {
   // internalCode?: string
 }
 
+/** Dev-only fields appended to error payloads outside production. */
+type DevApiErrorResponse = ApiErrorResponse & { devStack?: string };
+
 /**
  * 안전한 에러 응답 생성
  * - 프로덕션: message만 반환
@@ -23,12 +26,17 @@ export function createErrorResponse(
   statusCode: number = 500,
   requestId?: string,
 ): Response {
-  const isProd = process.env.NODE_ENV === 'production';
-  const message = error instanceof Error ? error.message : 'Internal server error';
+  const isProd = process.env.NODE_ENV === "production";
+  const message =
+    error instanceof Error ? error.message : "Internal server error";
 
-  const body: ApiErrorResponse = {
-    error: statusCode >= 500 ? 'Internal Server Error' : 'Bad Request',
-    message: isProd ? (statusCode >= 500 ? 'An unexpected error occurred' : message) : message,
+  const body: DevApiErrorResponse = {
+    error: statusCode >= 500 ? "Internal Server Error" : "Bad Request",
+    message: isProd
+      ? statusCode >= 500
+        ? "An unexpected error occurred"
+        : message
+      : message,
   };
 
   if (requestId) {
@@ -37,11 +45,11 @@ export function createErrorResponse(
 
   // 개발 환경에서만 stack 포함 (프로덕션 절대 금지)
   if (!isProd && error instanceof Error && error.stack) {
-    (body as Record<string, unknown>).devStack = error.stack.split('\n').slice(0, 5).join('\n');
+    body.devStack = error.stack.split("\n").slice(0, 5).join("\n");
   }
 
   return new Response(JSON.stringify(body), {
     status: statusCode,
-    headers: { 'Content-Type': 'application/json' },
+    headers: { "Content-Type": "application/json" },
   });
 }
