@@ -1,0 +1,278 @@
+{
+  "compliance_score": 42,
+  "tool_usage": [
+    {
+      "step": "Step 0",
+      "name": "Auth Gate",
+      "required_tool": "terminal(check-tool-auth.sh)",
+      "actual_tool": "terminal",
+      "compliant": true
+    },
+    {
+      "step": "Step 0.5",
+      "name": "Config",
+      "required_tool": "terminal(grep delegation)",
+      "actual_tool": "terminal",
+      "compliant": true
+    },
+    {
+      "step": "Step 1",
+      "name": "Plan v1",
+      "required_tool": "write_file()",
+      "actual_tool": "write_file()",
+      "compliant": true
+    },
+    {
+      "step": "Step 2",
+      "name": "Red Team v1",
+      "required_tool": "delegate_task(tasks=[3+2])",
+      "actual_tool": "delegate_task()",
+      "compliant": true
+    },
+    {
+      "step": "Step 3",
+      "name": "Plan v2",
+      "required_tool": "write_file()",
+      "actual_tool": "write_file()",
+      "compliant": true
+    },
+    {
+      "step": "Step 4",
+      "name": "Development",
+      "required_tool": "terminal(opencode run ...)",
+      "actual_tool": "write_file/patch/terminal(sed/git/npx)",
+      "compliant": false
+    },
+    {
+      "step": "Step 5",
+      "name": "Verification",
+      "required_tool": "terminal(cursor agent --print --force ...)",
+      "actual_tool": "terminal(npx vitest run && pnpm typecheck)",
+      "compliant": false
+    },
+    {
+      "step": "Step 5.5",
+      "name": "Pre-processing",
+      "required_tool": "terminal(git diff ...)",
+      "actual_tool": "terminal",
+      "compliant": true
+    },
+    {
+      "step": "Step 5.6",
+      "name": "Red Team Primary (Gemini CLI)",
+      "required_tool": "terminal(gemini -p ... --skip-trust)",
+      "actual_tool": "terminal(gemini) — 180s timeout / failure",
+      "compliant": false
+    },
+    {
+      "step": "Step 5.7",
+      "name": "Evidence Verification",
+      "required_tool": "read_file() + comparison",
+      "actual_tool": "read_file()",
+      "compliant": true
+    },
+    {
+      "step": "Step 6",
+      "name": "Fix Loop",
+      "required_tool": "terminal(opencode run ...)",
+      "actual_tool": "patch/terminal(Hermes direct)",
+      "compliant": false
+    },
+    {
+      "step": "Step 7",
+      "name": "Reviewer",
+      "required_tool": "write_file()",
+      "actual_tool": "write_file()",
+      "compliant": true
+    },
+    {
+      "step": "Step 8",
+      "name": "Final Red Team",
+      "required_tool": "delegate_task(tasks=[3+2])",
+      "actual_tool": "delegate_task()",
+      "compliant": true
+    },
+    {
+      "step": "Step 9",
+      "name": "Secondary Red Team",
+      "required_tool": "terminal(codex review --base HEAD~5)",
+      "actual_tool": "terminal(codex) — 120s timeout / failure",
+      "compliant": false
+    },
+    {
+      "step": "Step 10",
+      "name": "PR Review",
+      "required_tool": "terminal(gemini -p ... --skip-trust)",
+      "actual_tool": "terminal(gemini) — auth/timeout issue",
+      "compliant": false
+    },
+    {
+      "step": "Step 11",
+      "name": "PR/Push",
+      "required_tool": "terminal(git add/commit/push)",
+      "actual_tool": "terminal(git)",
+      "compliant": true
+    }
+  ],
+  "deliverable_placement": [
+    {
+      "expected": ".hermes/plans/phase-{N}/phase-plan-v1.md",
+      "found": "partial",
+      "detail": "Only 6 of 9 phases have phase-plan-v1.md (A-1, B-2, B-3 missing). Track-level files exist but phase-level is incomplete."
+    },
+    {
+      "expected": ".hermes/plans/phase-{N}/implementation-summary.md",
+      "found": "partial",
+      "detail": "Only 1 of 9 phases has implementation-summary.md (phase-a-2)."
+    },
+    {
+      "expected": ".hermes/plans/phase-{N}/gemini-redteam-review.json",
+      "found": "none",
+      "detail": "No JSON format Gemini reviews found. All Gemini reviews saved as .md (e.g., gemini-pr-review.md, red-team-final-review.md). Zero gemini-redteam-review.json files exist in .hermes/plans/."
+    },
+    {
+      "expected": ".hermes/plans/phase-{N}/auth-check-result.md",
+      "found": "incorrect_location",
+      "detail": "auth-check-result.md found only at .hermes/plans/ root, not within phase-{N} directories."
+    },
+    {
+      "expected": ".hermes/plans/phase-{N}/red-team-review-v1.md + 5 persona files",
+      "found": "partial",
+      "detail": "7 phases have red-team-review-v1.md but as single integrated files, not split into security-review.md, architecture-review.md, etc. B-4 and B-5 have no red-team-review-v1.md."
+    },
+    {
+      "expected": ".hermes/plans/phase-{N}/secondary-redteam-review.md (when triggered)",
+      "found": "partial",
+      "detail": "Only Track A has secondary-redteam-review.md. Track B Secondary Red Team is missing despite high-risk changes in B-1/B-2."
+    },
+    {
+      "expected": ".hermes/plans/phase-{N}/push-result.md",
+      "found": "missing",
+      "detail": "push-result.md not generated for any phase."
+    },
+    {
+      "expected": "Track-level root deliverables exist alongside phase-level",
+      "found": "mixed",
+      "detail": "Track-level summaries exist (track-a/, track-b/), but phase-level independence is missing."
+    }
+  ],
+  "issues_found": [
+    {
+      "severity": "critical",
+      "category": "tool-misuse",
+      "description": "Step 4 (Development) and Step 6 (Fix Loop) do not use OpenCode. Hermes directly wrote code via write_file/patch/terminal, violating the skill rule that these steps must call terminal(opencode run ...). Skill-tool-audit.md confirms opencode call count: 0."
+    },
+    {
+      "severity": "critical",
+      "category": "tool-misuse",
+      "description": "Step 5 (Verification) does not use Cursor CLI. Direct npx vitest and pnpm typecheck were executed via terminal instead of cursor agent --print --force, violating the skill tool assignment. Cursor CLI call count: 0."
+    },
+    {
+      "severity": "critical",
+      "category": "tool-misuse",
+      "description": "Step 9 (Secondary Red Team) Codex/Claude Code not functional. Codex result: 120s timeout. Claude Code: not attempted. Secondary review consequently missing for Track B."
+    },
+    {
+      "severity": "critical",
+      "category": "tool-misuse",
+      "description": "Step 10 (PR Review) Gemini CLI not executed. Missing gemini-pr-review.json / .md output for multiple commits, breaking the mandatory pre-push gate."
+    },
+    {
+      "severity": "critical",
+      "category": "process-violation",
+      "description": "Recent commit 0ff1dbb message claims 'Fixed via OpenCode (Step 4)' but OpenCode is not installed/in PATH and was not invoked. Actual execution used Hermes direct tools. This misrepresents process compliance."
+    },
+    {
+      "severity": "high",
+      "category": "deliverable-placement",
+      "description": "8 of 9 phases lack implementation-summary.md in phase-{N}/ directories. Phase deliverables are stored only at Track-level, not phase-level."
+    },
+    {
+      "severity": "high",
+      "category": "deliverable-format",
+      "description": "Zero gemini-redteam-review.json files exist. Skill requires JSON output for Gemini reviews (.json), but all are present as .md. This breaks automated parsing expectations in Step 5.7/10."
+    },
+    {
+      "severity": "high",
+      "category": "tool-misuse",
+      "description": "delegate_task overuse: session 303471 used delegate_task 6 times, including for implementation tasks. Skill strictly limits delegate_task to Step 2 and Step 8 only."
+    },
+    {
+      "severity": "high",
+      "category": "deliverable-placement",
+      "description": "auth-check-result.md is at .hermes/plans/ root instead of .hermes/plans/phase-{N}/. Step 0 output placement is non-compliant."
+    },
+    {
+      "severity": "medium",
+      "category": "graceful-degradation",
+      "description": "Graceful Degradation violations: multiple times Cursor CLI/OpenCode/Gemini was substituted without required explicit documentation in deliverables ('OpenCode unavailable — used delegate_task' etc. not present)."
+    },
+    {
+      "severity": "medium",
+      "category": "configuration",
+      "description": "delegation.model is set to mimo-v2.5-pro. Skill recommends claude-sonnet-4 or gemini-2.5-pro for Red Team sub-agents to ensure reasoning depth. This correlates with timeouts and shallow review risk."
+    },
+    {
+      "severity": "medium",
+      "category": "process-gap",
+      "description": "Track B lacks Secondary Red Team and Gemini PR Review outputs. Step 9 and 10 appear skipped or not triggered for the entire Track."
+    }
+  ],
+  "recommended_fixes": [
+    {
+      "priority": "immediate",
+      "action": "Authenticate and enable CLI tools",
+      "detail": "Run ~/.hermes/skills/software-development/dev-loop-process/scripts/check-tool-auth.sh. OpenCode appears uninstalled/unauthenticated; Cursor CLI also absent. Authenticate available tools (gemini, codex, claude are present) and document a correct fallback pathway with mandatory output notices."
+    },
+    {
+      "priority": "immediate",
+      "action": "Restore Step 4/6 OpenCode usage",
+      "detail": "Install/authenticate OpenCode or, if unavailable, explicitly state 'OpenCode unavailable — used Hermes delegate_task' in implementation-summary.md and route via delegate_task as the documented graceful degradation path."
+    },
+    {
+      "priority": "immediate",
+      "action": "Restore Step 5 Cursor CLI usage or formalize fallback",
+      "detail": "If Cursor CLI cannot be authenticated, change skill or add scanner alert that replaces Step 5 with terminal vitest/typecheck and prepend test-result-report.md with 'Cursor CLI unavailable — used terminal' notice."
+    },
+    {
+      "priority": "immediate",
+      "action": "Stop claiming OpenCode in commit messages",
+      "detail": "Commit 0ff1dbb falsely states 'Fixed via OpenCode'. Amend messaging to reflect actual tool used, or actually enable OpenCode before claiming it."
+    },
+    {
+      "priority": "high",
+      "action": "Restructure deliverables to phase-{N} level",
+      "detail": "Migrate or duplicate Track-level summaries into phase-a-1/, phase-a-3/, etc. Ensure each phase has phase-plan-v1.md, implementation-summary.md, red-team-review.md, etc."
+    },
+    {
+      "priority": "high",
+      "action": "Produce valid JSON Gemini reviews",
+      "detail": "Either change skill to allow .md or regenerate gemini-redteam-review.json and gemini-pr-review.json in the exact JSON schema prescribed in SKILL.md for Steps 5.6 and 10."
+    },
+    {
+      "priority": "high",
+      "action": "Fix auth-check-result.md placement",
+      "detail": "Move/copy auth-check-result.md into each phase-{N}/ directory or re-run Step 0 per phase."
+    },
+    {
+      "priority": "medium",
+      "action": "Enforce delegate_task limits",
+      "detail": "Add runtime guardrails or prompts so delegate_task is only invoked in Step 2 and Step 8. Replace implementation/analysis delegation with direct terminal tool execution."
+    },
+    {
+      "priority": "medium",
+      "action": "Re-run Gemini and Codex steps",
+      "detail": "Re-execute Step 5.6 (Gemini Red Team), Step 9 (Codex Secondary), and Step 10 (Gemini PR Review) for recent commits (including 0ff1dbb) to regen missing outputs before next push."
+    },
+    {
+      "priority": "medium",
+      "action": "Fix delegation.model config",
+      "detail": "Change delegation.model to anthropic/claude-sonnet-4 or google/gemini-2.5-pro per skill recommendation to improve Red Team reasoning depth and avoid timeouts."
+    },
+    {
+      "priority": "low",
+      "action": "Create push-result.md",
+      "detail": "Add push-result.md output in Step 11 to complete the Phase deliverable set."
+    }
+  ]
+}
