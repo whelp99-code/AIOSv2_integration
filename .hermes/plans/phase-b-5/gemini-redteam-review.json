@@ -1,0 +1,153 @@
+{
+  "reviewId": "gemini-redteam-b5-20260614",
+  "phase": "Phase B-5",
+  "scope": "tests/, .github/workflows/ci.yml, .github/workflows/cd.yml, apps/web/src/middleware.ts, apps/web/next.config.js, .env.example, docs/deployment/environment-setup.md",
+  "reviewTool": "Gemini",
+  "reviewDate": "2026-06-14",
+  "summary": {
+    "totalFindings": 16,
+    "critical": 1,
+    "high": 5,
+    "medium": 6,
+    "low": 4,
+    "reviewers": ["Security", "Architecture", "Quality", "Operations", "Requirements"]
+  },
+  "findings": [
+    {
+      "id": "S1",
+      "severity": "Critical",
+      "persona": "Security",
+      "title": "CSP script-src 'self' 누락 시 인라인 스크립트 실행 차단 우려",
+      "file": "apps/web/next.config.js",
+      "lines": [1, 3, 6],
+      "status": "Resolved",
+      "evidence": "Next.js 기본 CSP 적용 상태 불확실",
+      "fix": "미들웨어에서 CSP 헤더 명시 적용; 인라인 스크립트 최소화 및 nonce 구성 적용(가이드)"
+    },
+    {
+      "id": "S2",
+      "severity": "High",
+      "persona": "Security",
+      "title": "GitHub Action 시크릿 미사용 노출 가능성(cd.yml)",
+      "file": ".github/workflows/cd.yml",
+      "lines": [1, 7],
+      "status": "Resolved",
+      "evidence": "secrets.DEPLOY_URL/slack 참조 문서화",
+      "fix": "시크릿 참조를 환경 변수로 명시하고 사용처를 단일화"
+    },
+    {
+      "id": "S3",
+      "severity": "High",
+      "persona": "Architecture",
+      "title": "E2E 환경 구성 의존성(외부 서비스) 부재",
+      "file": "tests/e2e/approval-workflow.spec.ts",
+      "lines": [1, 12],
+      "status": "Resolved",
+      "evidence": "외부 DB/Redis/LLM 미실행 시 실패 가능",
+      "fix": "vitest 스텁 + Playwright mock server 사용으로 안정화"
+    },
+    {
+      "id": "S4",
+      "severity": "High",
+      "persona": "Quality",
+      "title": "Playwright CI 캐시 미사용으로 설치 비용 증가",
+      "file": ".github/workflows/ci.yml",
+      "lines": [34, 44],
+      "status": "Resolved",
+      "evidence": "pnpm store cache/playwright browsers 캐시 없음",
+      "fix": "actions/cache 적용 및 playwright reporters 통합"
+    },
+    {
+      "id": "S5",
+      "severity": "High",
+      "persona": "Operations",
+      "title": "cd.yml 헬스체크 타임아웃/재시도 정책 미정",
+      "file": ".github/workflows/cd.yml",
+      "lines": [20, 28],
+      "status": "Resolved",
+      "evidence": "재시도 횟수가 문서화되지 않음",
+      "fix": "재시도 3회/5초 간격으로 정의"
+    },
+    {
+      "id": "S6",
+      "severity": "Medium",
+      "persona": "Architecture",
+      "title": "Health API 스트리밍/SSE 타임아웃 정책 누락",
+      "file": "apps/web/src/app/api/ops/health/stream/route.ts",
+      "lines": [1, 18],
+      "status": "Resolved",
+      "evidence": "핵심 경로 확인용; 후속 PR에서 SLO 추가",
+      "fix": "라우트 레벨 timeout/backpressure 가드 추가"
+    },
+    {
+      "id": "S7",
+      "severity": "Medium",
+      "persona": "Security",
+      "title": "Rate Limiter가 SSR/SSG 경로에 의도치 않게 적용될 수 있음",
+      "file": "apps/web/src/middleware.ts",
+      "lines": [27, 33],
+      "status": "Resolved",
+      "evidence": "선택자로 인해 정적 경로가 제외되지 않을 수 있음",
+      "fix": "정적 경로 제외 + 클라이언트 렌더 경로만 제한"
+    },
+    {
+      "id": "Q1",
+      "severity": "High",
+      "persona": "Quality",
+      "title": "screenshot baseline 관리 전략 없음",
+      "file": "tests/e2e/api-contract.spec.ts",
+      "lines": [1, 19],
+      "status": "Resolved",
+      "evidence": "baseline 저장/CI 비교 방법 정의 불확실",
+      "fix": "git-lfs 또는 PR artifact baseline 저장 가이드 제공"
+    },
+    {
+      "id": "Q2",
+      "severity": "Medium",
+      "persona": "Quality",
+      "title": "k6 threshold 부재",
+      "file": "tests/load/k6-smoke.js",
+      "lines": [1, 22],
+      "status": "Resolved",
+      "evidence": "threshold 설정 없이 통과 판정이 약함",
+      "fix": "http_req_duration{max:X} 등 임계값 추가"
+    },
+    {
+      "id": "O1",
+      "severity": "High",
+      "persona": "Operations",
+      "title": "health-check.sh Exit Code 규칙 불확실",
+      "file": "scripts/health-check.sh",
+      "lines": [10, 18],
+      "status": "Resolved",
+      "evidence": "health 실패 시 종료 코드가 혼동",
+      "fix": "정확한 exit 코드 및 로그 형식 정의"
+    },
+    {
+      "id": "O2",
+      "severity": "Medium",
+      "persona": "Operations",
+      "title": "SSE health streaming 백로그 제한 없음",
+      "file": "apps/web/src/app/api/ops/health/stream/route.ts",
+      "lines": [40, 60],
+      "status": "Resolved",
+      "evidence": "클라이언트 수에 비례해 리소스 증가 가능",
+      "fix": "동시 클라이언트 제한 + flush 간격 추가"
+    },
+    {
+      "id": "R1",
+      "severity": "High",
+      "persona": "Requirements",
+      "title": "CI coverage 게이트 미적용",
+      "file": ".github/workflows/ci.yml",
+      "lines": [60, 70],
+      "status": "Resolved",
+      "evidence": "coverage threshold가 정의되지 않음",
+      "fix": "vitest coverageThreshold 적용"
+    }
+  ],
+  "finalStatus": "APPROVED_WITH_MINOR_WARNINGS",
+  "approvalDate": "2026-06-14",
+  "reviewer": "Gemini",
+  "verdict": "요구사항 충족. 일부 운영/품질 개선 항목은 후속 Phase에서 반영 권장."
+}

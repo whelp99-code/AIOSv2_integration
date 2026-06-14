@@ -1,0 +1,24 @@
+{
+  "prId": "PR-PHASE-B-5-E2E-DEPLOY-READINESS",
+  "phase": "Phase B-5",
+  "title": "feat(devops): 크로스 서비스 E2E(Playwright), k6 부하 테스트, CI/CD 고도화, 프로덕션 배포 준비",
+  "sourceBranch": "phase-b-5/implementation",
+  "targetBranch": "main",
+  "author": "Hermes Agent",
+  "reviewers": ["Security", "Architecture", "Quality", "Operations", "Requirements"],
+  "status": "APPROVED",
+  "createdAt": "2026-06-14",
+  "reviewedAt": "2026-06-14",
+  "summary": "Phase B-5 구현 완료. E2E/부하/보안 스캔 CI job 추가, CD 배포 파이프라인 보강, 환경변수/문서 정비.",
+  "filesChanged": 10,
+  "testsPassed": 12,
+  "typeCheck": "passed",
+  "securityScan": "passed",
+  "approval": {
+    "security": "APPROVED",
+    "architecture": "APPROVED",
+    "quality": "APPROVED",
+    "operations": "APPROVED",
+    "requirements": "APPROVED"
+  }
+}
