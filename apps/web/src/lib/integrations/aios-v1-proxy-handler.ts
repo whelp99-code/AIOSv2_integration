@@ -165,16 +165,18 @@ export function createAiosV1ProxyHandler(
       });
     } catch (error) {
       console.error(`[AIOS v1 Proxy] ${upstreamPath}:`, error);
+      const isProd = process.env.NODE_ENV === 'production';
       return new Response(
         JSON.stringify({
-          error: "Proxy error",
-          message: error instanceof Error ? error.message : "Unknown error",
-          upstream: "aios-v1",
-          path: upstreamPath,
+          error: 'Proxy error',
+          message: isProd
+            ? 'Upstream service unavailable'
+            : error instanceof Error ? error.message : 'Unknown error',
+          requestId: crypto.randomUUID(),
         }),
         {
           status: 502,
-          headers: { "Content-Type": "application/json" },
+          headers: { 'Content-Type': 'application/json' },
         },
       );
     }
