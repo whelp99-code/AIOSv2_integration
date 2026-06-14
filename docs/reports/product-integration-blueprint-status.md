@@ -15,7 +15,7 @@
 | ---------------- | ---------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
 | Product vision   | [`.hermes/plans/2026-06-11_010000-aios-brainstorming.md`](../../.hermes/plans/2026-06-11_010000-aios-brainstorming.md)       | 5 capabilities: mail, knowledge, agents, code, self-evolution |
 | Real integration | [`.hermes/plans/2026-06-11_020000-real-integration-plan.md`](../../.hermes/plans/2026-06-11_020000-real-integration-plan.md) | ~30 AIOS v1 API proxies, auth, dashboard                      |
-| Execution phases | [`cursor-opencode-collaboration.md`](cursor-opencode-collaboration.md), [`phase5-handoff.md`](phase5-handoff.md)             | Phases 1–5: health, proxy, gates, live UI, deep integration   |
+| Execution phases | [`cursor-opencode-collaboration.md`](cursor-opencode-collaboration.md), [`phase5-handoff.md`](phase5-handoff.md), [`phase-7-integrated-operational-verification.md`](../evidence/phase-7-integrated-operational-verification.md) | Phases 1–7: health, proxy, gates, Ops Console, connectors, evidence |
 | Registry         | [`packages/shared/src/constants/integrations.ts`](../../packages/shared/src/constants/integrations.ts)                       | 5 upstream targets + env keys                                 |
 
 ---
@@ -62,23 +62,25 @@ Each product is scored on four axes (each 0–100%, combined into overall **Prog
 
 - Integration registry and multi-project health: [`/api/integrations/health`](../../apps/web/src/app/api/integrations/health/route.ts), [`project-health-probe.ts`](../../packages/infrastructure/src/integrations/project-health-probe.ts)
 - Shared proxy infrastructure: [`upstream-proxy.ts`](../../apps/web/src/lib/integrations/upstream-proxy.ts), [`approval-gate.ts`](../../apps/web/src/lib/integrations/approval-gate.ts)
-- UI pages: `/dashboard`, `/settings`, `/mail`, `/workflows`, `/sangfor`, `/collaboration`, `/kanban`
+- UI pages: `/dashboard`, `/settings`, `/mail`, `/workflows`, `/sangfor`, `/collaboration`, `/kanban`, **`/ops`**, **`/vibe-coding`**
+- **Unified Ops Console** ([`/ops`](../../apps/web/src/app/(portal)/ops/page.tsx), [`ops-console.tsx`](../../apps/web/src/components/ops/ops-console.tsx)): integrations health, approvals, sessions, phase dispatch
+- Ops APIs: [`/api/ops/summary`](../../apps/web/src/app/api/ops/summary/route.ts), [`/api/ops/dispatch`](../../apps/web/src/app/api/ops/dispatch/route.ts)
 - Settings integrations tab: live health + Outlook/GitHub/Slack status
 - CI: [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml)
-- 32 Next.js API routes under [`apps/web/src/app/api/`](../../apps/web/src/app/api/)
+- **67** Next.js API routes under [`apps/web/src/app/api/`](../../apps/web/src/app/api/)
+- Phase 7 evidence: [`phase-7-integrated-operational-verification.md`](../evidence/phase-7-integrated-operational-verification.md)
 
 ### 미진 (Not done)
 
-- **Unified Ops Console** — health, agents, approvals, phase dispatch split across dashboard / settings / collaboration
 - **Kanban** uses local mock cards, not `/api/tasks` ([`kanban-board.tsx`](../../apps/web/src/components/kanban/kanban-board.tsx))
 - **Shared DB** — Prisma schema exists; portal data not persisted or synced with upstreams
-- **Phase dispatch** — CLI only: `pnpm collaboration:continue`, `pnpm collaboration:dispatch-opencode` ([`scripts/dispatch-opencode-phase5.ts`](../../scripts/dispatch-opencode-phase5.ts))
+- **Browser E2E smoke** — `/ops` and `/vibe-coding` HTTP smoke PASS; full live upstream UX not yet exercised end-to-end
 
 ### 개선사항
 
 | Priority | Item                                                                         |
 | -------- | ---------------------------------------------------------------------------- |
-| **P0**   | Single Ops view: integrations health + pending approvals + opencode dispatch |
+| **P0**   | Browser/live UX smoke across major portal flows                              |
 | **P1**   | Wire Kanban to `/api/tasks` or domain workflow service                       |
 | **P2**   | Shared auth/session with upstream services; remove duplicate env config      |
 
@@ -114,29 +116,26 @@ Each product is scored on four axes (each 0–100%, combined into overall **Prog
 
 ### 미진 (Not done)
 
-Hermes plan ~30 APIs — major gaps:
+Hermes plan ~30 APIs — remaining gaps:
 
 | Missing proxy                             | Hermes reference                                |
 | ----------------------------------------- | ----------------------------------------------- |
-| `/api/mail-import`                        | Task 1.3                                        |
-| `/api/mail-candidates`                    | mailApi                                         |
-| `/api/mail-insight-threads`               | mailApi                                         |
 | `/api/customers/[id]` GET/PUT/DELETE      | customerApi                                     |
 | `/api/partners/[id]`                      | partnerApi                                      |
 | `/api/workflows/[id]/execute` (native v1) | workflowApi                                     |
 | `/api/knowledge/documents`                | knowledgeApi                                    |
 | `/api/automation/workflows`               | automationApi (path mismatch vs `/api/actions`) |
 
-- No approval gates on AIOS v1 write routes
-- Mail intelligence not exposed through v1 proxy (Outlook path is separate)
+- Mail intelligence proxies **done** — see [§7 Outlook / Mail](#7-outlook--mail)
+- Approval gates on some AIOS v1 write routes still partial
 
 ### 개선사항
 
 | Priority | Item                                                                      |
 | -------- | ------------------------------------------------------------------------- |
-| **P0**   | Batch mail-intelligence proxies (import, candidates, threads)             |
-| **P1**   | `customers/[id]`, `partners/[id]` CRUD routes                             |
-| **P2**   | Approval policy on v1 POST/PUT/DELETE; align automation paths with Hermes |
+| **P0**   | `customers/[id]`, `partners/[id]` CRUD routes                             |
+| **P1**   | Approval policy on v1 POST/PUT/DELETE; align automation paths with Hermes |
+| **P2**   | Unified mail hub UI merging Outlook + v1 intelligence                     |
 
 ---
 
@@ -152,21 +151,25 @@ Hermes plan ~30 APIs — major gaps:
   - [`/api/aios-v3/health`](../../apps/web/src/app/api/aios-v3/health/route.ts) → `/health`
   - [`/api/aios-v3/workflows`](../../apps/web/src/app/api/aios-v3/workflows/route.ts) → `/api/workflows`
   - [`/api/aios-v3/knowledge`](../../apps/web/src/app/api/aios-v3/knowledge/route.ts) → `/api/knowledge`, `/api/knowledge/search`
+  - [`/api/aios-v3/lightrag`](../../apps/web/src/app/api/aios-v3/lightrag/route.ts) → LightRAG endpoints
+  - [`/api/aios-v3/orchestrator`](../../apps/web/src/app/api/aios-v3/orchestrator/route.ts) → orchestrator endpoints
+  - [`/api/aios-v3/monitoring`](../../apps/web/src/app/api/aios-v3/monitoring/route.ts) → monitoring endpoints
+- Tests: [`tests/integration/faios-v3-proxy.test.ts`](../../tests/integration/faios-v3-proxy.test.ts)
 - Dashboard integrations row via `/api/integrations/health`
 
 ### 미진 (Not done)
 
-- **15 packages** (a2a, ag-ui, evolution, hyperagents, lightrag, orchestrator, monitoring, etc.) — no portal proxy
+- **Remaining packages** (a2a, ag-ui, evolution, hyperagents, etc.) — no portal proxy
 - **Workflows UI** uses `/api/workflows` → AIOS v1 tasks, not F-aios-v3
 - No F-aios-v3 dedicated UI page
-- Self-evolution / RAG / benchmark capabilities not surfaced
+- Self-evolution / benchmark capabilities not surfaced
 
 ### 개선사항
 
 | Priority | Item                                                                       |
 | -------- | -------------------------------------------------------------------------- |
 | **P0**   | Clarify workflows UI data source (v1 vs v3) or add F-aios-v3 workflows tab |
-| **P1**   | Proxy map for orchestrator, monitoring, lightrag endpoints                 |
+| **P1**   | Proxy remaining package endpoints (evolution, hyperagents, a2a)          |
 | **P2**   | Package-level integration matrix in docs + settings                        |
 
 ---
@@ -186,27 +189,30 @@ Hermes plan ~30 APIs — major gaps:
 | `/api/sangfor/dashboard`              | `/api/dashboard/stats`       | —          |
 | `/api/sangfor/events`                 | `/api/events`                | —          |
 | `/api/sangfor/compliance/trend`       | `/api/compliance/trend`      | —          |
+| `/api/sangfor/compliance/track`       | `/api/compliance/track`      | **deploy** |
+| `/api/sangfor/compliance/roadmap`     | `/api/compliance/roadmap`    | **deploy** |
+| `/api/sangfor/compliance/proposal`    | `/api/compliance/proposal`   | **deploy** |
+| `/api/sangfor/device/capture-menu`    | `/api/device/capture-menu`   | **deploy** |
+| `/api/sangfor/device/compare`         | `/api/device/compare`        | **deploy** |
 | `/api/sangfor/workflows/[id]/execute` | `/api/workflows/:id/execute` | **deploy** |
 
 - UI [`/sangfor`](../../apps/web/src/app/sangfor/page.tsx): workflows tab live; security tab events live with mock fallback; execute + approval flow
-- Tests: events proxy smoke in [`tests/phase5-smoke.test.ts`](../../tests/phase5-smoke.test.ts)
+- Tests: [`tests/integration/sangfor-phase4-proxy.test.ts`](../../tests/integration/sangfor-phase4-proxy.test.ts), events smoke in [`tests/phase5-smoke.test.ts`](../../tests/phase5-smoke.test.ts)
 
 ### 미진 (Not done)
 
-Upstream operator-console has ~25+ routes; not proxied:
+Upstream operator-console has additional routes not yet proxied:
 
-- Device: `/api/device/capture-menu`, `/api/device/compare`
-- Compliance POST: `/api/compliance/track`, `/api/compliance/roadmap`, `/api/compliance/proposal`
 - Templates, learning, access, manual, vendors, guide generate
-- **Devices / topology tabs** — mock data only in UI
+- **Devices / topology tabs** — mock data only in UI; live device validation pending
 
 ### 개선사항
 
 | Priority | Item                                                                 |
 | -------- | -------------------------------------------------------------------- |
-| **P0**   | Device read proxy + optional live devices tab                        |
-| **P1**   | Compliance POST routes with `external-share` or `deploy` gate        |
-| **P2**   | Remove mock fallback when upstream healthy; templates/learning proxy |
+| **P0**   | Live device validation with upstream operator-console              |
+| **P1**   | Remove mock fallback when upstream healthy; templates/learning proxy |
+| **P2**   | Topology tab wired to live device data                             |
 
 ---
 
@@ -218,28 +224,34 @@ Upstream operator-console has ~25+ routes; not proxied:
 
 ### 진행 (Done)
 
-| Portal route                  | Upstream          | Gate               |
-| ----------------------------- | ----------------- | ------------------ |
-| `/api/vibe-coding/health`     | `/api/health`     | —                  |
-| `/api/vibe-coding/projects`   | `/api/projects`   | —                  |
-| `/api/vibe-coding/rag/ingest` | `/api/rag/ingest` | **external-share** |
+| Portal route                              | Upstream                    | Gate               |
+| ----------------------------------------- | --------------------------- | ------------------ |
+| `/api/vibe-coding/health`                 | `/api/health`               | —                  |
+| `/api/vibe-coding/projects`               | `/api/projects`             | —                  |
+| `/api/vibe-coding/projects/[id]`          | `/api/projects/:id`         | —                  |
+| `/api/vibe-coding/rag/ingest`             | `/api/rag/ingest`           | **external-share** |
+| `/api/vibe-coding/agents`                 | `/api/agents`               | —                  |
+| `/api/vibe-coding/agents/run`             | `/api/agents/run`           | **deploy**         |
+| `/api/vibe-coding/learning/schedules`     | `/api/learning/schedules`   | **deploy**         |
+| `/api/vibe-coding/sandbox/run`            | `/api/sandbox/run`          | **deploy**         |
 
+- UI: [`/vibe-coding`](../../apps/web/src/app/vibe-coding/page.tsx) — projects, RAG ingest form, agent controls
 - Approval + resume tested in [`tests/integration.test.ts`](../../tests/integration.test.ts)
+- Proxy tests: [`tests/integration/vibe-coding-phase5-proxy.test.ts`](../../tests/integration/vibe-coding-phase5-proxy.test.ts)
 - Health in integrations dashboard
 
 ### 미진 (Not done)
 
-- No dedicated UI page (not in sidebar)
-- No ingest form / approval UX in portal
-- Agent run, learning schedules, sandbox — not proxied
+- Live RAG search smoke with upstream vibe-coding-os
+- Full agent run progress visibility in portal
 
 ### 개선사항
 
 | Priority | Item                                                      |
 | -------- | --------------------------------------------------------- |
-| **P0**   | Dashboard widget or `/vibe-coding` page for projects list |
-| **P1**   | RAG ingest UI with 409 → approve → retry flow             |
-| **P2**   | Agent execution and learning schedule proxies             |
+| **P0**   | Live RAG search smoke with upstream running                          |
+| **P1**   | Agent run progress polling in `/vibe-coding` UI                      |
+| **P2**   | Learning schedule management UI                                      |
 
 ---
 
@@ -379,7 +391,7 @@ Upstream operator-console has ~25+ routes; not proxied:
 
 ### 미진 (Not done)
 
-- **UI phase dispatch** — `continue` / `dispatch-opencode` not exposed as portal buttons with task prompts
+- **UI phase dispatch** — `/api/ops/dispatch` exists; full prompt UX and Codex trigger still limited
 - **Codex dispatch** — review-only assignments recorded but no UI/API trigger
 - **Auto loop** — no auto `continue` on phase completion or failure retry chain
 - **Job progress** — long opencode runs (15min+) invisible in portal
@@ -394,59 +406,62 @@ Upstream operator-console has ~25+ routes; not proxied:
 
 ---
 
-## Cross-Product Gaps (Phase 6 Candidates)
+## Cross-Product Gaps (Post–Phase 7)
 
-Consolidated from [`phase5-handoff.md`](phase5-handoff.md) and this audit:
+Consolidated from [`phase5-handoff.md`](phase5-handoff.md), Phase 7 evidence, and this audit:
 
-| ID  | Gap                                              | Products affected     |
-| --- | ------------------------------------------------ | --------------------- |
-| G1  | Unified Ops Console                              | Portal, Collaboration |
-| G2  | AIOS v1 mail API batch (~19 routes)              | AIOS v1, Outlook/Mail |
-| G3  | F-aios-v3 deep proxy map                         | F-aios-v3             |
-| G4  | sangfor device/compliance POST + UI mock removal | sangfor               |
-| G5  | whelp99 MCP HTTP bridge live endpoint            | whelp99               |
-| G6  | Slack live send smoke                            | Slack                 |
-| G7  | Browser/live UX smoke for major flows            | All                   |
+| ID  | Gap                                              | Status (2026-06-14)   | Products affected     |
+| --- | ------------------------------------------------ | --------------------- | --------------------- |
+| G1  | Unified Ops Console                              | **Done** (HTTP smoke) | Portal, Collaboration |
+| G2  | AIOS v1 mail API batch                           | **Partial** — import/candidates/threads proxied | AIOS v1, Outlook/Mail |
+| G3  | F-aios-v3 deep proxy map                         | **Partial** — lightrag/orchestrator/monitoring added | F-aios-v3             |
+| G4  | sangfor device/compliance POST + UI mock removal | **Partial** — routes + gates done; live validation pending | sangfor               |
+| G5  | whelp99 MCP HTTP bridge live endpoint            | **Partial** — web bridge routes done | whelp99               |
+| G6  | Slack live send smoke                            | **Partial** — gate + route done; live send needs approval | Slack                 |
+| G7  | Browser/live UX smoke for major flows            | **Open**              | All                   |
 
 ```mermaid
 flowchart TB
-  subgraph phase1to5 [Phase1to5 Complete]
+  subgraph phase1to7 [Phase1to7 Complete]
     Health["integrations/health"]
-    ProxyCore["upstream-proxy + aios-v1-proxy"]
-    Gates["deploy + external-share gates"]
-    LiveUI["settings dashboard sangfor partial"]
-    CollabCLI["collaboration dispatch CLI"]
+    ProxyCore["upstream-proxy + product proxies"]
+    Gates["deploy + external-share + send gates"]
+    OpsUI["/ops Unified Ops Console"]
+    Connectors["whelp99 GitHub Slack"]
+    Evidence["phase-0..7 evidence docs"]
   end
-  subgraph phase6 [Phase6 Candidates]
-    Ops["G1 Unified Ops Console"]
-    Mail["G2 v1 mail APIs"]
-    F3["G3 F-aios-v3 expand"]
-    SF["G4 sangfor writes"]
-    WH["G5 whelp99 bridge"]
-    SL["G6 Slack send"]
+  subgraph post7 [Post Phase7 Open]
+    LiveUX["G7 browser/live UX smoke"]
+    LiveUpstream["live upstream validation"]
+    MailHub["unified mail hub UI"]
   end
-  phase1to5 --> phase6
+  phase1to7 --> post7
 ```
 
 ---
 
-## Code Inventory (verification snapshot)
+## Code Inventory (verification snapshot — 2026-06-14)
 
-### Web API routes (32)
+### Web API routes (67)
 
-`integrations/health`, `aios-v3/*`, AIOS v1 proxies (`customers`, `tasks`, `partners`, `knowledge`, `workflows`, `automation`, `github`, `plan`, `analyze`, `commands`, `risk`), `sangfor/*`, `vibe-coding/*`, `collaboration/*`, `approvals`, `proxy/outlook/*`, `slack/status`, `auth/*`
+Core: `integrations/health`, `ops/summary`, `ops/dispatch`, `collaboration/*`, `approvals`, `auth/*`
+
+Product proxies: `aios-v3/*` (health, workflows, knowledge, lightrag, orchestrator, monitoring), AIOS v1 (`customers`, `tasks`, `partners`, `knowledge`, `workflows`, `automation`, `github`, `plan`, `analyze`, `commands`, `risk`, `mail-import`, `mail-candidates`, `mail-insight-threads`), `sangfor/*` (health, workflows, dashboard, events, compliance, device), `vibe-coding/*` (health, projects, rag, agents, learning, sandbox), `whelp99/*`, `github/branches`, `github/pull-requests`, `slack/send`, `proxy/outlook/*`
 
 ### API app extras
 
-- `GET /api/whelp99/health`
+- `GET /api/whelp99/health` (filesystem probe)
 - `GET /api/slack/status`
 
-### Tests (25)
+### Tests (394)
 
-- [`tests/basic.test.ts`](../../tests/basic.test.ts)
-- [`tests/approval-gate.test.ts`](../../tests/approval-gate.test.ts)
-- [`tests/integration.test.ts`](../../tests/integration.test.ts)
-- [`tests/phase5-smoke.test.ts`](../../tests/phase5-smoke.test.ts)
+| Suite | File | Focus |
+| ----- | ---- | ----- |
+| Unit / schema | `tests/unit/*`, `tests/basic.test.ts` | domain, infra, schemas |
+| Approval | `tests/approval-gate.test.ts` | GET/HEAD-safe gate regression |
+| Integration | `tests/integration.test.ts` | collaboration + approval resume |
+| Phase proxies | `tests/integration/aios-v1-mail-proxy.test.ts`, `faios-v3-proxy.test.ts`, `sangfor-phase4-proxy.test.ts`, `vibe-coding-phase5-proxy.test.ts`, `phase6-connectors.test.ts` | product proxy + gate evidence |
+| Smoke | `tests/phase5-smoke.test.ts` | upstream health smoke |
 
 ---
 
@@ -458,7 +473,7 @@ These documents are **historical** or **partially outdated**. Use **this file** 
 | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ | --------------------------------------- |
 | [`final-feature-diff.md`](final-feature-diff.md)                                                         | “Development Complete” = monorepo structure, not integration | This doc                                |
 | [`missing-feature-checklist.md`](missing-feature-checklist.md)                                           | UI/tests marked missing but partially implemented            | This doc + checklist for v2.0.1 backlog |
-| [`.hermes/...-real-integration-plan.md`](../../.hermes/plans/2026-06-11_020000-real-integration-plan.md) | Timeline all “미시작”; Phases 3–5 done                       | This doc                                |
+| [`.hermes/...-real-integration-plan.md`](../../.hermes/plans/2026-06-11_020000-real-integration-plan.md) | Timeline all “미시작”; Phases 1–7 build/test/evidence done       | This doc                                |
 | [`phase5-handoff.md`](phase5-handoff.md)                                                                 | Task checklist may lag opencode completion                   | evidence + this doc                     |
 
 ---
