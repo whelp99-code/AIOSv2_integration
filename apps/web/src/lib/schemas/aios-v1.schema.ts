@@ -5,6 +5,10 @@ export const ProjectIdSchema = z.object({
   projectId: z.string().min(1, 'projectId는 필수입니다').refine(v => v.trim().length > 0, '공백만 있는 projectId는 허용되지 않습니다'),
 });
 
+export const ProjectIdQuerySchema = z.object({
+  projectId: z.string().uuid('projectId는 유효한 UUID 형식이어야 합니다'),
+});
+
 export const IdempotencyKeySchema = z.object({
   idempotencyKey: z.string().min(1).optional().refine(v => !v || v.trim().length > 0, '공백만 있는 idempotencyKey는 허용되지 않습니다')
 });

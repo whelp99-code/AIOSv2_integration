@@ -26,14 +26,17 @@ const BUILT_IN_COMMANDS: CommandEntry[] = [
 export class CommandRegistry {
   private commands = new Map<string, CommandEntry>();
   private readonly actionService = getAiosV1ActionService();
+  private static readonly ALLOWED_COMMAND_IDS = new Set(
+    BUILT_IN_COMMANDS.map(cmd => cmd.id),
+  );
 
   constructor() {
     for (const cmd of BUILT_IN_COMMANDS) {
-      this.commands.set(cmd.id, cmd);
+      this.register(cmd);
     }
   }
 
-  register(entry: CommandEntry): void {
+  private register(entry: CommandEntry): void {
     this.commands.set(entry.id, entry);
   }
 

@@ -28,12 +28,12 @@ describe('AIOS v1 Routes Integration', () => {
       const req = new Request('http://localhost/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ projectId: 'p1', type: 'full' }),
+        body: JSON.stringify({ projectId: '550e8400-e29b-41d4-a716-446655440000', type: 'full' }),
       });
       const res = await POST(req);
       expect(res.status).toBe(200);
       const body = await res.json();
-      expect(body.projectId).toBe('p1');
+      expect(body.projectId).toBe('550e8400-e29b-41d4-a716-446655440000');
     });
 
     it('type 기본값이 full이다', async () => {
@@ -41,7 +41,7 @@ describe('AIOS v1 Routes Integration', () => {
       const req = new Request('http://localhost/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ projectId: 'p1' }),
+        body: JSON.stringify({ projectId: '550e8400-e29b-41d4-a716-446655440000' }),
       });
       const res = await POST(req);
       const body = await res.json();
@@ -59,7 +59,7 @@ describe('AIOS v1 Routes Integration', () => {
 
     it('projectId로 not_found를 반환한다', async () => {
       const { GET } = await import('@/app/api/analyze/route');
-      const req = new Request('http://localhost/api/analyze?projectId=p1');
+      const req = new Request('http://localhost/api/analyze?projectId=550e8400-e29b-41d4-a716-446655440000');
       const res = await GET(req);
       const body = await res.json();
       expect(body.status).toBe('not_found');
@@ -83,7 +83,7 @@ describe('AIOS v1 Routes Integration', () => {
       const req = new Request('http://localhost/api/plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ projectId: 'p1' }),
+        body: JSON.stringify({ projectId: '550e8400-e29b-41d4-a716-446655440000' }),
       });
       const res = await POST(req);
       const body = await res.json();
@@ -96,7 +96,7 @@ describe('AIOS v1 Routes Integration', () => {
       const req = new Request('http://localhost/api/plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ projectId: 'p1', requirements: ['r1'] }),
+        body: JSON.stringify({ projectId: '550e8400-e29b-41d4-a716-446655440000', requirements: ['r1'] }),
       });
       const res = await POST(req);
       expect(res.status).toBe(200);
@@ -113,7 +113,7 @@ describe('AIOS v1 Routes Integration', () => {
 
     it('projectId로 not_found를 반환한다', async () => {
       const { GET } = await import('@/app/api/plan/route');
-      const req = new Request('http://localhost/api/plan?projectId=p1');
+      const req = new Request('http://localhost/api/plan?projectId=550e8400-e29b-41d4-a716-446655440000');
       const res = await GET(req);
       const body = await res.json();
       expect(body.status).toBe('not_found');
@@ -137,7 +137,7 @@ describe('AIOS v1 Routes Integration', () => {
       const req = new Request('http://localhost/api/risk', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ projectId: 'p1', scope: 'full' }),
+        body: JSON.stringify({ projectId: '550e8400-e29b-41d4-a716-446655440000', scope: 'full' }),
       });
       const res = await POST(req);
       const body = await res.json();
@@ -150,7 +150,7 @@ describe('AIOS v1 Routes Integration', () => {
       const req = new Request('http://localhost/api/risk', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ projectId: 'p1' }),
+        body: JSON.stringify({ projectId: '550e8400-e29b-41d4-a716-446655440000' }),
       });
       const res = await POST(req);
       const body = await res.json();
@@ -168,7 +168,7 @@ describe('AIOS v1 Routes Integration', () => {
 
     it('projectId로 not_found를 반환한다', async () => {
       const { GET } = await import('@/app/api/risk/route');
-      const req = new Request('http://localhost/api/risk?projectId=p1');
+      const req = new Request('http://localhost/api/risk?projectId=550e8400-e29b-41d4-a716-446655440000');
       const res = await GET(req);
       const body = await res.json();
       expect(body.status).toBe('not_found');
@@ -204,7 +204,7 @@ describe('AIOS v1 Routes Integration', () => {
       const req = new Request('http://localhost/api/commands', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ command: 'analyze', params: { projectId: 'p1' } }),
+        body: JSON.stringify({ command: 'analyze', params: { projectId: '550e8400-e29b-41d4-a716-446655440000' } }),
       });
       const res = await POST(req);
       expect(res.status).toBe(200);

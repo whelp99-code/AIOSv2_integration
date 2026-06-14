@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { createGatedHandler, type ApprovedRequestContext } from '../../../lib/integrations/approval-middleware';
 import { getPlanningService } from '../../../lib/services/planning-service';
-import { PlanRequestSchema } from '../../../lib/schemas/aios-v1.schema';
+import { PlanRequestSchema, ProjectIdQuerySchema } from '../../../lib/schemas/aios-v1.schema';
 
 export const POST = createGatedHandler(
   'deploy',
@@ -35,12 +35,15 @@ export const POST = createGatedHandler(
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const projectId = searchParams.get('projectId');
+  const parsed = ProjectIdQuerySchema.safeParse({ projectId: searchParams.get('projectId') });
 
-  if (!projectId) {
-    return NextResponse.json({ error: 'Project ID required' }, { status: 400 });
+  if (!parsed.success) {
+    return NextResponse.json(
+      { error: '잘못된 projectId', details: parsed.error.flatten() },
+      { status: 400 },
+    );
   }
 
   const service = getPlanningService();
-  return service.getResults(projectId);
+  return service.getResults(parsed.data.projectId);
 }
