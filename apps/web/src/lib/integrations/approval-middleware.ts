@@ -12,6 +12,52 @@ import type { ApprovalActionType, ApprovalRequest } from "@aios/domain";
 /** 승인 게이트용 액션 타입 (none 제외) */
 export type ApprovalGateActionType = Exclude<GateRequirement, "none">;
 
+/** 멱등성 응답 캐시 (5분 TTL) */
+const idempotencyCache = new Map<string, { body: unknown; status: number; ts: number }>();
+const IDEMPOTENCY_TTL_MS = 5 * 60 * 1000;
+
+function getIdempotencyCacheKey(
+  key: string,
+  userId: string,
+  sessionId: string | undefined,
+  resourceId: string | undefined,
+): string {
+  return `${userId}:${sessionId ?? ''}:${resourceId ?? ''}:${key}`;
+}
+
+function getCachedIdempotentResponse(cacheKey: string): { body: unknown; status: number } | null {
+  const entry = idempotencyCache.get(cacheKey);
+  if (!entry) return null;
+  if (Date.now() - entry.ts > IDEMPOTENCY_TTL_MS) {
+    idempotencyCache.delete(cacheKey);
+    return null;
+  }
+  return entry;
+}
+
+function setIdempotentCache(cacheKey: string, body: unknown, status: number): void {
+  idempotencyCache.set(cacheKey, { body, status, ts: Date.now() });
+  if (idempotencyCache.size > 500) {
+    const oldest = idempotencyCache.keys().next().value;
+    if (oldest) idempotencyCache.delete(oldest);
+  }
+}
+
+export function clearIdempotencyCache(): void {
+  idempotencyCache.clear();
+}
+
+function extractStringField(
+  body: unknown,
+  field: string,
+): string | undefined {
+  if (body && typeof body === 'object' && field in body) {
+    const val = (body as Record<string, unknown>)[field];
+    if (typeof val === 'string') return val;
+  }
+  return undefined;
+}
+
 function requestWithJsonBody(req: Request, body: unknown): Request {
   const headers = new Headers(req.headers);
   if (!headers.has("Content-Type")) {
@@ -47,6 +93,9 @@ export interface ApprovedRequestContext {
   actionType: ApprovalGateActionType;
   target: string;
   requestedBy: string;
+  sessionId?: string;
+  resourceId?: string;
+  idempotencyKey?: string;
 }
 
 /**
@@ -157,6 +206,7 @@ export function withApprovalGate<TBody = unknown>(config: ApprovalGateConfig) {
 
 /**
  * 상위 레벨 헬퍼: 간단한 POST/PUT/DELETE 핸들러에 승인 게이트 적용
+ * 멱등성 키 + 사용자/세션/리소스 바인딩 지원
  */
 export function createGatedHandler(
   gate: ApprovalGateActionType,
@@ -173,13 +223,41 @@ export function createGatedHandler(
     if (process.env.NODE_ENV !== "production") {
       const body =
         req.method !== "GET" ? await req.json().catch(() => ({})) : {};
-      return handler(requestWithJsonBody(req, body), {
+      const idempotencyKey =
+        extractStringField(body, 'idempotencyKey') ??
+        req.headers.get("x-idempotency-key") ?? undefined;
+      const sessionId =
+        extractStringField(body, 'sessionId') ??
+        req.headers.get("x-session-id") ?? undefined;
+      const resourceId =
+        extractStringField(body, 'projectId') ??
+        extractStringField(body, 'command') ??
+        extractStringField(body, 'resourceId') ?? undefined;
+      
+      // 개발 모드에서도 승인 컨텍스트 구성하여 핸들러 호출
+      const mockApprovalContext = {
         approvalId: "dev-bypass",
         approvalStatus: "approved",
         actionType: gate,
         target,
         requestedBy: "dev-user",
-      });
+        sessionId,
+        resourceId,
+        idempotencyKey,
+      };
+      
+      const response = await handler(requestWithJsonBody(req, body), mockApprovalContext);
+      
+      // 개발 모드에서도 응답에 승인 정보 추가
+      const responseData = await response.json().catch(() => ({}));
+      return NextResponse.json(
+        {
+          ...responseData,
+          approvalStatus: "approved",
+          approvalId: "dev-bypass",
+        },
+        { status: response.status }
+      );
     }
 
     let body: unknown = {};
@@ -192,20 +270,33 @@ export function createGatedHandler(
     }
 
     const approvalId =
-      body &&
-      typeof body === "object" &&
-      "approvalId" in body &&
-      typeof body.approvalId === "string"
-        ? body.approvalId
-        : req.headers.get("x-approval-id") || undefined;
+      extractStringField(body, 'approvalId') ??
+      req.headers.get("x-approval-id") ?? undefined;
 
     const requestedBy =
-      body &&
-      typeof body === "object" &&
-      "requestedBy" in body &&
-      typeof body.requestedBy === "string"
-        ? body.requestedBy
-        : req.headers.get("x-requested-by") || "api-client";
+      (extractStringField(body, 'requestedBy') ?? req.headers.get("x-requested-by")) || "api-client";
+
+    const sessionId =
+      extractStringField(body, 'sessionId') ??
+      req.headers.get("x-session-id") ?? undefined;
+
+    const resourceId =
+      extractStringField(body, 'projectId') ??
+      extractStringField(body, 'command') ??
+      extractStringField(body, 'resourceId') ?? undefined;
+
+    const idempotencyKey =
+      extractStringField(body, 'idempotencyKey') ??
+      req.headers.get("x-idempotency-key") ?? undefined;
+
+    // 멱등성 키 체크
+    if (idempotencyKey) {
+      const cacheKey = getIdempotencyCacheKey(idempotencyKey, requestedBy, sessionId, resourceId);
+      const cached = getCachedIdempotentResponse(cacheKey);
+      if (cached) {
+        return NextResponse.json(cached.body as Record<string, unknown>, { status: cached.status });
+      }
+    }
 
     const gateResult = await ensureApprovedAction({
       approvalId,
@@ -215,7 +306,7 @@ export function createGatedHandler(
       target,
       context: contextBuilder
         ? contextBuilder(body)
-        : (body as Record<string, unknown>),
+        : { ...((body ?? {}) as Record<string, unknown>), sessionId, resourceId, idempotencyKey },
     });
 
     if (!gateResult.allowed) {
@@ -229,6 +320,9 @@ export function createGatedHandler(
       actionType: gateResult.approval.actionType as ApprovalGateActionType,
       target: gateResult.approval.target,
       requestedBy: gateResult.approval.requestedBy,
+      sessionId,
+      resourceId,
+      idempotencyKey,
     };
 
     const response = await handler(
@@ -241,6 +335,13 @@ export function createGatedHandler(
     }
 
     const responseData = await response.json().catch(() => ({}));
+
+    // 멱등성 캐시 저장
+    if (idempotencyKey && response.ok) {
+      const cacheKey = getIdempotencyCacheKey(idempotencyKey, requestedBy, sessionId, resourceId);
+      setIdempotentCache(cacheKey, responseData, response.status);
+    }
+
     return NextResponse.json(
       {
         ...responseData,

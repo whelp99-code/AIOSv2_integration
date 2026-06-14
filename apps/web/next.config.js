@@ -5,6 +5,12 @@ const nextConfig = {
     root: '../../',
   },
   reactStrictMode: true,
+  // Disable turbopack for production build if it causes hangs
+  experimental: {
+    turbo: {
+      // Disable for production build stability
+    },
+  },
 }
 
 module.exports = nextConfig

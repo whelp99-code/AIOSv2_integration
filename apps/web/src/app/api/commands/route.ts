@@ -1,98 +1,39 @@
-import { NextResponse } from 'next/server'
-import { proxyAiosV1Json } from '../../../lib/integrations/aios-v1-proxy'
-import { createGatedHandler } from '../../../lib/integrations/approval-middleware'
-
-const FALLBACK_COMMANDS = [
-  {
-    id: 'analyze',
-    name: 'Analyze',
-    description: '프로젝트 구조 및 코드 분석',
-    endpoint: '/api/analyze',
-  },
-  {
-    id: 'plan',
-    name: 'Plan',
-    description: '개발 계획 수립',
-    endpoint: '/api/plan',
-  },
-  {
-    id: 'risk',
-    name: 'Risk Assessment',
-    description: '프로젝트 리스크 평가',
-    endpoint: '/api/risk',
-  },
-  {
-    id: 'customers',
-    name: 'Customers',
-    description: '고객 관리',
-    endpoint: '/api/customers',
-  },
-  {
-    id: 'partners',
-    name: 'Partners',
-    description: '파트너 관리',
-    endpoint: '/api/partners',
-  },
-  {
-    id: 'workflows',
-    name: 'Workflows',
-    description: '워크플로우 관리',
-    endpoint: '/api/workflows',
-  },
-]
+import { NextResponse } from 'next/server';
+import { createGatedHandler, type ApprovedRequestContext } from '../../../lib/integrations/approval-middleware';
+import { getCommandRegistry } from '../../../lib/services/command-registry';
+import { CommandExecuteRequestSchema } from '../../../lib/schemas/aios-v1.schema';
 
 export async function GET() {
-  try {
-    const result = await proxyAiosV1Json({ path: '/api/commands' })
-
-    if (result.ok) {
-      return NextResponse.json(result.data, { status: result.status })
-    }
-
-    return NextResponse.json({ commands: FALLBACK_COMMANDS })
-  } catch (error) {
-    console.error('Commands error:', error)
-    return NextResponse.json({ commands: FALLBACK_COMMANDS })
-  }
+  const registry = getCommandRegistry();
+  return registry.listCommands();
 }
 
 export const POST = createGatedHandler(
   'deploy',
   'command-execute',
   '명령어 실행',
-  async (request) => {
-    let command: string | undefined
-    let params: unknown
-
+  async (request, approvalCtx: ApprovedRequestContext) => {
+    let body: unknown;
     try {
-      const body = await request.json()
-      command = body.command
-      params = body.params
+      body = await request.json();
     } catch {
-      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 })
+      return NextResponse.json({ error: 'Invalid request body' }, { status: 400 });
     }
 
-    try {
-      const result = await proxyAiosV1Json({
-        path: '/api/commands',
-        method: 'POST',
-        body: { command, params },
-      })
-
-      if (result.ok) {
-        return NextResponse.json(result.data, { status: result.status })
-      }
-
-      return NextResponse.json({
-        status: 'queued',
-        message: `${command} 명령어가 실행되었습니다.`,
-      })
-    } catch (error) {
-      console.error('Command execute error:', error)
-      return NextResponse.json({
-        status: 'queued',
-        message: `${command} 명령어가 실행되었습니다.`,
-      })
+    const parsed = CommandExecuteRequestSchema.safeParse(body);
+    if (!parsed.success) {
+      return NextResponse.json(
+        { error: '요청 데이터 검증 실패', details: parsed.error.flatten() },
+        { status: 400 },
+      );
     }
-  }
-)
+
+    const registry = getCommandRegistry();
+    return registry.executeCommand(parsed.data, {
+      userId: approvalCtx.requestedBy,
+      sessionId: approvalCtx.approvalId,
+      resourceId: parsed.data.command,
+      idempotencyKey: parsed.data.idempotencyKey,
+    });
+  },
+);

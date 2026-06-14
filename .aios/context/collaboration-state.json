@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "workspaceRoot": "/Users/jmpark/Documents/Playground/AIOSv2_integration",
-  "lastUpdatedAt": "2026-06-13T03:44:51.420Z",
+  "lastUpdatedAt": "2026-06-13T11:21:33.807Z",
   "projects": [
     {
       "name": "AIOS v1",
@@ -44,7 +44,7 @@
       "id": "cursor-opencode-main-session",
       "title": "Cursor + opencode multi-session collaboration",
       "objective": "Cursor와 opencode가 같은 상태를 읽고 서로 넘겨받으며 AIOS v1, F-aios-v3-core, sangfor-mcp-workflow, vibe-coding-os, whelp99-code-sangfor-engineer-mcp 연동을 진행한다.",
-      "status": "completed",
+      "status": "blocked",
       "owner": "cursor",
       "participants": [
         {
@@ -52,35 +52,21 @@
           "role": "orchestrator",
           "displayName": "Cursor",
           "active": true,
-          "capabilities": [
-            "planning",
-            "review",
-            "navigation",
-            "verification"
-          ]
+          "capabilities": ["planning", "review", "navigation", "verification"]
         },
         {
           "tool": "opencode",
           "role": "implementer",
           "displayName": "opencode",
           "active": true,
-          "capabilities": [
-            "implementation",
-            "refactor",
-            "testing",
-            "patching"
-          ]
+          "capabilities": ["implementation", "refactor", "testing", "patching"]
         },
         {
           "tool": "codex",
           "role": "reviewer",
           "displayName": "Codex",
           "active": true,
-          "capabilities": [
-            "review",
-            "refactor-suggestion",
-            "cleanup"
-          ]
+          "capabilities": ["review", "refactor-suggestion", "cleanup"]
         }
       ],
       "assignments": [
@@ -94,10 +80,7 @@
             ".aios/context/collaboration-state.json",
             "docs/reports/cursor-opencode-collaboration.md"
           ],
-          "requiredApprovals": [
-            "external-sharing",
-            "deployment"
-          ],
+          "requiredApprovals": ["external-sharing", "deployment"],
           "status": "done",
           "createdAt": "2026-06-13T00:00:00.000Z",
           "updatedAt": "2026-06-13T00:00:00.000Z",
@@ -199,9 +182,7 @@
           "description": "구현 결과를 리뷰하고 리팩토링 제안만 남긴다. 직접 구현은 하지 않는다.",
           "assignedTo": "codex",
           "role": "reviewer",
-          "targetFiles": [
-            "docs/evidence/cursor-opencode-main-session.md"
-          ],
+          "targetFiles": ["docs/evidence/cursor-opencode-main-session.md"],
           "requiredApprovals": [],
           "status": "done",
           "createdAt": "2026-06-12T17:03:28.841Z",
@@ -243,9 +224,7 @@
           "description": "approval-queue.json 항목에 sessionId, assignmentId, requestedBy, actionType을 채운다.",
           "assignedTo": "opencode",
           "role": "implementer",
-          "targetFiles": [
-            ".aios/context/approval-queue.json"
-          ],
+          "targetFiles": [".aios/context/approval-queue.json"],
           "requiredApprovals": [],
           "status": "done",
           "createdAt": "2026-06-12T17:08:03.752Z",
@@ -264,9 +243,7 @@
           "description": "AIOS_WORKSPACE_ROOT 등 환경 변수를 collaboration contract에 반영한다.",
           "assignedTo": "cursor",
           "role": "orchestrator",
-          "targetFiles": [
-            "docs/reports/cursor-opencode-collaboration.md"
-          ],
+          "targetFiles": ["docs/reports/cursor-opencode-collaboration.md"],
           "requiredApprovals": [],
           "status": "done",
           "createdAt": "2026-06-12T17:08:03.754Z",
@@ -285,10 +262,7 @@
           "description": "pnpm test 및 pnpm typecheck로 phase 2 변경을 검증한다.",
           "assignedTo": "opencode",
           "role": "implementer",
-          "targetFiles": [
-            "tests/integration.test.ts",
-            "package.json"
-          ],
+          "targetFiles": ["tests/integration.test.ts", "package.json"],
           "requiredApprovals": [],
           "status": "done",
           "createdAt": "2026-06-12T17:08:03.755Z",
@@ -307,9 +281,7 @@
           "description": "5개 연동 프로젝트 URL/health 경로를 shared constants로 정의한다.",
           "assignedTo": "cursor",
           "role": "orchestrator",
-          "targetFiles": [
-            "packages/shared/src/constants/integrations.ts"
-          ],
+          "targetFiles": ["packages/shared/src/constants/integrations.ts"],
           "requiredApprovals": [],
           "status": "done",
           "createdAt": "2026-06-12T17:12:51.785Z",
@@ -393,9 +365,7 @@
           "description": "sangfor execute와 vibe RAG ingest 승인 게이트 매핑 artifact를 정리한다.",
           "assignedTo": "cursor",
           "role": "orchestrator",
-          "targetFiles": [
-            "docs/reports/cursor-opencode-collaboration.md"
-          ],
+          "targetFiles": ["docs/reports/cursor-opencode-collaboration.md"],
           "requiredApprovals": [],
           "status": "done",
           "createdAt": "2026-06-12T17:19:55.336Z",
@@ -504,9 +474,7 @@
           "description": "구현 없이 proxy/approval/live UI 변경에 대한 Codex 리뷰 artifact를 남긴다.",
           "assignedTo": "codex",
           "role": "reviewer",
-          "targetFiles": [
-            "docs/reports/cursor-opencode-collaboration.md"
-          ],
+          "targetFiles": ["docs/reports/cursor-opencode-collaboration.md"],
           "requiredApprovals": [],
           "status": "done",
           "createdAt": "2026-06-12T17:19:55.363Z",
@@ -525,9 +493,7 @@
           "description": "AIOS v1 잔여 마이그레이션, sangfor 확장, whelp99 bridge, connector 실연동 범위를 artifact로 정리한다.",
           "assignedTo": "cursor",
           "role": "orchestrator",
-          "targetFiles": [
-            "docs/reports/phase5-handoff.md"
-          ],
+          "targetFiles": ["docs/reports/phase5-handoff.md"],
           "requiredApprovals": [],
           "status": "done",
           "createdAt": "2026-06-13T00:42:33.061Z",
@@ -617,9 +583,7 @@
           "description": "AIOS v1/sangfor/whelp99 smoke 테스트 추가 후 pnpm test/typecheck를 통과시킨다.",
           "assignedTo": "opencode",
           "role": "implementer",
-          "targetFiles": [
-            "tests/integration.test.ts"
-          ],
+          "targetFiles": ["tests/integration.test.ts"],
           "requiredApprovals": [],
           "status": "done",
           "createdAt": "2026-06-13T00:42:33.066Z",
@@ -638,9 +602,7 @@
           "description": "Phase 5 deep integration diff에 대한 Codex 리뷰 artifact만 작성한다.",
           "assignedTo": "codex",
           "role": "reviewer",
-          "targetFiles": [
-            "docs/reports/phase5-handoff.md"
-          ],
+          "targetFiles": ["docs/reports/phase5-handoff.md"],
           "requiredApprovals": [],
           "status": "done",
           "createdAt": "2026-06-13T00:42:33.067Z",
@@ -742,9 +704,7 @@
           "description": "Phase 5 Task 4 — tests.\n\nRead docs/reports/phase5-handoff.md Task 5.\n\nAdd integration smoke tests for AIOS v1 customers proxy, sangfor events proxy, whelp99 health.\nRun pnpm test and pnpm typecheck; fix any failures you introduced.",
           "assignedTo": "opencode",
           "role": "implementer",
-          "targetFiles": [
-            "tests/integration.test.ts"
-          ],
+          "targetFiles": ["tests/integration.test.ts"],
           "requiredApprovals": [],
           "status": "done",
           "createdAt": "2026-06-13T00:57:15.355Z",
@@ -876,6 +836,68 @@
             "summary": "Now I'll run all verification commands in parallel to assess the current state of each repo.",
             "completedAt": "2026-06-13T03:44:51.416Z"
           }
+        },
+        {
+          "id": "assignment-1781348482151-m3h4sxlp",
+          "title": "Phase 7 report correction + AIOSv2 commit readiness",
+          "description": "Phase 7 remediation — AIOSv2 (Cursor verification audit 2026-06-13).\n\nWorkspace: /Users/jmpark/Documents/Playground/AIOSv2_integration\n\nProblems found:\n- phase7-final-report.md overstates 69/69 tests, AIOSv2 commit SHA (says 0c90b6e, HEAD is fb64e95+), and \"운영 준비\" without caveats.\n- Uncommitted Codex follow-up changes may exist — ensure changed-file-only Prettier passes before commit.\n\nRequired:\n1. Update docs/reports/phase7-final-report.md section 2/4/7 with verified numbers: AIOSv2 pnpm test = 26/26, HEAD fb64e95, repo-wide format:check FAIL (legacy), changed-file Prettier PASS, build PASS with NFT warning.\n2. Replace \"100% operational ready\" with scoped claim: build/TS gate green; portal integration still partial per product-integration-blueprint-status.md.\n3. Re-run and record: pnpm test, pnpm lint, pnpm typecheck, pnpm --filter @aios/web build, git diff --check, changed-file-only prettier check.\n4. Do NOT commit unless user explicitly requests — prepare clean staging list only.",
+          "assignedTo": "opencode",
+          "role": "implementer",
+          "targetFiles": [
+            "docs/reports/phase7-final-report.md",
+            "docs/evidence/cursor-opencode-main-session.md",
+            "docs/reports/phase6-progress-report.md",
+            "apps/web/src/lib/integrations/approval-middleware.ts",
+            "tests/approval-gate.test.ts"
+          ],
+          "requiredApprovals": [],
+          "status": "completed",
+          "createdAt": "2026-06-13T11:01:22.151Z",
+          "updatedAt": "2026-06-13T11:06:33.752Z",
+          "metadata": {
+            "trigger": "phase7-remediation-dispatch",
+            "cwd": "/Users/jmpark/Documents/Playground/AIOSv2_integration",
+            "auditDoc": "docs/reports/phase7-final-report.md"
+          }
+        },
+        {
+          "id": "assignment-1781348793753-xi10g5wj",
+          "title": "Sangfor LM Studio test stability",
+          "description": "Phase 7 remediation — Sangfor MCP flaky tests.\n\nWorkspace: /Users/jmpark/Documents/Playground/sangfor-mcp-workflow\n\nProblem: pnpm test intermittently fails 42/44 when LM Studio is slow/unavailable (getCurrentModel / timeouts).\n\nRequired:\n1. Use isLmStudioReady() guard on ALL tests that require live LM Studio (including getCurrentModel).\n2. Prefer test.skip() or early return with explicit skip log when LM Studio unavailable — no assertion failures on missing model.\n3. Verify: pnpm test passes with LM Studio off AND with LM Studio on (44/44 or documented skips).",
+          "assignedTo": "opencode",
+          "role": "implementer",
+          "targetFiles": ["tests/ai-workflow.test.ts"],
+          "requiredApprovals": [],
+          "status": "failed",
+          "createdAt": "2026-06-13T11:06:33.753Z",
+          "updatedAt": "2026-06-13T11:21:33.792Z",
+          "metadata": {
+            "trigger": "phase7-remediation-dispatch",
+            "cwd": "/Users/jmpark/Documents/Playground/sangfor-mcp-workflow",
+            "auditDoc": "docs/reports/phase7-final-report.md"
+          }
+        },
+        {
+          "id": "assignment-1781349693802-gclrzi8n",
+          "title": "VibeCodingOS i18n MISSING_MESSAGE cleanup",
+          "description": "Phase 7 remediation — VibeCodingOS build warnings.\n\nWorkspace: /Users/jmpark/Documents/Playground/vibe-coding-os\n\nProblem: pnpm build succeeds but SSG logs MISSING_MESSAGE for projects.create.*, common.backToList, projects.subtitle, common.loading (ko + en).\n\nRequired:\n1. Add all missing keys to messages/ko.json and messages/en.json (match keys used in projects/new and projects pages).\n2. Re-run pnpm build — zero MISSING_MESSAGE errors during static generation.\n3. ignoreBuildErrors must remain removed.",
+          "assignedTo": "opencode",
+          "role": "implementer",
+          "targetFiles": [
+            "messages/ko.json",
+            "messages/en.json",
+            "app/[locale]/projects/new/page.tsx",
+            "app/[locale]/projects/page.tsx"
+          ],
+          "requiredApprovals": [],
+          "status": "running",
+          "createdAt": "2026-06-13T11:21:33.802Z",
+          "updatedAt": "2026-06-13T11:21:33.807Z",
+          "metadata": {
+            "trigger": "phase7-remediation-dispatch",
+            "cwd": "/Users/jmpark/Documents/Playground/vibe-coding-os",
+            "auditDoc": "docs/reports/phase7-final-report.md"
+          }
         }
       ],
       "handoffs": [
@@ -957,6 +979,15 @@
           "reason": "phase-6-diagnostic-fix-dispatch",
           "summary": "Cursor가 진단 리포트 검증 결과 4건(AIOSv2 settings, Vibe GitHub facade, Sangfor build, cross-repo verify)을 opencode에 순차 실행 지시한다.",
           "createdAt": "2026-06-13T03:42:57.982Z",
+          "metadata": {}
+        },
+        {
+          "id": "handoff-1781348482150-mt19q9r7",
+          "from": "cursor",
+          "to": "opencode",
+          "reason": "phase7-verification-audit",
+          "summary": "Cursor가 phase7-final-report 검증 감사 결과 4건을 opencode에 수정 지시한다.",
+          "createdAt": "2026-06-13T11:01:22.150Z",
           "metadata": {}
         }
       ],
@@ -1162,7 +1193,7 @@
         }
       ],
       "createdAt": "2026-06-13T00:00:00.000Z",
-      "updatedAt": "2026-06-13T03:44:51.420Z",
+      "updatedAt": "2026-06-13T11:21:33.807Z",
       "metadata": {
         "activeProjects": [
           "AIOS v1",
@@ -1173,9 +1204,9 @@
         ],
         "contractVersion": "cursor-opencode-collaboration-v1",
         "lastOrchestrationAt": "2026-06-12T17:03:28.835Z",
-        "phase": 6,
+        "phase": "phase7-remediation",
         "lastContinueAt": "2026-06-13T00:42:33.059Z",
-        "lastOpencodeDispatchAt": "2026-06-13T03:44:51.419Z",
+        "lastOpencodeDispatchAt": "2026-06-13T11:01:22.145Z",
         "objective": "diagnostic-fix-all-build-blockers",
         "lastPhase6DispatchResult": "all-completed"
       }
