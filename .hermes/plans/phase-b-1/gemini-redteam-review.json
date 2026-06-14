@@ -1,0 +1,207 @@
+{
+  "reviewId": "redteam-v1-phase-b-1",
+  "phase": "phase-b-1",
+  "title": "Gemini Red Team Review — DB 마이그레이션",
+  "date": "2026-06-14",
+  "reviewer": "Red Team AI",
+  "source": "red-team-review-v1.md",
+  "summary": {
+    "totalFindings": 20,
+    "critical": 3,
+    "high": 5,
+    "medium": 7,
+    "low": 5
+  },
+  "findings": [
+    {
+      "id": "S1",
+      "severity": "critical",
+      "category": "security",
+      "title": "OAuth tokens stored in plaintext",
+      "file": "packages/db/prisma/schema.prisma",
+      "evidence": "Account model stores refresh_token, access_token, id_token as plain String?",
+      "impact": "Database breach exposes linked provider accounts; full account takeover risk.",
+      "recommendation": "Implement AES-256-GCM encryption via Prisma middleware; store keys in vault."
+    },
+    {
+      "id": "S2",
+      "severity": "critical",
+      "category": "security",
+      "title": "No row-level security or tenant isolation",
+      "file": "packages/db/prisma/schema.prisma",
+      "evidence": "All models use userId FK but no RLS, no automatic filter middleware. Queries like findMany() return all rows.",
+      "impact": "Cross-tenant data leak from any code path missing userId filter.",
+      "recommendation": "Add Prisma extension middleware to inject userId filter; add PostgreSQL RLS policies."
+    },
+    {
+      "id": "R1",
+      "severity": "critical",
+      "category": "requirements",
+      "title": "Rollback restores invalid state",
+      "file": "packages/db/scripts/rollback.ts",
+      "evidence": "rollbackV1 sets userId='' (invalid) for Customer and Partner records.",
+      "impact": "Rollback renders data unusable; referential integrity violation.",
+      "recommendation": "Capture original userId before migration in metadata table; restore during rollback."
+    },
+    {
+      "id": "S3",
+      "severity": "high",
+      "category": "security",
+      "title": "Hardcoded system user ID in migrations",
+      "file": "packages/db/scripts/migrate-v1.ts",
+      "evidence": "userId: 'system-migration-v1' magic string used where FK is required.",
+      "impact": "FK constraint failures or orphaned data.",
+      "recommendation": "Create real system user; store UUID in migration metadata."
+    },
+    {
+      "id": "A1",
+      "severity": "high",
+      "category": "architecture",
+      "title": "Two conflicting Prisma schemas exist",
+      "file": "packages/db/prisma/schema.prisma, packages/db/prisma/schema 2.prisma",
+      "evidence": "Duplicate schema file with space in filename suggests merge conflict artifact.",
+      "impact": "Accidental usage of old schema undoes v3 fields silently.",
+      "recommendation": "Delete schema 2.prisma; archive outside prisma/ if needed."
+    },
+    {
+      "id": "A2",
+      "severity": "high",
+      "category": "architecture",
+      "title": "No transaction boundaries in migration scripts",
+      "file": "packages/db/scripts/migrate-v1.ts, packages/db/scripts/migrate-v3.ts",
+      "evidence": "Records updated individually in loops with no transaction wrapper.",
+      "impact": "Partial migration leaves DB in inconsistent state on failure.",
+      "recommendation": "Wrap each migration function in prisma.$transaction(); implement chunked transactions."
+    },
+    {
+      "id": "Q1",
+      "severity": "high",
+      "category": "quality",
+      "title": "Zero tests for migration/rollback scripts",
+      "file": "packages/db/",
+      "evidence": "No test files exist in packages/db/.",
+      "impact": "Schema/data changes discovered only in production.",
+      "recommendation": "Add integration tests using test DB; verify counts, rollback, idempotency."
+    },
+    {
+      "id": "O1",
+      "severity": "high",
+      "category": "operations",
+      "title": "No backup/restore procedure",
+      "file": "packages/db/scripts/",
+      "evidence": "Destructive operations with no pre-migration backup script.",
+      "impact": "Failed migration = permanent data loss.",
+      "recommendation": "Create scripts/backup.ts; document restore steps."
+    },
+    {
+      "id": "S4",
+      "severity": "medium",
+      "category": "security",
+      "title": "No migration dry-run mode",
+      "file": "packages/db/scripts/migrate-v1.ts, packages/db/scripts/migrate-v3.ts",
+      "evidence": "Scripts execute writes immediately with no preview or confirmation.",
+      "impact": "Accidental production execution corrupts data.",
+      "recommendation": "Add --dry-run and --confirm flags."
+    },
+    {
+      "id": "A3",
+      "severity": "medium",
+      "category": "architecture",
+      "title": "Status normalization loses semantic information",
+      "file": "packages/db/scripts/migrate-v3.ts",
+      "evidence": "draft, paused, running, archived all map to active.",
+      "impact": "Users cannot distinguish worklow states post-migration.",
+      "recommendation": "Use semantically correct mapping; add PAUSED and COMPLETED to WorkflowStatus enum."
+    },
+    {
+      "id": "A4",
+      "severity": "medium",
+      "category": "architecture",
+      "title": "AgentJob has no relation to Task",
+      "file": "packages/db/prisma/schema.prisma",
+      "evidence": "AgentJob has taskId String but no @relation to Task.",
+      "impact": "Orphaned jobs with invalid task references allowed.",
+      "recommendation": "Add task Task @relation(fields: [taskId], references: [id])."
+    },
+    {
+      "id": "Q2",
+      "severity": "medium",
+      "category": "quality",
+      "title": "Migration errors collected but exit code always 0",
+      "file": "packages/db/scripts/migrate-v1.ts, packages/db/scripts/migrate-v3.ts",
+      "evidence": "Errors logged in array; script exits 0 even with errors.",
+      "impact": "CI/CD reports success despite data loss.",
+      "recommendation": "Exit with non-zero if errors > 0."
+    },
+    {
+      "id": "Q3",
+      "severity": "medium",
+      "category": "quality",
+      "title": "LearningData has no User relation",
+      "file": "packages/db/prisma/schema.prisma",
+      "evidence": "LearningData userId String but no User @relation.",
+      "impact": "Orphaned learning data; GDPR cascade delete missing.",
+      "recommendation": "Add user User @relation(fields: [userId], references: [id])."
+    },
+    {
+      "id": "O2",
+      "severity": "medium",
+      "category": "operations",
+      "title": "Prisma singleton may retain stale connections",
+      "file": "packages/db/src/client.ts",
+      "evidence": "globalForPrisma persists across reloads with no health check or reconnect.",
+      "impact": "Stale connections after DB restart in development.",
+      "recommendation": "Add $connect() health check and reconnection middleware."
+    },
+    {
+      "id": "O3",
+      "severity": "medium",
+      "category": "operations",
+      "title": "No structured logging in migration scripts",
+      "file": "packages/db/scripts/",
+      "evidence": "console.log with emojis; no log levels or file output.",
+      "impact": "Cannot audit or pipe migration logs to monitoring.",
+      "recommendation": "Use pino; add --log-level and --log-file flags."
+    },
+    {
+      "id": "Q4",
+      "severity": "low",
+      "category": "quality",
+      "title": "Inconsistent table mapping across models",
+      "file": "packages/db/prisma/schema.prisma",
+      "evidence": "Some models have @@map to snake_case; others default to PascalCase.",
+      "impact": "Inconsistent DB naming; confusing for raw SQL.",
+      "recommendation": "Add @@map to all models for consistent snake_case."
+    },
+    {
+      "id": "Q5",
+      "severity": "low",
+      "category": "quality",
+      "title": "MailMessage body stored as plaintext",
+      "file": "packages/db/prisma/schema.prisma",
+      "evidence": "body String? has no encryption or size limit.",
+      "impact": "PII exposure; large emails cause performance issues.",
+      "recommendation": "Encrypt PII fields; add size constraint."
+    },
+    {
+      "id": "O4",
+      "severity": "low",
+      "category": "operations",
+      "title": "No migration lock mechanism",
+      "file": "packages/db/scripts/",
+      "evidence": "No advisory lock or mutex for concurrent safety.",
+      "impact": "Concurrent execution could corrupt data.",
+      "recommendation": "Use PostgreSQL advisory lock at migration start."
+    },
+    {
+      "id": "R2",
+      "severity": "low",
+      "category": "requirements",
+      "title": "Schema does not support multi-database",
+      "file": "packages/db/prisma/schema.prisma",
+      "evidence": "datasource hardcoded to PostgreSQL only.",
+      "impact": "Tests require PostgreSQL instance; slower CI.",
+      "recommendation": "Use env(\"DATABASE_PROVIDER\") or maintain separate test schema."
+    }
+  ]
+}
