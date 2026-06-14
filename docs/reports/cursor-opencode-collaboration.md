@@ -23,6 +23,13 @@ Cursor와 opencode가 같은 협업 상태를 읽고, 작업 분담과 핸드오
 - `CURSOR_AGENT_COMMAND`: Cursor 실행 클라이언트 경로 또는 명령
 - `OPENCODE_COMMAND`: opencode 실행 클라이언트 경로 또는 명령
 
+## Command Routing
+
+- 상세 명령표는 [`codex-cli-command-reference.md`](codex-cli-command-reference.md)와 [`scripts/codex-cli-command-routing.md`](../../scripts/codex-cli-command-routing.md)를 우선 참조한다.
+- 현재 workspace 기준 `opencode`는 실제 실행 가능한 agent command이고, `cursor`는 editor launcher로 취급한다.
+- `cursor agent`가 필요한 플로우는 이 repo의 현재 CLI 조합으로는 직접 실행할 수 없다.
+- 따라서 code generation / implementation은 `opencode`, navigation / file opening은 `cursor`로 분리한다.
+
 ## Approval Gate
 - 위험 액션 분류는 `delete`, `send`, `deploy`, `external-share`로 고정한다.
 - 승인 요청은 `sessionId`, `assignmentId`, `requestedBy`, `actionType`을 반드시 포함한다.

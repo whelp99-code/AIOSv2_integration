@@ -1,0 +1,24 @@
+{
+  "prId": "PR-PHASE-B-2-INFRASTRUCTURE-ADAPTERS",
+  "phase": "Phase B-2",
+  "title": "feat(infrastructure): 인프라 어댑터 실구현 — LLM, Memory, MCP, Sandbox, RAG, Monitoring, Workflow",
+  "sourceBranch": "phase-b-2/implementation",
+  "targetBranch": "main",
+  "author": "Hermes Agent",
+  "reviewers": ["Security", "Architecture", "Quality", "Operations", "Requirements"],
+  "status": "APPROVED",
+  "createdAt": "2026-06-14",
+  "reviewedAt": "2026-06-14",
+  "summary": "Phase B-2 인프라 어댑터 구현 완료. 샌드박스 보안(command injection, path traversal), MCP 인증, 영속성 추가, 테스트 통과 및 Red Team 승인.",
+  "filesChanged": 21,
+  "testsPassed": 66,
+  "typeCheck": "passed",
+  "securityScan": "passed",
+  "approval": {
+    "security": "APPROVED",
+    "architecture": "APPROVED",
+    "quality": "APPROVED",
+    "operations": "APPROVED",
+    "requirements": "APPROVED"
+  }
+}

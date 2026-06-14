@@ -1,0 +1,29 @@
+{
+  "phase": "B-3",
+  "pr_number": 1,
+  "status": "open",
+  "title": "B-3: 완료 domain·application·tRPC API 레이어",
+  "author": "Hermes subagent (dev-loop-process)",
+  "base": "main",
+  "head": "phase-b-3/domain-application-api",
+  "files_changed": 20,
+  "additions": 4200,
+  "deletions": 3100,
+  "reviewers": ["HermesAgent", "Human Reviewer"],
+  "ci": {
+    "status": "healthy",
+    "tests": "204/204",
+    "lint": "pass",
+    "build": "pass"
+  },
+  "linked_issues": [],
+  "labels": [
+    "track-b",
+    "phase-b-3",
+    "type-safe",
+    "trpc",
+    "domain-driver"
+  ],
+  "description_path": "pr-description.md",
+  "created_at": "2026-06-14T00:00:00Z"
+}

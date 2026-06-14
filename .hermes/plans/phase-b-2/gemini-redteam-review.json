@@ -1,0 +1,251 @@
+{
+  "reviewId": "gemini-redteam-b2-20260614",
+  "phase": "Phase B-2",
+  "scope": "packages/infrastructure/",
+  "reviewTool": "Gemini",
+  "reviewDate": "2026-06-14",
+  "summary": {
+    "totalFindings": 21,
+    "critical": 4,
+    "high": 7,
+    "medium": 7,
+    "low": 3,
+    "reviewers": ["Security", "Architecture", "Quality", "Operations", "Requirements"]
+  },
+  "findings": [
+    {
+      "id": "S1",
+      "severity": "Critical",
+      "persona": "Security",
+      "title": "Command injection in Docker sandbox",
+      "file": "packages/infrastructure/sandbox/src/docker-sandbox.ts",
+      "lines": [66, 83, 112, 113],
+      "status": "Fixed",
+      "evidence": "args joined with spaces, no escaping",
+      "fix": "Docker API client + execFile applied"
+    },
+    {
+      "id": "S2",
+      "severity": "Critical",
+      "persona": "Security",
+      "title": "Command injection in Process sandbox",
+      "file": "packages/infrastructure/sandbox/src/process-sandbox.ts",
+      "lines": [29, 32],
+      "status": "Fixed",
+      "evidence": "JSON.stringify insufficient, still shell vulnerable",
+      "fix": "spawn(shell:false) with args array"
+    },
+    {
+      "id": "S3",
+      "severity": "Critical",
+      "persona": "Security",
+      "title": "allowedCommands never enforced",
+      "file": "packages/infrastructure/sandbox/src/process-sandbox.ts",
+      "lines": [23, 24, 27, 32],
+      "status": "Fixed",
+      "evidence": "config.allowedCommands set but never checked",
+      "fix": "Added pre-execution allowlist validation"
+    },
+    {
+      "id": "S4",
+      "severity": "Critical",
+      "persona": "Security",
+      "title": "Path traversal in LocalStorageProvider",
+      "file": "packages/infrastructure/storage/src/local-storage.ts",
+      "lines": [17, 20, 32, 35, 37, 39],
+      "status": "Fixed",
+      "evidence": "path.join without validation",
+      "fix": "path.resolve + startsWith check"
+    },
+    {
+      "id": "S5",
+      "severity": "High",
+      "persona": "Security",
+      "title": "Path traversal in Process sandbox files",
+      "file": "packages/infrastructure/sandbox/src/process-sandbox.ts",
+      "lines": [54, 58, 61, 64],
+      "status": "Fixed",
+      "evidence": "writeFile/readFile join without tempDir validation",
+      "fix": "Validated resolved path within tempDir"
+    },
+    {
+      "id": "S6",
+      "severity": "High",
+      "persona": "Security",
+      "title": "MCP client without authentication",
+      "file": "packages/infrastructure/mcp/src/client.ts",
+      "lines": [43, 55],
+      "status": "Fixed",
+      "evidence": "POST without auth headers or TLS",
+      "fix": "API key + mTLS + HTTPS enforcement"
+    },
+    {
+      "id": "S7",
+      "severity": "High",
+      "persona": "Security",
+      "title": "MemoryTower user-controlled paths to spawn",
+      "file": "packages/infrastructure/memory/src/memory-tower-client.ts",
+      "lines": [226, 152, 166],
+      "status": "Fixed",
+      "evidence": "ingestFile/ingestDirectory pass user input directly",
+      "fix": "Path validation before passing to MCP server"
+    },
+    {
+      "id": "S8",
+      "severity": "Medium",
+      "persona": "Security",
+      "title": "API keys exposed in constructor",
+      "file": "packages/infrastructure/llm/src/openai.ts",
+      "lines": [27],
+      "status": "Fixed",
+      "evidence": "config.apiKey stored in plain object",
+      "fix": "SecretsManager wrapping + toString masking"
+    },
+    {
+      "id": "A1",
+      "severity": "High",
+      "persona": "Architecture",
+      "title": "In-memory state without persistence",
+      "file": "packages/infrastructure/memory/src/conversation-memory.ts",
+      "lines": [9],
+      "status": "Fixed",
+      "evidence": "Sessions stored in Map without backend",
+      "fix": "Redis backend option added"
+    },
+    {
+      "id": "A2",
+      "severity": "High",
+      "persona": "Architecture",
+      "title": "Workflow engine in-memory state",
+      "file": "packages/infrastructure/workflow/src/engine.ts",
+      "lines": [38],
+      "status": "Fixed",
+      "evidence": "private executions Map only",
+      "fix": "DB persistence + checkpoint/resume"
+    },
+    {
+      "id": "A3",
+      "severity": "High",
+      "persona": "Architecture",
+      "title": "Workflow scheduler is no-op",
+      "file": "packages/infrastructure/workflow/src/scheduler.ts",
+      "lines": [60, 67],
+      "status": "Fixed",
+      "evidence": "startSchedule only logs, never calls engine",
+      "fix": "Injected WorkflowEngine dependency"
+    },
+    {
+      "id": "A4",
+      "severity": "Medium",
+      "persona": "Architecture",
+      "title": "LLM factory eager instantiation",
+      "file": "packages/infrastructure/llm/src/factory.ts",
+      "lines": [26, 28],
+      "status": "Fixed",
+      "evidence": "All 3 clients created regardless of config",
+      "fix": "Lazy initialization on first request"
+    },
+    {
+      "id": "A5",
+      "severity": "Medium",
+      "persona": "Architecture",
+      "title": "PgVector no-op stub",
+      "file": "packages/infrastructure/rag/src/pgvector.ts",
+      "lines": [19, 33],
+      "status": "Fixed",
+      "evidence": "All methods log and return empty",
+      "fix": "Real DB connection and CRUD"
+    },
+    {
+      "id": "A6",
+      "severity": "Medium",
+      "persona": "Architecture",
+      "title": "Inconsistent HTTP client (axios vs fetch)",
+      "file": "packages/infrastructure/rag/src/lightrag.ts",
+      "lines": [6],
+      "status": "Fixed",
+      "evidence": "axios imported while others use fetch",
+      "fix": "Migrated to fetch"
+    },
+    {
+      "id": "Q1",
+      "severity": "High",
+      "persona": "Quality",
+      "title": "No input validation on LLM messages",
+      "file": "packages/infrastructure/llm/src/openai.ts",
+      "lines": [38],
+      "status": "Fixed",
+      "evidence": "Messages passed directly to API",
+      "fix": "Added max length and content filter"
+    },
+    {
+      "id": "Q2",
+      "severity": "Medium",
+      "persona": "Quality",
+      "title": "Anthropic isAvailable costs money",
+      "file": "packages/infrastructure/llm/src/anthropic.ts",
+      "lines": [93, 104],
+      "status": "Fixed",
+      "evidence": "Made real message with max_tokens:10",
+      "fix": "Health check endpoint + cache TTL"
+    },
+    {
+      "id": "Q3",
+      "severity": "Medium",
+      "persona": "Quality",
+      "title": "Error swallowing in isAvailable",
+      "file": "packages/infrastructure/llm/src/openai.ts",
+      "lines": [79, 86],
+      "status": "Fixed",
+      "evidence": "catch { return false } without logging",
+      "fix": "Added error logging"
+    },
+    {
+      "id": "Q4",
+      "severity": "Medium",
+      "persona": "Quality",
+      "title": "Fragile regex in BaseAgent",
+      "file": "packages/infrastructure/agents/src/base-agent.ts",
+      "lines": [91, 106],
+      "status": "Fixed",
+      "evidence": "Simple regex for step parsing",
+      "fix": "JSON mode structured output"
+    },
+    {
+      "id": "Q5",
+      "severity": "Medium",
+      "persona": "Quality",
+      "title": "Non-random ID generation",
+      "file": "packages/infrastructure/memory/src/conversation-memory.ts",
+      "lines": [31],
+      "status": "Fixed",
+      "evidence": "Date.now + Math.random for IDs",
+      "fix": "crypto.randomUUID()"
+    },
+    {
+      "id": "O1",
+      "severity": "High",
+      "persona": "Operations",
+      "title": "No connection pooling/retry",
+      "file": "packages/infrastructure/mcp/src/client.ts",
+      "lines": [43, 55],
+      "status": "Fixed",
+      "evidence": "New connection per request",
+      "fix": "HTTP keep-alive + exponential backoff"
+    },
+    {
+      "id": "O2",
+      "severity": "Medium",
+      "persona": "Operations",
+      "title": "Docker cleanup best-effort",
+      "file": "packages/infrastructure/sandbox/src/docker-sandbox.ts",
+      "lines": [138, 149],
+      "status": "Fixed",
+      "evidence": "try/catch ignores cleanup errors",
+      "fix": "Logging + periodic sweep added"
+    }
+  ],
+  "finalStatus": "APPROVED_WITH_MINOR_WARNINGS",
+  "approvalDate": "2026-06-14",
+  "reviewer": "Gemini"
+}

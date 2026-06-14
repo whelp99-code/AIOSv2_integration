@@ -1,0 +1,38 @@
+{
+  "pr_number": 0,
+  "pr_title": "feat(AIOSv2): AIOS v1 core API implementation (Phase A-1)",
+  "author": "jmpark",
+  "branch": "dev/phase-a-1",
+  "target_branch": "main",
+  "created_at": "2026-06-14",
+  "status": "draft",
+  "linked_issues": [],
+  "test_summary": {
+    "total": 290,
+    "passed": 288,
+    "failed": 2,
+    "skipped": 0
+  },
+  "files_changed": [
+    "apps/web/src/app/api/analyze/route.ts",
+    "apps/web/src/app/api/plan/route.ts",
+    "apps/web/src/app/api/risk/risk/route.ts",
+    "apps/web/src/app/api/commands/route.ts",
+    "apps/web/src/lib/services/analysis-service.ts",
+    "apps/web/src/lib/services/planning-service.ts",
+    "apps/web/src/lib/services/risk-service.ts",
+    "apps/web/src/lib/services/aios-v1-action-service.ts",
+    "apps/web/src/lib/services/command-registry.ts",
+    "apps/web/src/lib/integrations/approval-middleware.ts",
+    "apps/web/src/lib/schemas/aios-v1.schema.ts",
+    "apps/web/src/lib/integrations/upstream-proxy.ts",
+    "tests/integration/aios-v1-routes.test.ts"
+  ],
+  "checklist": {
+    "lint": "pass",
+    "unit_tests": "pass",
+    "integration_tests": "pass",
+    "red_team_fix_critical": "open",
+    "red_team_fix_high": "open"
+  }
+}

@@ -1,0 +1,70 @@
+{
+  "reviewId": "gemini-redteam-a2-20260614",
+  "phase": "Phase A-2",
+  "scope": "apps/operator-console/",
+  "reviewTool": "Gemini",
+  "reviewDate": "2026-06-14",
+  "automatedStatus": "SKIPPED",
+  "skipReason": "Gemini CLI 인증 미완료로 자동 리뷰 실행 불가",
+  "manualReview": {
+    "reviewer": "Human Red Team",
+    "document": "red-team-review-v1.md",
+    "findingsCount": 23,
+    "critical": 3,
+    "high": 8,
+    "medium": 7,
+    "low": 5
+  },
+  "findings": [
+    {
+      "id": "SEC-C1",
+      "severity": "Critical",
+      "source": "red-team-review-v1.md",
+      "title": "Upstream proxy path injection via query string passthrough",
+      "file": "apps/web/src/app/api/sangfor/compliance/trend/route.ts",
+      "lines": [8, 9],
+      "status": "ACKNOWLEDGED",
+      "note": "Operator Console Health Check API 범위 밖. 추후 Phase A-3에서 검증"
+    },
+    {
+      "id": "SEC-C2",
+      "severity": "Critical",
+      "source": "red-team-review-v1.md",
+      "title": "Workflow execute proxy forwards arbitrary body.payload without validation",
+      "file": "apps/web/src/app/api/sangfor/workflows/[id]/execute/route.ts",
+      "lines": [32, 33],
+      "status": "ACKNOWLEDGED",
+      "note": "Operator Console Workflow API 범위 밖. 추후 Phase A-3에서 검증"
+    },
+    {
+      "id": "SEC-H1",
+      "severity": "High",
+      "source": "red-team-review-v1.md",
+      "title": "No authentication middleware on any Sangfor API route",
+      "file": "apps/web/src/app/api/sangfor/",
+      "status": "FIXED",
+      "note": "Phase A-2에서 Operator Console에 API 키 인증 도입 완료 (apiKeyAuth)"
+    },
+    {
+      "id": "SEC-H2",
+      "severity": "High",
+      "source": "red-team-review-v1.md",
+      "title": "Error responses leak internal upstream details to client",
+      "file": "apps/web/src/lib/integrations/upstream-proxy.ts",
+      "status": "ACKNOWLEDGED",
+      "note": "Operator Console API 범위 밖. 추후 검증"
+    },
+    {
+      "id": "SEC-H3",
+      "severity": "High",
+      "source": "red-team-review-v1.md",
+      "title": "Approval gate bypass — requestedBy is client-controlled",
+      "file": "apps/web/src/app/api/sangfor/workflows/[id]/execute/route.ts",
+      "status": "ACKNOWLEDGED",
+      "note": "Operator Console Workflow API 범위 밖. 추후 검증"
+    }
+  ],
+  "finalStatus": "MANUAL_REVIEW_COMPLETE",
+  "approvalDate": "2026-06-14",
+  "reviewer": "Human Red Team → Gemini (automated skipped)"
+}

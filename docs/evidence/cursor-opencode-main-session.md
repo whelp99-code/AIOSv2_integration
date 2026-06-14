@@ -52,6 +52,12 @@ Cursor와 opencode가 같은 상태를 읽고 서로 넘겨받으며 AIOS v1, F-
 - assignment-bootstrap-plan | external-share | approved | .aios/context/collaboration-state.json
 - assignment-bootstrap-plan | deploy | approved | staging environment
 
+## codex cli routing note
+
+- `opencode` is the implementation path for agent-backed code generation in this workspace.
+- `cursor` is the editor launcher path only; there is no `cursor agent` CLI available here.
+- The shared collaboration scripts under `package.json` map to `scripts/dispatch-opencode-*.ts` and `scripts/run-collaboration-contract.ts`.
+
 ## failures and retry result
 
 - Codex review (commit `0c90b6e`, 2026-06-13): `pnpm test`, `pnpm lint`, `pnpm format:check` failed — recorded as **Codex review found blockers**

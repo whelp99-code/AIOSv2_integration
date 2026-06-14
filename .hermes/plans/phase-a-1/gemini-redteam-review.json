@@ -1,0 +1,147 @@
+{
+  "review_id": "phase-a-1-redteam-v1",
+  "reviewer": "Gemini Red Team",
+  "review_date": "2026-06-14",
+  "phase": "A-1",
+  "target": "AIOS v1 핵심 API (analyze, plan, risk, commands)",
+  "summary": {
+    "critical": 2,
+    "high": 13,
+    "medium": 15,
+    "low": 4,
+    "total": 34
+  },
+  "findings": [
+    {
+      "id": "S-C1",
+      "severity": "critical",
+      "category": "security",
+      "title": "GET 엔드포인트 인증/인가 완전 부재",
+      "files": [
+        "apps/web/src/app/api/analyze/route.ts",
+        "apps/web/src/app/api/plan/route.ts",
+        "apps/web/src/app/api/risk/risk/route.ts"
+      ],
+      "status": "open",
+      "fix_plan": "createGatedHandler 적용 또는 세션 인증 미들웨어 추가"
+    },
+    {
+      "id": "S-C2",
+      "severity": "critical",
+      "category": "security",
+      "title": "requestedBy 기본값 하드코딩 — 사용자 위장 가능",
+      "files": [
+        "apps/web/src/lib/integrations/approval-middleware.ts"
+      ],
+      "status": "open",
+      "fix_plan": "서버사이드 세션에서 사용자 ID 추출"
+    },
+    {
+      "id": "S-H1",
+      "severity": "high",
+      "category": "security",
+      "title": "개발 모드 승인 게이트 완전 우회 (NODE_ENV 의존)",
+      "files": [
+        "apps/web/src/lib/integrations/approval-middleware.ts"
+      ],
+      "status": "open",
+      "fix_plan": "명시적 플래그(APPROVAL_GATE_ENABLED) 사용"
+    },
+    {
+      "id": "S-H2",
+      "severity": "high",
+      "category": "security",
+      "title": "CommandExecuteRequestSchema.params가 임의 파라미터 허용",
+      "files": [
+        "apps/web/src/lib/schemas/aios-v1.schema.ts",
+        "apps/web/src/lib/services/command-registry.ts"
+      ],
+      "status": "open",
+      "fix_plan": "명령어별 params 스키마 분리 및 검증"
+    },
+    {
+      "id": "S-H3",
+      "severity": "high",
+      "category": "security",
+      "title": "에러 메시지에 내부 정보 노출",
+      "files": [
+        "apps/web/src/lib/services/command-registry.ts",
+        "apps/web/src/lib/integrations/approval-middleware.ts"
+      ],
+      "status": "open",
+      "fix_plan": "프로덕션에서 일반화된 에러 메시지 반환"
+    },
+    {
+      "id": "S-H4",
+      "severity": "high",
+      "category": "security",
+      "title": "aiosV1Url이 응답에 직접 노출",
+      "files": [
+        "apps/web/src/lib/services/analysis-service.ts",
+        "apps/web/src/lib/services/planning-service.ts",
+        "apps/web/src/lib/services/risk-service.ts"
+      ],
+      "status": "open",
+      "fix_plan": "프로덕션 응답에서 aiosV1Url 제거"
+    },
+    {
+      "id": "A-H1",
+      "severity": "high",
+      "category": "architecture",
+      "title": "이중 멱등성 캐시 — 중복 및 불일치 위험",
+      "files": [
+        "apps/web/src/lib/integrations/approval-middleware.ts",
+        "apps/web/src/lib/services/aios-v1-action-service.ts"
+      ],
+      "status": "open",
+      "fix_plan": "멱등성 캐시를 한 곳에서만 관리 (미들웨어 또는 서비스)"
+    },
+    {
+      "id": "A-H2",
+      "severity": "high",
+      "category": "architecture",
+      "title": "NEXT_PUBLIC_ 접두사 feature flag — 빌드 타임 상수",
+      "files": [
+        "apps/web/src/lib/services/feature-flag.ts"
+      ],
+      "status": "open",
+      "fix_plan": "서버사이드 전용 환경 변수로 변경"
+    },
+    {
+      "id": "Q-H2",
+      "severity": "high",
+      "category": "quality",
+      "title": "AnalyzeResponseSchema.not_found status — enum 불일치",
+      "files": [
+        "apps/web/src/lib/services/analysis-service.ts",
+        "apps/web/src/lib/schemas/aios-v1.schema.ts"
+      ],
+      "status": "open",
+      "fix_plan": "not_found를 status enum에 추가하거나 별도 에러 응답 스키마 정의"
+    },
+    {
+      "id": "O-H2",
+      "severity": "high",
+      "category": "operations",
+      "title": "장애 시 fallback 전략 — 항상 성공 응답 반환",
+      "files": [
+        "apps/web/src/lib/services/aios-v1-action-service.ts",
+        "apps/web/src/lib/services/analysis-service.ts"
+      ],
+      "status": "open",
+      "fix_plan": "fallback 응답에 status: degraded 또는 warning 필드 추가"
+    },
+    {
+      "id": "R-H1",
+      "severity": "high",
+      "category": "requirements",
+      "title": "Phase A-1 범위에 포함되지 않은 명령어 노출",
+      "files": [
+        "apps/web/src/lib/services/command-registry.ts"
+      ],
+      "status": "open",
+      "fix_plan": "customers/partners/workflows 명령어 제거 또는 disabled 플래그 추가"
+    }
+  ],
+  "reviewer_signature": "Gemini Red Team v1.0"
+}
