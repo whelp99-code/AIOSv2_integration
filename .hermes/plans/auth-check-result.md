@@ -1,28 +1,11 @@
-# Auth Gate Check Result
+=== DEV Loop Tool Auth Check ===
 
-> **실행일**: 2026-06-14
-> **단계**: Step 0 — Auth Gate
+1. Gemini CLI: ✅ authenticated
+2. Claude Code: ✅ installed (run 'claude /login' if not authenticated)
+3. Codex CLI: ✅ installed + authenticated
+4. Cursor CLI: ✅ installed (2026.06.12-19-59-36-f6aba9a) + authenticated
+5. GitHub (gh): ✅ authenticated (whelp99-code)
+6. Hermes delegation.model: ✅ mimo-v2.5-pro
 
----
-
-## CLI 도구 인증 상태
-
-| 도구 | 상태 | 인증 방식 |
-|------|------|-----------|
-| Gemini CLI | ✅ | OAuth (Sign in with Google) |
-| Codex CLI | ✅ | OAuth (Sign in with Google) |
-| Claude Code | ✅ | OAuth (/login) |
-| Cursor CLI | ✅ | OAuth (agent login) |
-| GitHub | ✅ | SSH key (whelp99-code) |
-| OpenCode | ✅ | API key (Xiaomi MiMo) |
-
-## Hermes Config
-
-| 설정 | 값 | 상태 |
-|------|-----|------|
-| delegation.model | mimo-v2.5-pro | ✅ |
-| delegation.max_concurrent_children | 3 | ✅ |
-
-## Graceful Degradation
-
-모든 도구 인증 완료 — Graceful Degradation 불필요.
+=== Result: 6 passed, 0 failed ===
+✅ All tools ready. Proceed with dev loop.

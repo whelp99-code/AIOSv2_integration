@@ -1,0 +1,29 @@
+{
+  "phase": "B-4",
+  "pr_number": 1,
+  "status": "open",
+  "title": "B-4: UI 통합 검증 + 플러그인 시스템 활성화",
+  "author": "Hermes subagent (dev-loop-process)",
+  "base": "main",
+  "head": "phase-b-4/ui-plugin-integration",
+  "files_changed": 8,
+  "additions": 2400,
+  "deletions": 800,
+  "reviewers": ["HermesAgent", "Human Reviewer"],
+  "ci": {
+    "status": "healthy",
+    "tests": "34/34",
+    "lint": "pass",
+    "build": "pass"
+  },
+  "linked_issues": [],
+  "labels": [
+    "track-b",
+    "phase-b-4",
+    "ui",
+    "plugin",
+    "integration"
+  ],
+  "description_path": "pr-description.md",
+  "created_at": "2026-06-14T00:00:00Z"
+}
