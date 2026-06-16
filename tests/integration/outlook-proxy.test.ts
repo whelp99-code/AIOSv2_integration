@@ -224,7 +224,9 @@ describe("mail portal block registry", () => {
   it("resolvePortalBlock fetches entity candidates from portal endpoint", async () => {
     mockFetchMailIntelligence.mockResolvedValueOnce({
       response: { ok: true, status: 200 },
-      data: { candidates: [{ domain: "customer.example", entityRole: "customer" }] },
+      data: {
+        candidates: [{ domain: "customer.example", entityRole: "customer" }],
+      },
     });
 
     const data = await resolvePortalBlock("mail.entityCandidate");

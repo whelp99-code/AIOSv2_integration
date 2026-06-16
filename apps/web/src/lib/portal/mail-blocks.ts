@@ -95,7 +95,9 @@ export async function resolvePortalBlock<T = unknown>(
 }
 
 function mappingFor(blockId: PortalBlockId) {
-  const row = MAIL_PORTAL_API_MAPPING.find((entry) => entry.blockId === blockId);
+  const row = MAIL_PORTAL_API_MAPPING.find(
+    (entry) => entry.blockId === blockId,
+  );
   if (!row) {
     throw new Error(`Missing API mapping for portal block: ${blockId}`);
   }
