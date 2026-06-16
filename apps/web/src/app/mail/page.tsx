@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react'
 
-type HubTab = 'inbox' | 'candidates' | 'insights' | 'attachments'
+type HubTab = 'inbox' | 'candidates' | 'insights' | 'attachments' | 'entities' | 'calendar'
 
 interface ThreadGroup {
   key: string
@@ -71,6 +71,32 @@ interface InsightThread {
   participantDomains?: string[]
 }
 
+interface EntityCandidate {
+  domain?: string
+  email?: string
+  candidateName?: string
+  entityRole?: string
+  confidence?: number
+  messageCount?: number
+  sampleSubjects?: string[]
+}
+
+interface CalendarHint {
+  title?: string
+  when?: string
+  owner?: string
+  lane?: string
+  messageId?: string
+}
+
+interface MailAccount {
+  id: string
+  email?: string
+  displayName?: string
+  isActive?: boolean
+  connected?: boolean
+}
+
 export default function MailPage() {
   const [hubTab, setHubTab] = useState<HubTab>('inbox')
   const [analyze, setAnalyze] = useState<AnalyzePayload | null>(null)
@@ -78,11 +104,24 @@ export default function MailPage() {
   const [candidates, setCandidates] = useState<TaskCandidate[]>([])
   const [insights, setInsights] = useState<InsightThread[]>([])
   const [attachments, setAttachments] = useState<AttachmentRef[]>([])
+  const [entityCandidates, setEntityCandidates] = useState<EntityCandidate[]>([])
+  const [calendarHints, setCalendarHints] = useState<CalendarHint[]>([])
+  const [accounts, setAccounts] = useState<MailAccount[]>([])
+  const [activeAccountId, setActiveAccountId] = useState<string | null>(null)
+  const [switchingAccount, setSwitchingAccount] = useState(false)
   const [selectedThread, setSelectedThread] = useState<ThreadGroup | null>(null)
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [pendingApproval, setPendingApproval] = useState<string | null>(null)
+
+  const fetchAccounts = useCallback(async () => {
+    const res = await fetch('/api/proxy/outlook/accounts')
+    if (!res.ok) return
+    const data = await res.json()
+    setAccounts(data.accounts || [])
+    setActiveAccountId(data.activeAccountId || null)
+  }, [])
 
   const fetchInbox = useCallback(async () => {
     const [statusRes, analyzeRes] = await Promise.all([
@@ -97,7 +136,8 @@ export default function MailPage() {
     } else {
       setError('메일 분석을 불러오지 못했습니다.')
     }
-  }, [])
+    await fetchAccounts()
+  }, [fetchAccounts])
 
   const fetchTabData = useCallback(async (tab: HubTab) => {
     if (tab === 'inbox') {
@@ -127,6 +167,22 @@ export default function MailPage() {
         const data = await res.json()
         setAttachments(data.attachments || data.entries || [])
       }
+      return
+    }
+    if (tab === 'entities') {
+      const res = await fetch('/api/proxy/outlook/entity-candidates')
+      if (res.ok) {
+        const data = await res.json()
+        setEntityCandidates(data.candidates || [])
+      }
+      return
+    }
+    if (tab === 'calendar') {
+      const res = await fetch('/api/proxy/outlook/calendar-hints')
+      if (res.ok) {
+        const data = await res.json()
+        setCalendarHints(data.calendar || [])
+      }
     }
   }, [fetchInbox])
 
@@ -154,6 +210,26 @@ export default function MailPage() {
         .map((id) => messagesById.get(id))
         .filter(Boolean) as AnalyzeMessage[]
     : []
+
+  async function switchAccount(accountId: string) {
+    if (!accountId || accountId === activeAccountId || switchingAccount) return
+    setSwitchingAccount(true)
+    try {
+      const res = await fetch('/api/proxy/outlook/accounts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ accountId }),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setActiveAccountId(data.activeAccountId || accountId)
+        if (data.status) setStatus(data.status)
+        await fetchTabData(hubTab)
+      }
+    } finally {
+      setSwitchingAccount(false)
+    }
+  }
 
   async function requestSendDraft() {
     setPendingApproval('발송 승인 요청 중...')
@@ -214,13 +290,33 @@ export default function MailPage() {
               {refreshing ? '...' : '새로고침'}
             </button>
           </div>
+          {accounts.length > 1 && (
+            <div style={{ marginTop: 10 }}>
+              <label style={{ fontSize: 12, color: '#6b7280', marginRight: 8 }}>계정</label>
+              <select
+                value={activeAccountId || ''}
+                disabled={switchingAccount}
+                onChange={(e) => switchAccount(e.target.value)}
+                style={{ fontSize: 13, padding: '4px 8px', borderRadius: 6, border: '1px solid #e5e7eb' }}
+              >
+                {accounts.map((account) => (
+                  <option key={account.id} value={account.id}>
+                    {account.displayName || account.email || account.id}
+                    {account.connected === false ? ' (미연결)' : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
-            {(['inbox', 'candidates', 'insights', 'attachments'] as HubTab[]).map((tab) => (
+            {(['inbox', 'candidates', 'insights', 'attachments', 'entities', 'calendar'] as HubTab[]).map((tab) => (
               <button key={tab} type="button" style={tabStyle(tab)} onClick={() => setHubTab(tab)}>
                 {tab === 'inbox' && 'Inbox'}
                 {tab === 'candidates' && 'Candidates'}
                 {tab === 'insights' && 'Insights'}
                 {tab === 'attachments' && '첨부'}
+                {tab === 'entities' && 'Entities'}
+                {tab === 'calendar' && 'Calendar'}
               </button>
             ))}
           </div>
@@ -308,6 +404,44 @@ export default function MailPage() {
                   <div style={{ fontWeight: 600 }}>{a.name || a.id}</div>
                   <div style={{ fontSize: 12, color: '#6b7280' }}>
                     {[a.fromAddress, a.subject, a.category].filter(Boolean).join(' · ')}
+                  </div>
+                </div>
+              ))
+            ))}
+
+          {hubTab === 'entities' &&
+            (entityCandidates.length === 0 ? (
+              <p style={{ padding: 24, color: '#6b7280' }}>엔티티 후보가 없습니다.</p>
+            ) : (
+              entityCandidates.map((entity, i) => (
+                <div key={entity.domain || entity.email || i} style={{ padding: '14px 20px', borderBottom: '1px solid #f3f4f6' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+                    <div style={{ fontWeight: 600 }}>{entity.candidateName || entity.domain}</div>
+                    <span style={{ fontSize: 11, color: '#6b7280' }}>{entity.entityRole || 'customer'}</span>
+                  </div>
+                  <div style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>
+                    {entity.domain || entity.email}
+                    {entity.confidence != null ? ` · ${Math.round(entity.confidence * 100)}%` : ''}
+                    {entity.messageCount ? ` · ${entity.messageCount}통` : ''}
+                  </div>
+                  {(entity.sampleSubjects || []).slice(0, 2).map((subject, subjectIndex) => (
+                    <div key={`${entity.domain}-subject-${subjectIndex}`} style={{ fontSize: 11, color: '#374151', marginTop: 4 }}>
+                      • {subject}
+                    </div>
+                  ))}
+                </div>
+              ))
+            ))}
+
+          {hubTab === 'calendar' &&
+            (calendarHints.length === 0 ? (
+              <p style={{ padding: 24, color: '#6b7280' }}>일정 힌트가 없습니다.</p>
+            ) : (
+              calendarHints.map((item, i) => (
+                <div key={item.messageId || i} style={{ padding: '14px 20px', borderBottom: '1px solid #f3f4f6' }}>
+                  <div style={{ fontWeight: 600 }}>{item.title || '일정'}</div>
+                  <div style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>
+                    {[item.when, item.owner, item.lane].filter(Boolean).join(' · ')}
                   </div>
                 </div>
               ))
