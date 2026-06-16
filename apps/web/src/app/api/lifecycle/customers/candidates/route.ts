@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import {
-  createCustomerOrPartnerCandidateFromMail,
+  createCustomerOrPartnerCandidateWithPersistence,
+} from "@/lib/lifecycle/lifecycle-mutations";
+import {
   jsonError,
   jsonOk,
   parseJsonBody,
@@ -36,7 +38,7 @@ export async function POST(request: Request) {
       return jsonError("entityRole and sourceThreadKey are required");
     }
 
-    const result = createCustomerOrPartnerCandidateFromMail({
+    const result = await createCustomerOrPartnerCandidateWithPersistence({
       entityRole: body.entityRole,
       domain: body.domain,
       candidateName: body.candidateName,

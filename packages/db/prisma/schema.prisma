@@ -363,6 +363,26 @@ model KanbanCard {
   @@map("kanban_cards")
 }
 
+// Lifecycle workflow persistence (Mail → CRM → Opportunity → Project → Maintenance)
+model LifecycleRecord {
+  id              String   @id @default(cuid())
+  entityType      String
+  status          String
+  payload         Json
+  domain          String?
+  sourceThreadKey String?
+  projectId       String?
+  userId          String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([entityType])
+  @@index([domain])
+  @@index([sourceThreadKey])
+  @@index([projectId])
+  @@map("lifecycle_records")
+}
+
 // Enums
 enum Role {
   USER

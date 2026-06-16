@@ -1,10 +1,5 @@
-import {
-  createCustomerProductFromProject,
-  getLifecycleStore,
-  jsonError,
-  jsonOk,
-  parseJsonBody,
-} from "@/lib/lifecycle/lifecycle-api";
+import { createCustomerProductWithPersistence } from "@/lib/lifecycle/lifecycle-mutations";
+import { getLifecycleStore, jsonError, jsonOk, parseJsonBody } from "@/lib/lifecycle/lifecycle-api";
 
 export async function GET() {
   const store = getLifecycleStore();
@@ -25,7 +20,7 @@ export async function POST(request: Request) {
       return jsonError("projectId, customerId, and productName are required");
     }
 
-    const product = createCustomerProductFromProject({
+    const product = await createCustomerProductWithPersistence({
       projectId: body.projectId,
       customerId: body.customerId,
       productName: body.productName,

@@ -1,10 +1,9 @@
+import { createAgentTaskWithPersistence } from "@/lib/lifecycle/lifecycle-mutations";
 import {
-  createAgentTask,
   getLifecycleStore,
   jsonError,
   jsonOk,
   parseJsonBody,
-  startLifecycleWorkflowRun,
 } from "@/lib/lifecycle/lifecycle-api";
 import type { AgentTaskType } from "@aios/domain";
 
@@ -33,7 +32,6 @@ export async function POST(request: Request) {
       input?: Record<string, unknown>;
       requestedBy?: string;
       startRun?: boolean;
-      source?: "f-aios-v3" | "mcp-workflow" | "vibe-coding" | "local";
       upstreamAvailable?: boolean;
     }>(request);
 
@@ -44,25 +42,20 @@ export async function POST(request: Request) {
       return jsonError(`Invalid agent task type: ${body.type}`);
     }
 
-    const task = createAgentTask({
-      type: body.type,
-      targetRef: body.targetRef,
-      input: body.input,
-      requestedBy: body.requestedBy || "lifecycle-api",
-    });
-
-    let workflowRun = null;
-    if (body.startRun) {
-      workflowRun = startLifecycleWorkflowRun({
-        agentTaskId: task.id,
-        source: body.source || "f-aios-v3",
-        upstreamRef: `/api/aios-v3/workflows/run`,
+    const result = await createAgentTaskWithPersistence(
+      {
+        type: body.type,
+        targetRef: body.targetRef,
+        input: body.input,
         requestedBy: body.requestedBy || "lifecycle-api",
+      },
+      {
+        startRun: body.startRun,
         upstreamAvailable: body.upstreamAvailable,
-      });
-    }
+      },
+    );
 
-    return jsonOk({ agentTask: task, workflowRun }, 201);
+    return jsonOk(result, 201);
   } catch (error) {
     return jsonError(
       error instanceof Error ? error.message : "Agent task failed",

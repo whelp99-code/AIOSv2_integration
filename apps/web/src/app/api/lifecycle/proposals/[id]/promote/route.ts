@@ -1,10 +1,6 @@
 import { NextResponse } from "next/server";
-import {
-  jsonError,
-  jsonOk,
-  parseJsonBody,
-  promoteProposalToProject,
-} from "@/lib/lifecycle/lifecycle-api";
+import { promoteProposalToProjectWithPersistence } from "@/lib/lifecycle/lifecycle-mutations";
+import { jsonOk, parseJsonBody } from "@/lib/lifecycle/lifecycle-api";
 
 export async function POST(
   request: Request,
@@ -18,7 +14,7 @@ export async function POST(
       requestedBy?: string;
     }>(request);
 
-    const project = promoteProposalToProject({
+    const project = await promoteProposalToProjectWithPersistence({
       proposalId: id,
       projectName: body.projectName || "New Project",
       description: body.description,

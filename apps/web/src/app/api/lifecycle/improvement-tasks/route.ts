@@ -1,10 +1,12 @@
 import {
-  createImprovementTask,
-  createSolutionCandidate,
+  createImprovementTaskWithPersistence,
+  createSolutionCandidateWithPersistence,
+  linkImprovementToVibeProjectWithPersistence,
+} from "@/lib/lifecycle/lifecycle-mutations";
+import {
   getLifecycleStore,
   jsonError,
   jsonOk,
-  linkImprovementToVibeProject,
   parseJsonBody,
 } from "@/lib/lifecycle/lifecycle-api";
 
@@ -37,7 +39,7 @@ export async function POST(request: Request) {
       if (!body.improvementTaskId || !body.vibeProjectRef) {
         return jsonError("improvementTaskId and vibeProjectRef are required");
       }
-      const devProject = linkImprovementToVibeProject({
+      const devProject = await linkImprovementToVibeProjectWithPersistence({
         improvementTaskId: body.improvementTaskId,
         vibeProjectRef: body.vibeProjectRef,
         projectName: body.projectName || "Vibe Dev Project",
@@ -50,7 +52,7 @@ export async function POST(request: Request) {
       if (!body.title) {
         return jsonError("title is required");
       }
-      const candidate = createSolutionCandidate({
+      const candidate = await createSolutionCandidateWithPersistence({
         title: body.title,
         description: body.description,
         improvementTaskId: body.improvementTaskId,
@@ -63,7 +65,7 @@ export async function POST(request: Request) {
       return jsonError("title is required");
     }
 
-    const task = createImprovementTask({
+    const task = await createImprovementTaskWithPersistence({
       title: body.title,
       description: body.description,
       sourceType: body.sourceType || "lifecycle",

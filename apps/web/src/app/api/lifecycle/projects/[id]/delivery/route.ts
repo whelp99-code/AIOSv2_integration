@@ -1,9 +1,5 @@
-import {
-  createProjectDeliveryPackage,
-  jsonError,
-  jsonOk,
-  parseJsonBody,
-} from "@/lib/lifecycle/lifecycle-api";
+import { createProjectDeliveryPackageWithPersistence } from "@/lib/lifecycle/lifecycle-mutations";
+import { jsonError, jsonOk, parseJsonBody } from "@/lib/lifecycle/lifecycle-api";
 
 export async function POST(
   request: Request,
@@ -18,7 +14,7 @@ export async function POST(
       requestedBy?: string;
     }>(request);
 
-    const delivery = createProjectDeliveryPackage({
+    const delivery = await createProjectDeliveryPackageWithPersistence({
       projectId: id,
       includeEstimate: body.includeEstimate ?? true,
       includeProposal: body.includeProposal ?? true,

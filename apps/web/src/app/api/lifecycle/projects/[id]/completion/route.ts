@@ -1,10 +1,12 @@
 import {
-  completeProjectForCfoHandoff,
+  completeProjectForCfoHandoffWithPersistence,
+  requestCfoHandoffWithPersistence,
+} from "@/lib/lifecycle/lifecycle-mutations";
+import {
   gatedSend,
   jsonError,
   jsonOk,
   parseJsonBody,
-  requestCfoHandoff,
 } from "@/lib/lifecycle/lifecycle-api";
 
 export async function POST(
@@ -36,7 +38,7 @@ export async function POST(
       if (!gate.allowed) {
         return gate.response;
       }
-      const handoff = requestCfoHandoff(
+      const handoff = await requestCfoHandoffWithPersistence(
         {
           projectCompletionId: body.projectCompletionId,
           approvalId: gate.approvalId,
@@ -47,7 +49,7 @@ export async function POST(
       return jsonOk({ handoff, approvalId: gate.approvalId });
     }
 
-    const completion = completeProjectForCfoHandoff({
+    const completion = await completeProjectForCfoHandoffWithPersistence({
       projectId: id,
       estimateId: body.estimateId,
       completionSummary:

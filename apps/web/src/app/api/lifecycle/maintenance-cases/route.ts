@@ -1,5 +1,5 @@
+import { createMaintenanceCaseWithPersistence } from "@/lib/lifecycle/lifecycle-mutations";
 import {
-  createMaintenanceCase,
   gatedDeviceControl,
   getLifecycleStore,
   jsonError,
@@ -42,7 +42,7 @@ export async function POST(request: Request) {
       }
     }
 
-    const maintenanceCase = createMaintenanceCase({
+    const maintenanceCase = await createMaintenanceCaseWithPersistence({
       customerProductId: body.customerProductId,
       caseType: body.caseType || "support",
       title: body.title,

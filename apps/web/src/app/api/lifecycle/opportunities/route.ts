@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import {
-  createOpportunityFromMailThread,
+  createOpportunityWithPersistence,
+  promoteOpportunityToProposalWithPersistence,
+} from "@/lib/lifecycle/lifecycle-mutations";
+import {
   getLifecycleStore,
   jsonError,
   jsonOk,
   parseJsonBody,
-  promoteOpportunityToProposal,
 } from "@/lib/lifecycle/lifecycle-api";
 
 export async function GET() {
@@ -31,7 +33,7 @@ export async function POST(request: Request) {
       return jsonError("threadKey, title, and messageIds are required");
     }
 
-    const opportunity = createOpportunityFromMailThread({
+    const opportunity = await createOpportunityWithPersistence({
       customerId: body.customerId,
       partnerId: body.partnerId,
       threadKey: body.threadKey,
@@ -65,7 +67,7 @@ export async function PATCH(request: Request) {
       return jsonError("opportunityId is required");
     }
 
-    const proposal = promoteOpportunityToProposal({
+    const proposal = await promoteOpportunityToProposalWithPersistence({
       opportunityId: body.opportunityId,
       estimateRequired: body.estimateRequired,
       pocRequired: body.pocRequired,

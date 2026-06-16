@@ -7,3 +7,11 @@
 export { prisma, Prisma } from './client'
 export type { PrismaClient } from '@prisma/client'
 export { default } from './client'
+export {
+  upsertLifecycleRecord,
+  findLifecycleRecordByDomain,
+  listLifecycleRecords,
+  getLifecycleSummaryFromDb,
+  isLifecyclePersistenceAvailable,
+} from './lifecycle-persistence'
+export type { LifecycleEntityType, LifecyclePersistInput } from './lifecycle-persistence'
