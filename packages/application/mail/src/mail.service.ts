@@ -6,15 +6,52 @@
 import type { AnalyzedMail, AIAnalysis, MailRepository } from '@aios/domain/mail';
 import type { ClassificationFeedback, ThreadGroup } from '@aios/domain/mail';
 import type { LLMClient, LLMMessage } from '@aios/infrastructure/llm';
-import { createGraphMailAdapter } from '@aios/infrastructure/mail';
+import { createGraphMailAdapter, createJsonMailRepository } from '@aios/infrastructure/mail';
 
 export class MailService {
   private graph = createGraphMailAdapter();
+  private jsonRepo = process.env.MAIL_JSON_REPO_PATH
+    ? createJsonMailRepository()
+    : null;
 
   constructor(
     private mailRepo: MailRepository,
     private llm: LLMClient
   ) {}
+
+  /** Optional JSON cache repository when MAIL_JSON_REPO_PATH is configured. */
+  getJsonRepository() {
+    return this.jsonRepo;
+  }
+
+  async syncInboxToJsonCache(options?: { top?: number; sync?: 'cache' | 'auto' | 'initial' }) {
+    if (!this.jsonRepo) {
+      throw new Error('MAIL_JSON_REPO_PATH is not configured');
+    }
+    const payload = await this.graph.syncInbox(options);
+    const rawMessages = (payload as { messages?: Array<Record<string, unknown>> }).messages ?? [];
+    const mails: AnalyzedMail[] = rawMessages
+      .filter((message) => typeof message.id === 'string')
+      .map((message) => ({
+        id: String(message.id),
+        subject: String(message.subject ?? '(제목 없음)'),
+        from: {
+          address: String((message.from as string | undefined) ?? 'unknown@local'),
+          name: String(message.fromName ?? ''),
+        },
+        to: [],
+        body: String(message.body ?? message.bodyPreview ?? ''),
+        bodyPreview: String(message.bodyPreview ?? ''),
+        receivedAt: String(message.receivedAt ?? new Date().toISOString()),
+        isRead: Boolean(message.isRead),
+        importance: 'normal',
+        attachments: [],
+        groupKey: typeof message.groupKey === 'string' ? message.groupKey : undefined,
+        status: 'analyzed',
+      }));
+    await this.jsonRepo.replaceAll(mails);
+    return { saved: mails.length, sync: payload.sync, connected: payload.connected };
+  }
 
   async syncInbox(options?: { top?: number; sync?: 'cache' | 'auto' | 'initial' }) {
     return this.graph.syncInbox(options);

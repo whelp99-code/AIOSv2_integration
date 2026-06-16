@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { recordMailReadEvidence } from "@/lib/integrations/mail-evidence";
 import { fetchMailIntelligence } from "@/lib/integrations/mail-intelligence-proxy";
 
 export async function GET(request: Request) {
@@ -14,6 +15,22 @@ export async function GET(request: Request) {
     if (!response.ok) {
       return NextResponse.json(data, { status: response.status });
     }
+
+    const payload = data as {
+      connected?: boolean;
+      threadGroups?: unknown[];
+      sync?: { mode?: string; newCount?: number };
+    };
+    await recordMailReadEvidence({
+      operation: "mail-analyze",
+      target: `mail analyze${query ? `?${query}` : ""}`,
+      context: {
+        connected: payload.connected ?? false,
+        threadCount: payload.threadGroups?.length ?? 0,
+        syncMode: payload.sync?.mode,
+        newCount: payload.sync?.newCount,
+      },
+    });
 
     return NextResponse.json(data);
   } catch (error) {

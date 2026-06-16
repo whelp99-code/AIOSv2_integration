@@ -44,6 +44,16 @@ describe("outlook proxy contract", () => {
     };
     expect(gated.unapprovedStatus).toBe(409);
   });
+
+  it("documents read operations that emit collaboration evidence", () => {
+    const readEvidenceOps = [
+      "mail-analyze",
+      "mail-sync",
+      "mail-thread-insights",
+    ];
+    expect(readEvidenceOps).toContain("mail-analyze");
+    expect(readEvidenceOps).toContain("mail-sync");
+  });
 });
 
 describe("mail portal block registry", () => {
