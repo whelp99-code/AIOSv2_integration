@@ -19,12 +19,12 @@ export async function recordMailReadEvidence(input: {
 }): Promise<void> {
   const { coordinator } = getCollaborationServices();
   await coordinator.addArtifact(COLLABORATION_SESSION_ID, {
-    type: "mail-read-operation",
+    type: "log",
     path: "",
     description: input.target,
     createdAt: new Date(),
     metadata: {
-      operation: input.operation,
+      mailOperation: input.operation,
       ...input.context,
     },
   });

@@ -48,12 +48,24 @@ type AttachmentRef = {
   proxyPath?: string
 }
 
+interface TaskCandidate {
+  mailMessageId?: string
+  title?: string
+  summary?: string
+}
+
+interface InsightThread {
+  threadKey?: string
+  threadTitle?: string
+  summary?: string
+}
+
 export default function MailPage() {
   const [hubTab, setHubTab] = useState<HubTab>('inbox')
   const [analyze, setAnalyze] = useState<AnalyzePayload | null>(null)
   const [status, setStatus] = useState<OutlookStatus | null>(null)
-  const [candidates, setCandidates] = useState<unknown[]>([])
-  const [insights, setInsights] = useState<unknown[]>([])
+  const [candidates, setCandidates] = useState<TaskCandidate[]>([])
+  const [insights, setInsights] = useState<InsightThread[]>([])
   const [attachments, setAttachments] = useState<AttachmentRef[]>([])
   const [selectedThread, setSelectedThread] = useState<ThreadGroup | null>(null)
   const [loading, setLoading] = useState(true)
@@ -238,7 +250,7 @@ export default function MailPage() {
             (candidates.length === 0 ? (
               <p style={{ padding: 24, color: '#6b7280' }}>후보가 없습니다.</p>
             ) : (
-              candidates.map((c: { mailMessageId?: string; title?: string; summary?: string }, i) => (
+              candidates.map((c, i) => (
                 <div key={c.mailMessageId || i} style={{ padding: '14px 20px', borderBottom: '1px solid #f3f4f6' }}>
                   <div style={{ fontWeight: 600 }}>{c.title}</div>
                   <div style={{ fontSize: 12, color: '#6b7280' }}>{c.summary}</div>
@@ -250,7 +262,7 @@ export default function MailPage() {
             (insights.length === 0 ? (
               <p style={{ padding: 24, color: '#6b7280' }}>인사이트 스레드가 없습니다.</p>
             ) : (
-              insights.map((t: { threadKey?: string; threadTitle?: string; summary?: string }, i) => (
+              insights.map((t, i) => (
                 <div key={t.threadKey || i} style={{ padding: '14px 20px', borderBottom: '1px solid #f3f4f6' }}>
                   <div style={{ fontWeight: 600 }}>{t.threadTitle}</div>
                   <div style={{ fontSize: 12, color: '#6b7280' }}>{t.summary}</div>
