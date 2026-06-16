@@ -4,6 +4,15 @@
 
 const MAIL_INTELLIGENCE_URL = process.env.MAIL_INTELLIGENCE_URL || 'http://localhost:3010';
 
+async function readJson(response: Response) {
+  const text = await response.text();
+  try {
+    return text ? JSON.parse(text) : {};
+  } catch {
+    return { raw: text };
+  }
+}
+
 export interface GraphSyncResult {
   connected: boolean;
   messages: unknown[];
@@ -51,7 +60,11 @@ export class GraphMailAdapter {
       body: JSON.stringify(payload),
       signal: AbortSignal.timeout(30_000),
     });
-    return response.json();
+    const data = await readJson(response);
+    if (!response.ok) {
+      throw new Error(`sendApprovedMail failed: ${response.status}`);
+    }
+    return data;
   }
 
   async markRead(messageId: string, approvalId: string, isRead = true) {
@@ -64,7 +77,11 @@ export class GraphMailAdapter {
       body: JSON.stringify({ messageId, isRead }),
       signal: AbortSignal.timeout(15_000),
     });
-    return response.json();
+    const data = await readJson(response);
+    if (!response.ok) {
+      throw new Error(`markRead failed: ${response.status}`);
+    }
+    return data;
   }
 }
 

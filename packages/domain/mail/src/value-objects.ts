@@ -11,7 +11,7 @@ export type WorkflowLane = z.infer<typeof WorkflowLaneSchema>;
 export const ThreadGroupSchema = z.object({
   key: z.string(),
   label: z.string(),
-  messageCount: z.number().int().min(0),
+  count: z.number().int().min(0),
   messageIds: z.array(z.string()),
   userReplied: z.boolean().optional(),
   aiGrouped: z.boolean().optional(),
