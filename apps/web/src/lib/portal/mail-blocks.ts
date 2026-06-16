@@ -1,7 +1,19 @@
 import { fetchMailIntelligence } from "@/lib/integrations/mail-intelligence-proxy";
 import { MAIL_PORTAL_API_MAPPING } from "./mail-api-mapping";
 
-export type PortalBlockId = "mail.thread" | "mail.taskCandidate";
+export type PortalBlockId =
+  | "mail.account"
+  | "mail.thread"
+  | "mail.insightThread"
+  | "mail.taskCandidate"
+  | "mail.attachment"
+  | "mail.entityCandidate"
+  | "mail.calendarHint";
+
+export interface MailAccountBlockData {
+  accounts?: unknown[];
+  activeAccountId?: string | null;
+}
 
 export interface MailThreadGroup {
   key: string;
@@ -23,6 +35,26 @@ export interface MailThreadBlockData {
 
 export interface MailTaskCandidateBlockData {
   candidates?: unknown[];
+}
+
+export interface MailInsightThreadBlockData {
+  threads?: unknown[];
+  count?: number;
+}
+
+export interface MailAttachmentBlockData {
+  attachments?: unknown[];
+  entries?: unknown[];
+}
+
+export interface MailEntityCandidateBlockData {
+  candidates?: unknown[];
+  count?: number;
+}
+
+export interface MailCalendarHintBlockData {
+  calendar?: unknown[];
+  count?: number;
 }
 
 export type PortalBlockFetcher<T = unknown> = () => Promise<T>;
@@ -70,6 +102,22 @@ function mappingFor(blockId: PortalBlockId) {
   return row;
 }
 
+registerPortalBlock<MailAccountBlockData>("mail.account", {
+  proxyPath: "/api/proxy/outlook/accounts",
+  standaloneEndpoint: mappingFor("mail.account").standaloneEndpoint,
+  method: "GET",
+  fetch: async () => {
+    const { response, data } = await fetchMailIntelligence(
+      "/api/outlook/accounts",
+      { method: "GET" },
+    );
+    if (!response.ok) {
+      throw new Error(`mail.account fetch failed: ${response.status}`);
+    }
+    return data as MailAccountBlockData;
+  },
+});
+
 registerPortalBlock<MailThreadBlockData>("mail.thread", {
   proxyPath: "/api/proxy/outlook/analyze?top=10&sync=cache",
   standaloneEndpoint: mappingFor("mail.thread").standaloneEndpoint,
@@ -86,6 +134,22 @@ registerPortalBlock<MailThreadBlockData>("mail.thread", {
   },
 });
 
+registerPortalBlock<MailInsightThreadBlockData>("mail.insightThread", {
+  proxyPath: "/api/proxy/outlook/thread-insights",
+  standaloneEndpoint: mappingFor("mail.insightThread").standaloneEndpoint,
+  method: "GET",
+  fetch: async () => {
+    const { response, data } = await fetchMailIntelligence(
+      "/api/portal/thread-insights",
+      { method: "GET" },
+    );
+    if (!response.ok) {
+      throw new Error(`mail.insightThread fetch failed: ${response.status}`);
+    }
+    return data as MailInsightThreadBlockData;
+  },
+});
+
 registerPortalBlock<MailTaskCandidateBlockData>("mail.taskCandidate", {
   proxyPath: "/api/proxy/outlook/candidates",
   standaloneEndpoint: mappingFor("mail.taskCandidate").standaloneEndpoint,
@@ -99,5 +163,53 @@ registerPortalBlock<MailTaskCandidateBlockData>("mail.taskCandidate", {
       throw new Error(`mail.taskCandidate fetch failed: ${response.status}`);
     }
     return data as MailTaskCandidateBlockData;
+  },
+});
+
+registerPortalBlock<MailAttachmentBlockData>("mail.attachment", {
+  proxyPath: "/api/proxy/outlook/attachments",
+  standaloneEndpoint: mappingFor("mail.attachment").standaloneEndpoint,
+  method: "GET",
+  fetch: async () => {
+    const { response, data } = await fetchMailIntelligence(
+      "/api/portal/attachments",
+      { method: "GET" },
+    );
+    if (!response.ok) {
+      throw new Error(`mail.attachment fetch failed: ${response.status}`);
+    }
+    return data as MailAttachmentBlockData;
+  },
+});
+
+registerPortalBlock<MailEntityCandidateBlockData>("mail.entityCandidate", {
+  proxyPath: "/api/proxy/outlook/entity-candidates",
+  standaloneEndpoint: mappingFor("mail.entityCandidate").standaloneEndpoint,
+  method: "GET",
+  fetch: async () => {
+    const { response, data } = await fetchMailIntelligence(
+      "/api/portal/entity-candidates?top=30&sync=cache",
+      { method: "GET" },
+    );
+    if (!response.ok) {
+      throw new Error(`mail.entityCandidate fetch failed: ${response.status}`);
+    }
+    return data as MailEntityCandidateBlockData;
+  },
+});
+
+registerPortalBlock<MailCalendarHintBlockData>("mail.calendarHint", {
+  proxyPath: "/api/proxy/outlook/calendar-hints",
+  standaloneEndpoint: mappingFor("mail.calendarHint").standaloneEndpoint,
+  method: "GET",
+  fetch: async () => {
+    const { response, data } = await fetchMailIntelligence(
+      "/api/portal/calendar-hints?top=30&sync=cache",
+      { method: "GET" },
+    );
+    if (!response.ok) {
+      throw new Error(`mail.calendarHint fetch failed: ${response.status}`);
+    }
+    return data as MailCalendarHintBlockData;
   },
 });
