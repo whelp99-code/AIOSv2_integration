@@ -29,7 +29,13 @@ interface AnalyzePayload {
   connected?: boolean
   messages?: AnalyzeMessage[]
   threadGroups?: ThreadGroup[]
-  sync?: { mode?: string; newCount?: number; totalCached?: number; lastSyncedAt?: string }
+  sync?: {
+    mode?: string
+    newCount?: number
+    totalCached?: number
+    lastSyncedAt?: string
+    deltaLink?: boolean | string | null
+  }
   result?: { messageInsights?: Array<{ id: string; summary?: string[]; status?: string }> }
 }
 
@@ -58,6 +64,11 @@ interface InsightThread {
   threadKey?: string
   threadTitle?: string
   summary?: string
+  status?: string
+  effectiveStatus?: string
+  messageCount?: number
+  nextActions?: Array<{ recommendedAction?: string; owner?: string }>
+  participantDomains?: string[]
 }
 
 export default function MailPage() {
@@ -110,6 +121,7 @@ export default function MailPage() {
       return
     }
     if (tab === 'attachments') {
+      await fetch('/api/proxy/outlook/attachments/sync?top=10', { method: 'POST' }).catch(() => null)
       const res = await fetch('/api/proxy/outlook/attachments')
       if (res.ok) {
         const data = await res.json()
@@ -192,7 +204,10 @@ export default function MailPage() {
               <h2 style={{ margin: 0, fontSize: 20 }}>메일 허브</h2>
               <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6b7280' }}>
                 {status?.connected ? status.mailboxUser || '연결됨' : '연결 안됨'}
-                {analyze?.sync?.lastSyncedAt ? ` · ${analyze.sync.mode} · 신규 ${analyze.sync.newCount ?? 0}` : ''}
+                {analyze?.sync?.lastSyncedAt
+                  ? ` · ${analyze.sync.mode || 'sync'} · 신규 ${analyze.sync.newCount ?? 0} · 캐시 ${analyze.sync.totalCached ?? 0}`
+                  : ''}
+                {analyze?.sync?.deltaLink ? ' · delta' : ''}
               </p>
             </div>
             <button type="button" onClick={refresh} disabled={refreshing} style={{ padding: '8px 12px' }}>
@@ -264,8 +279,22 @@ export default function MailPage() {
             ) : (
               insights.map((t, i) => (
                 <div key={t.threadKey || i} style={{ padding: '14px 20px', borderBottom: '1px solid #f3f4f6' }}>
-                  <div style={{ fontWeight: 600 }}>{t.threadTitle}</div>
-                  <div style={{ fontSize: 12, color: '#6b7280' }}>{t.summary}</div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+                    <div style={{ fontWeight: 600 }}>{t.threadTitle}</div>
+                    <span style={{ fontSize: 11, color: '#6b7280' }}>
+                      {t.effectiveStatus || t.status || 'active'}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: 12, color: '#6b7280', marginTop: 4 }}>
+                    {t.messageCount ? `${t.messageCount}통 · ` : ''}
+                    {t.participantDomains?.length ? t.participantDomains.join(', ') : ''}
+                  </div>
+                  <div style={{ fontSize: 12, color: '#6b7280', marginTop: 6 }}>{t.summary}</div>
+                  {(t.nextActions || []).slice(0, 2).map((action, actionIndex) => (
+                    <div key={`${t.threadKey}-action-${actionIndex}`} style={{ fontSize: 11, color: '#374151', marginTop: 4 }}>
+                      • {action.recommendedAction || action.owner || '다음 액션'}
+                    </div>
+                  ))}
                 </div>
               ))
             ))}
