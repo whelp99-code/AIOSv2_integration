@@ -1,6 +1,6 @@
 import { createAgentTaskWithPersistence } from "@/lib/lifecycle/lifecycle-mutations";
 import {
-  getLifecycleStore,
+  getHydratedLifecycleStore,
   jsonError,
   jsonOk,
   parseJsonBody,
@@ -17,7 +17,7 @@ const VALID_TYPES: AgentTaskType[] = [
 ];
 
 export async function GET() {
-  const store = getLifecycleStore();
+  const store = await getHydratedLifecycleStore();
   return jsonOk({
     agentTasks: [...store.agentTasks.values()],
     workflowRuns: [...store.workflowRuns.values()],

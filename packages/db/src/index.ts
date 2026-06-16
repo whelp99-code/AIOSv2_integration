@@ -11,6 +11,7 @@ export {
   upsertLifecycleRecord,
   findLifecycleRecordByDomain,
   listLifecycleRecords,
+  listAllLifecycleRecords,
   getLifecycleSummaryFromDb,
   isLifecyclePersistenceAvailable,
 } from './lifecycle-persistence'

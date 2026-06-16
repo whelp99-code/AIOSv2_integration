@@ -13,26 +13,26 @@ const SERVICE_CONFIGS: Record<
 > = {
   "aios-v1": {
     baseUrl: getUrl("AIOS_V1"),
-    livenessPath: "/health/liveness",
-    readinessPath: "/health/readiness",
+    livenessPath: "/api/health",
+    readinessPath: "/api/health",
     critical: true,
   },
   "f-aios-v3": {
     baseUrl: getUrl("F_AIOS_V3"),
-    livenessPath: "/health/liveness",
-    readinessPath: "/health/readiness",
+    livenessPath: "/api/health",
+    readinessPath: "/api/health",
     critical: true,
   },
   "sangfor-mcp": {
     baseUrl: getUrl("SANGFOR_MCP"),
-    livenessPath: "/health",
-    readinessPath: "/health/ready",
+    livenessPath: "/api/system/health",
+    readinessPath: "/api/system/health",
     critical: true,
   },
   "vibe-coding-os": {
     baseUrl: getUrl("VIBE_CODING_OS"),
-    livenessPath: "/health",
-    readinessPath: "/health/ready",
+    livenessPath: "/api/health",
+    readinessPath: "/api/health",
     critical: false,
   },
   "mail-intelligence": {

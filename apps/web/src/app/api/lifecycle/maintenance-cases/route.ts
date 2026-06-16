@@ -1,14 +1,14 @@
 import { createMaintenanceCaseWithPersistence } from "@/lib/lifecycle/lifecycle-mutations";
 import {
   gatedDeviceControl,
-  getLifecycleStore,
+  getHydratedLifecycleStore,
   jsonError,
   jsonOk,
   parseJsonBody,
 } from "@/lib/lifecycle/lifecycle-api";
 
 export async function GET() {
-  const store = getLifecycleStore();
+  const store = await getHydratedLifecycleStore();
   return jsonOk({ cases: [...store.maintenanceCases.values()] });
 }
 

@@ -38,10 +38,12 @@ import {
   persistSolutionCandidate,
   persistWorkflowRun,
 } from "./lifecycle-persist";
+import { ensureLifecycleStoreHydrated } from "./lifecycle-hydrate";
 
 export async function createCustomerOrPartnerCandidateWithPersistence(
   input: Parameters<typeof createCustomerOrPartnerCandidateFromMail>[0],
 ) {
+  await ensureLifecycleStoreHydrated();
   const result = createCustomerOrPartnerCandidateFromMail(input);
   if ("metadata" in result && "domain" in result) {
     if (input.entityRole === "partner") {
@@ -56,6 +58,7 @@ export async function createCustomerOrPartnerCandidateWithPersistence(
 export async function createOpportunityWithPersistence(
   input: Parameters<typeof createOpportunityFromMailThread>[0],
 ) {
+  await ensureLifecycleStoreHydrated();
   const opportunity = createOpportunityFromMailThread(input);
   await persistOpportunity(opportunity);
   return opportunity;
@@ -64,6 +67,7 @@ export async function createOpportunityWithPersistence(
 export async function promoteOpportunityToProposalWithPersistence(
   input: Parameters<typeof promoteOpportunityToProposal>[0],
 ) {
+  await ensureLifecycleStoreHydrated();
   const proposal = promoteOpportunityToProposal(input);
   await persistProposal(proposal);
   return proposal;
@@ -72,6 +76,7 @@ export async function promoteOpportunityToProposalWithPersistence(
 export async function promoteProposalToProjectWithPersistence(
   input: Parameters<typeof promoteProposalToProject>[0],
 ) {
+  await ensureLifecycleStoreHydrated();
   const project = promoteProposalToProject(input);
   await persistLifecycleProject(project);
   return project;
@@ -80,6 +85,7 @@ export async function promoteProposalToProjectWithPersistence(
 export async function createProjectDeliveryPackageWithPersistence(
   input: Parameters<typeof createProjectDeliveryPackage>[0],
 ) {
+  await ensureLifecycleStoreHydrated();
   const delivery = createProjectDeliveryPackage(input);
   if (delivery.estimate) await persistEstimate(delivery.estimate);
   if (delivery.proposalDocument)
@@ -91,6 +97,7 @@ export async function createProjectDeliveryPackageWithPersistence(
 export async function completeProjectForCfoHandoffWithPersistence(
   input: Parameters<typeof completeProjectForCfoHandoff>[0],
 ) {
+  await ensureLifecycleStoreHydrated();
   const completion = completeProjectForCfoHandoff(input);
   await persistProjectCompletion(completion);
   return completion;
@@ -100,6 +107,7 @@ export async function requestCfoHandoffWithPersistence(
   input: Parameters<typeof requestCfoHandoff>[0],
   approved: boolean,
 ) {
+  await ensureLifecycleStoreHydrated();
   const handoff = requestCfoHandoff(input, approved);
   await persistCfoHandoff(handoff);
   return handoff;
@@ -108,6 +116,7 @@ export async function requestCfoHandoffWithPersistence(
 export async function createCustomerProductWithPersistence(
   input: Parameters<typeof createCustomerProductFromProject>[0],
 ) {
+  await ensureLifecycleStoreHydrated();
   const product = createCustomerProductFromProject(input);
   await persistCustomerProduct(product);
   return product;
@@ -116,6 +125,7 @@ export async function createCustomerProductWithPersistence(
 export async function createMaintenanceCaseWithPersistence(
   input: Parameters<typeof createMaintenanceCase>[0],
 ) {
+  await ensureLifecycleStoreHydrated();
   const maintenanceCase = createMaintenanceCase(input);
   await persistMaintenanceCase(maintenanceCase);
   return maintenanceCase;
@@ -125,6 +135,7 @@ export async function createAgentTaskWithPersistence(
   input: Parameters<typeof createAgentTask>[0],
   options?: { startRun?: boolean; upstreamAvailable?: boolean },
 ) {
+  await ensureLifecycleStoreHydrated();
   const task = createAgentTask(input);
   await persistAgentTask(task);
   if (options?.startRun) {
@@ -143,6 +154,7 @@ export async function createAgentTaskWithPersistence(
 export async function createImprovementTaskWithPersistence(
   input: Parameters<typeof createImprovementTask>[0],
 ) {
+  await ensureLifecycleStoreHydrated();
   const task = createImprovementTask(input);
   await persistImprovementTask(task);
   return task;
@@ -151,6 +163,7 @@ export async function createImprovementTaskWithPersistence(
 export async function linkImprovementToVibeProjectWithPersistence(
   input: Parameters<typeof linkImprovementToVibeProject>[0],
 ) {
+  await ensureLifecycleStoreHydrated();
   const devProject = linkImprovementToVibeProject(input);
   await persistDevProject(devProject);
   return devProject;
@@ -159,6 +172,7 @@ export async function linkImprovementToVibeProjectWithPersistence(
 export async function createSolutionCandidateWithPersistence(
   input: Parameters<typeof createSolutionCandidate>[0],
 ) {
+  await ensureLifecycleStoreHydrated();
   const candidate = createSolutionCandidate(input);
   await persistSolutionCandidate(candidate);
   return candidate;

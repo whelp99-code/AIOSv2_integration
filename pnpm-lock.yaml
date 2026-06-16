@@ -199,6 +199,9 @@ importers:
       '@aios/domain/mail':
         specifier: workspace:*
         version: link:../../domain/mail
+      '@aios/infrastructure':
+        specifier: workspace:*
+        version: link:../../infrastructure
       '@aios/infrastructure/llm':
         specifier: workspace:*
         version: link:../../infrastructure/llm
@@ -295,14 +298,14 @@ importers:
   packages/db:
     dependencies:
       '@prisma/client':
-        specifier: ^6.0.0
+        specifier: 6.19.3
         version: 6.19.3(prisma@6.19.3(typescript@5.9.3))(typescript@5.9.3)
     devDependencies:
       '@types/node':
         specifier: ^20.0.0
         version: 20.19.42
       prisma:
-        specifier: ^6.0.0
+        specifier: 6.19.3
         version: 6.19.3(typescript@5.9.3)
       typescript:
         specifier: ^5.5.0
@@ -416,7 +419,7 @@ importers:
         specifier: ^21.0.0
         version: 21.1.1
       '@prisma/client':
-        specifier: ^6.0.0
+        specifier: 6.19.3
         version: 6.19.3(prisma@6.19.3(typescript@5.9.3))(typescript@5.9.3)
       axios:
         specifier: ^1.6.0
@@ -429,7 +432,7 @@ importers:
         specifier: ^20.0.0
         version: 20.19.42
       prisma:
-        specifier: ^6.0.0
+        specifier: 6.19.3
         version: 6.19.3(typescript@5.9.3)
       typescript:
         specifier: ^5.5.0

@@ -4,14 +4,14 @@ import {
   linkImprovementToVibeProjectWithPersistence,
 } from "@/lib/lifecycle/lifecycle-mutations";
 import {
-  getLifecycleStore,
+  getHydratedLifecycleStore,
   jsonError,
   jsonOk,
   parseJsonBody,
 } from "@/lib/lifecycle/lifecycle-api";
 
 export async function GET() {
-  const store = getLifecycleStore();
+  const store = await getHydratedLifecycleStore();
   return jsonOk({
     improvementTasks: [...store.improvementTasks.values()],
     devProjects: [...store.devProjects.values()],

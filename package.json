@@ -5,6 +5,7 @@
   "type": "module",
   "description": "AIOS Unified Platform - Modular Monolith Monorepo",
   "scripts": {
+    "preinstall": "node scripts/guard-llm-package.mjs",
     "dev": "turbo dev",
     "build": "if [ -f .env.local ]; then while IFS= read -r line; do case \"$line\" in ''|'#'*) continue;; *=*) export \"$line\";; esac; done < .env.local; fi; turbo build",
     "test": "vitest run",
@@ -34,6 +35,7 @@
     "integration:stack:stop": "node scripts/start-integration-stack.mjs stop",
     "integration:stack:wait": "node scripts/start-integration-stack.mjs wait-health",
     "integration:live-smoke": "node scripts/live-approval-smoke.mjs",
+    "integration:live-ops": "node scripts/live-ops-smoke.mjs",
     "integration:ports": "node scripts/verify-port-registry.mjs"
   },
   "devDependencies": {

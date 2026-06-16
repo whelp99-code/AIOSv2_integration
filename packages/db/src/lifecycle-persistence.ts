@@ -120,6 +120,37 @@ export async function listLifecycleRecords(
   }));
 }
 
+export async function listAllLifecycleRecords(): Promise<
+  Array<{
+    id: string;
+    entityType: LifecycleEntityType;
+    status: string;
+    payload: Record<string, unknown>;
+  }>
+> {
+  const rows = await prisma.$queryRaw<
+    Array<{
+      id: string;
+      entityType: LifecycleEntityType;
+      status: string;
+      payload: unknown;
+    }>
+  >`
+    SELECT "id", "entityType", "status", "payload"
+    FROM "lifecycle_records"
+    ORDER BY "createdAt" ASC
+  `;
+  return rows.map((row) => ({
+    id: row.id,
+    entityType: row.entityType,
+    status: row.status,
+    payload:
+      typeof row.payload === "string"
+        ? (JSON.parse(row.payload) as Record<string, unknown>)
+        : (row.payload as Record<string, unknown>),
+  }));
+}
+
 export async function getLifecycleSummaryFromDb(): Promise<
   Record<string, number>
 > {

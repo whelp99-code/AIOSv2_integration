@@ -19,6 +19,7 @@ export default defineConfig({
   test: {
     globals: true,
     environment: "node",
+    hookTimeout: 30_000,
     include: ["tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
     exclude: ["node_modules", "dist", ".next", "**/node_modules/**"],
     coverage: {

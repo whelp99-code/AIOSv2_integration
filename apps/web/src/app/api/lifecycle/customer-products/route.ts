@@ -1,8 +1,8 @@
 import { createCustomerProductWithPersistence } from "@/lib/lifecycle/lifecycle-mutations";
-import { getLifecycleStore, jsonError, jsonOk, parseJsonBody } from "@/lib/lifecycle/lifecycle-api";
+import { getHydratedLifecycleStore, jsonError, jsonOk, parseJsonBody } from "@/lib/lifecycle/lifecycle-api";
 
 export async function GET() {
-  const store = getLifecycleStore();
+  const store = await getHydratedLifecycleStore();
   return jsonOk({ products: [...store.customerProducts.values()] });
 }
 

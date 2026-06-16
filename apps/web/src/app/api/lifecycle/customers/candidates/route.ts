@@ -6,12 +6,11 @@ import {
   jsonError,
   jsonOk,
   parseJsonBody,
+  getHydratedLifecycleStore,
 } from "@/lib/lifecycle/lifecycle-api";
 
 export async function GET() {
-  const store = await import("@/lib/lifecycle/lifecycle-api").then((m) =>
-    m.getLifecycleStore(),
-  );
+  const store = await getHydratedLifecycleStore();
   return jsonOk({
     customers: [...store.customers.values()],
     partners: [...store.partners.values()],

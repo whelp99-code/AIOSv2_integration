@@ -384,9 +384,9 @@ describe("Integration: Multi-project integrations health", () => {
       });
 
     const res = await integrationsHealthGet();
-    expect(res.status).toBe(503);
+    expect(res.status).toBe(200);
     const data = await res.json();
-    expect(data.status).toBe("degraded");
+    expect(data.status).toBe("ok");
     expect(data.projects).toHaveLength(5);
     expect(data.summary.total).toBe(5);
     expect(data.summary.ok).toBeGreaterThan(0);

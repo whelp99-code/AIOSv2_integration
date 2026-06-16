@@ -22,8 +22,17 @@ import {
   requestCfoHandoff,
   startLifecycleWorkflowRun,
 } from "@aios/application";
+import {
+  ensureLifecycleStoreHydrated,
+  getHydratedLifecycleStore,
+} from "./lifecycle-hydrate";
 
-export { getLifecycleStore, listLifecycleSummary };
+export {
+  getLifecycleStore,
+  listLifecycleSummary,
+  getHydratedLifecycleStore,
+  ensureLifecycleStoreHydrated,
+};
 
 export async function parseJsonBody<T extends Record<string, unknown>>(
   request: Request,
