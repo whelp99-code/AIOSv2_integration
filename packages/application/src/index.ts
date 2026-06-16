@@ -16,3 +16,6 @@ export * from './agents';
 
 // Kanban
 export * from './kanban';
+
+// Lifecycle (Mail → CRM → Opportunity → Project → Delivery → Maintenance)
+export * from './lifecycle';

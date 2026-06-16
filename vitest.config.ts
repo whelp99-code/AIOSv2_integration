@@ -9,6 +9,11 @@ export default defineConfig({
         __dirname,
         "packages/proxy-core/src/index.ts",
       ),
+      "@aios/domain": path.resolve(__dirname, "packages/domain/src/index.ts"),
+      "@aios/application": path.resolve(
+        __dirname,
+        "packages/application/src/index.ts",
+      ),
     },
   },
   test: {

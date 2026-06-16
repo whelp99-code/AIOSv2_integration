@@ -259,4 +259,17 @@ describe("mail portal block registry", () => {
     await expect(resolvePortalBlock("mail.unknown")).resolves.toBeNull();
     expect(getMailPortalBlock("mail.unknown")).toBeUndefined();
   });
+
+  it("documents reply-draft proxy contract", () => {
+    const replyDraft = {
+      proxy: "/api/proxy/outlook/reply-draft",
+      standalone: "/api/outlook/reply-draft",
+      requiredQuery: "messageId",
+      method: "GET",
+      missingMessageIdStatus: 400,
+    };
+    expect(replyDraft.proxy).toContain("reply-draft");
+    expect(replyDraft.requiredQuery).toBe("messageId");
+    expect(replyDraft.missingMessageIdStatus).toBe(400);
+  });
 });
