@@ -3,6 +3,30 @@
  * 메일 값 객체
  */
 
+import { z } from 'zod';
+
+export const WorkflowLaneSchema = z.enum(['urgent', 'active', 'waiting', 'done', 'hold', 'reference']);
+export type WorkflowLane = z.infer<typeof WorkflowLaneSchema>;
+
+export const ThreadGroupSchema = z.object({
+  key: z.string(),
+  label: z.string(),
+  messageCount: z.number().int().min(0),
+  messageIds: z.array(z.string()),
+  userReplied: z.boolean().optional(),
+  aiGrouped: z.boolean().optional(),
+  participants: z.array(z.string()).optional(),
+});
+export type ThreadGroup = z.infer<typeof ThreadGroupSchema>;
+
+export const ClassificationFeedbackSchema = z.object({
+  messageId: z.string(),
+  userStatus: WorkflowLaneSchema,
+  reasonCode: z.string().optional(),
+  updatedAt: z.string().datetime().optional(),
+});
+export type ClassificationFeedback = z.infer<typeof ClassificationFeedbackSchema>;
+
 export class EmailAddress {
   constructor(
     public readonly address: string,

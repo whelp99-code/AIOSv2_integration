@@ -1,21 +1,17 @@
 import { NextResponse } from 'next/server'
-
-const MAIL_INTELLIGENCE_URL = process.env.MAIL_INTELLIGENCE_URL || 'http://localhost:3010'
+import { fetchMailIntelligence } from '@/lib/integrations/mail-intelligence-proxy'
 
 export async function GET() {
   try {
-    const response = await fetch(`${MAIL_INTELLIGENCE_URL}/api/outlook/messages`, {
+    const { response, data } = await fetchMailIntelligence('/api/outlook/messages', {
       method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      signal: AbortSignal.timeout(10_000),
     })
 
     if (!response.ok) {
       throw new Error(`Mail Intelligence API error: ${response.status}`)
     }
 
-    const data = await response.json()
     return NextResponse.json(data)
   } catch (error) {
     console.error('Outlook messages proxy error:', error)

@@ -2,6 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
+import { MailPortalWidget } from "./mail-portal-widget";
 
 const MAIL_INTELLIGENCE_URL =
   process.env.NEXT_PUBLIC_MAIL_INTELLIGENCE_URL ?? "http://localhost:3010";
@@ -469,6 +470,8 @@ export function Dashboard() {
         </div>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+          <MailPortalWidget />
+
           <div
             style={{
               backgroundColor: "white",
