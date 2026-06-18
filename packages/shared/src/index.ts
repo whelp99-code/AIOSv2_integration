@@ -14,3 +14,9 @@ export * from './utils/validation';
 export * from './constants/ports';
 export * from './constants/defaults';
 export * from './constants/integrations';
+
+// Execution Registry (Phase 5 - execution ID sharing)
+export * from './execution-registry';
+
+// AG-UI Event Stream (Phase 5 - SSE streaming)
+export * from './ag-ui-stream';
