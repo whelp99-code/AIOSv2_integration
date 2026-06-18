@@ -4,8 +4,8 @@
 
 import { readFile, writeFile, mkdir } from 'node:fs/promises';
 import { dirname } from 'node:path';
-import type { AnalyzedMail } from '@aios/domain/mail';
-import type { MailRepository } from '@aios/domain/mail';
+import type { AnalyzedMail } from '@aios/domain-mail';
+import type { MailRepository } from '@aios/domain-mail';
 
 type MailStore = {
   mails: AnalyzedMail[];

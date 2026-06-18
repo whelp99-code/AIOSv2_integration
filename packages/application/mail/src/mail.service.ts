@@ -3,9 +3,9 @@
  * 메일 유스케이스 서비스 (AIOS v1 재활용 + mail-intelligence bridge)
  */
 
-import type { AnalyzedMail, AIAnalysis, MailRepository } from '@aios/domain/mail';
-import type { ClassificationFeedback, ThreadGroup } from '@aios/domain/mail';
-import type { LLMClient, LLMMessage } from '@aios/infrastructure/llm';
+import type { AnalyzedMail, AIAnalysis, MailRepository } from '@aios/domain-mail';
+import type { ClassificationFeedback, ThreadGroup } from '@aios/domain-mail';
+import type { LLMClient, LLMMessage } from '@aios/infrastructure-llm';
 import { createGraphMailAdapter, createJsonMailRepository } from '@aios/infrastructure/mail';
 
 export class MailService {

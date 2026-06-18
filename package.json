@@ -36,7 +36,10 @@
     "integration:stack:wait": "node scripts/start-integration-stack.mjs wait-health",
     "integration:live-smoke": "node scripts/live-approval-smoke.mjs",
     "integration:live-ops": "node scripts/live-ops-smoke.mjs",
-    "integration:ports": "node scripts/verify-port-registry.mjs"
+    "integration:ports": "node scripts/verify-port-registry.mjs",
+    "desktop:dev": "pnpm --filter @aios/desktop dev",
+    "desktop:start": "pnpm --filter @aios/desktop start",
+    "desktop:build:mac": "pnpm --filter @aios/desktop build:mac"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.0",

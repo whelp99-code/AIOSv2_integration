@@ -21,14 +21,13 @@ model User {
   updatedAt DateTime @updatedAt
 
   // Relations
-  accounts            Account[]
-  sessions            Session[]
-  projects            Project[]
-  customers           Customer[]
-  partners            Partner[]
-  workflows           Workflow[]
-  knowledgeDocuments  KnowledgeDocument[]
-
+  accounts           Account[]
+  sessions           Session[]
+  projects           Project[]
+  customers          Customer[]
+  partners           Partner[]
+  workflows          Workflow[]
+  knowledgeDocuments KnowledgeDocument[]
 }
 
 model Account {
@@ -83,8 +82,8 @@ model Project {
   updatedAt   DateTime      @updatedAt
 
   // Relations
-  user   User   @relation(fields: [userId], references: [id])
-  tasks  Task[]
+  user    User     @relation(fields: [userId], references: [id])
+  tasks   Task[]
   results Result[]
 
   @@map("projects")
@@ -104,9 +103,9 @@ model Task {
   completedAt DateTime?
 
   // Relations
-  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  results Result[]
-  customer Customer? @relation(fields: [customerId], references: [id])
+  project    Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  results    Result[]
+  customer   Customer? @relation(fields: [customerId], references: [id])
   customerId String?
 
   @@map("tasks")
@@ -161,7 +160,7 @@ model Customer {
   updatedAt DateTime @updatedAt
 
   // Relations
-  user     User          @relation(fields: [userId], references: [id])
+  user     User      @relation(fields: [userId], references: [id])
   contacts Contact[]
   tasks    Task[]
 
@@ -189,14 +188,14 @@ model Partner {
 
 // Contact model
 model Contact {
-  id        String   @id @default(cuid())
-  name      String
-  email     String?
-  phone     String?
-  position  String?
+  id         String   @id @default(cuid())
+  name       String
+  email      String?
+  phone      String?
+  position   String?
   customerId String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   // Relations
   customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
@@ -206,21 +205,21 @@ model Contact {
 
 // Mail Message model (Mail Intelligence 통합)
 model MailMessage {
-  id              String   @id @default(cuid())
-  subject         String
-  fromEmail       String
-  fromName        String?
-  bodyPreview     String?
-  body            String?
-  receivedAt      DateTime
-  isRead          Boolean  @default(false)
-  importance      String?
-  webLink         String?
-  groupKey        String?
-  status          String?
-  aiAnalysis      Json?
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id          String   @id @default(cuid())
+  subject     String
+  fromEmail   String
+  fromName    String?
+  bodyPreview String?
+  body        String?
+  receivedAt  DateTime
+  isRead      Boolean  @default(false)
+  importance  String?
+  webLink     String?
+  groupKey    String?
+  status      String?
+  aiAnalysis  Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   @@map("mail_messages")
 }
@@ -235,14 +234,16 @@ model Workflow {
   config      Json?
   startStep   String?
   variables   Json?
+  version     Int      @default(1)
+  source      String   @default("aios-v2")
   userId      String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
   // Relations
-  user        User               @relation(fields: [userId], references: [id])
-  steps       WorkflowStep[]
-  executions  WorkflowExecution[]
+  user       User                @relation(fields: [userId], references: [id])
+  steps      WorkflowStep[]
+  executions WorkflowExecution[]
 
   @@map("workflows")
 }
@@ -269,33 +270,135 @@ model WorkflowStep {
 
 // Workflow Execution model
 model WorkflowExecution {
-  id          String   @id @default(cuid())
-  workflowId  String
-  status      String   @default("pending")
-  input       Json?
-  output      Json?
-  error       String?
-  stepResults Json?
-  startedAt   DateTime @default(now())
-  completedAt DateTime?
+  id             String    @id @default(cuid())
+  workflowId     String
+  status         String    @default("pending")
+  input          Json?
+  output         Json?
+  error          String?
+  stepResults    Json?
+  mode           String    @default("real")
+  engine         String?
+  approvalId     String?
+  requestedBy    String?
+  idempotencyKey String?   @unique
+  traceId        String?   @unique
+  heartbeatAt    DateTime?
+  attempt        Int       @default(0)
+  metadata       Json?
+  createdAt      DateTime  @default(now())
+  startedAt      DateTime  @default(now())
+  completedAt    DateTime?
 
   // Relations
-  workflow Workflow @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  workflow Workflow                 @relation(fields: [workflowId], references: [id], onDelete: Cascade)
+  events   WorkflowExecutionEvent[]
 
+  @@index([status, createdAt])
+  @@index([workflowId, startedAt])
   @@map("workflow_executions")
+}
+
+model WorkflowExecutionEvent {
+  id          String   @id @default(cuid())
+  executionId String
+  sequence    Int
+  type        String
+  payload     Json
+  createdAt   DateTime @default(now())
+
+  execution WorkflowExecution @relation(fields: [executionId], references: [id], onDelete: Cascade)
+
+  @@unique([executionId, sequence])
+  @@index([executionId, createdAt])
+  @@map("workflow_execution_events")
+}
+
+model ApprovalRequestRecord {
+  id           String    @id
+  type         String
+  sessionId    String
+  assignmentId String
+  requester    String
+  requestedBy  String
+  actionType   String
+  target       String
+  context      Json
+  status       String    @default("pending")
+  createdAt    DateTime  @default(now())
+  resolvedAt   DateTime?
+  resolvedBy   String?
+  resolution   String?
+
+  @@index([status, createdAt])
+  @@index([sessionId])
+  @@map("approval_requests")
+}
+
+model EvidenceArtifact {
+  id          String   @id @default(cuid())
+  sessionId   String?
+  executionId String?
+  type        String
+  path        String?
+  description String
+  checksum    String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+
+  @@index([sessionId, createdAt])
+  @@index([executionId, createdAt])
+  @@map("evidence_artifacts")
+}
+
+model AuditEvent {
+  id           String   @id @default(cuid())
+  actorId      String
+  action       String
+  resourceType String
+  resourceId   String?
+  approvalId   String?
+  traceId      String?
+  payload      Json?
+  createdAt    DateTime @default(now())
+
+  @@index([resourceType, resourceId])
+  @@index([actorId, createdAt])
+  @@map("audit_events")
+}
+
+model OutboxEvent {
+  id          String    @id @default(cuid())
+  topic       String
+  aggregateId String
+  payload     Json
+  status      String    @default("pending")
+  attempts    Int       @default(0)
+  availableAt DateTime  @default(now())
+  processedAt DateTime?
+  lastError   String?
+  createdAt   DateTime  @default(now())
+
+  @@index([status, availableAt])
+  @@map("outbox_events")
 }
 
 // Knowledge Document model (지식베이스 통합)
 model KnowledgeDocument {
-  id        String   @id @default(cuid())
-  title     String
-  content   String
-  category  String?
-  tags      String[]
-  source    String?
-  userId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  category    String?
+  tags        String[]
+  source      String?
+  checksum    String?
+  indexStatus String   @default("pending")
+  provider    String?
+  externalRef String?
+  metadata    Json?
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   // Relations
   user User @relation(fields: [userId], references: [id])
@@ -332,14 +435,14 @@ model KanbanBoard {
 }
 
 model KanbanColumn {
-  id        String       @id @default(cuid())
+  id        String   @id @default(cuid())
   boardId   String
   name      String
   position  Int
-  createdAt DateTime     @default(now())
+  createdAt DateTime @default(now())
 
   // Relations
-  board KanbanBoard @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  board KanbanBoard  @relation(fields: [boardId], references: [id], onDelete: Cascade)
   cards KanbanCard[]
 
   @@map("kanban_columns")

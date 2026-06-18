@@ -7,8 +7,8 @@ import type {
   SecurityPolicy, SecurityPolicyRepository,
   NetworkDevice, NetworkDeviceRepository,
   ThreatAlert, ThreatAlertRepository,
-} from '@aios/domain/sangfor';
-import type { MCPClient } from '@aios/infrastructure/mcp';
+} from '@aios/domain-sangfor';
+import type { MCPClient } from '@aios/infrastructure-mcp';
 
 export class SangforService {
   constructor(

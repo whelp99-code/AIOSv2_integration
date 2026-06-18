@@ -98,6 +98,13 @@ export interface ApprovedRequestContext {
   idempotencyKey?: string;
 }
 
+function canBypassApprovalInDevelopment(): boolean {
+  return (
+    process.env.NODE_ENV !== "production" &&
+    process.env.AIOS_ALLOW_DEV_APPROVAL_BYPASS === "true"
+  );
+}
+
 /**
  * 미들웨어 팩토리: 승인 게이트가 적용된 핸들러 생성
  */
@@ -114,7 +121,7 @@ export function withApprovalGate<TBody = unknown>(config: ApprovalGateConfig) {
     const params = await paramsPromise;
 
     // 개발 모드에서 게이트 스킵 (옵션)
-    if (config.skipOnDev && process.env.NODE_ENV !== "production") {
+    if (config.skipOnDev && canBypassApprovalInDevelopment()) {
       const body =
         req.method !== "GET" ? await req.json().catch(() => ({})) : {};
       const mockContext: ApprovedRequestContext = {
@@ -220,7 +227,7 @@ export function createGatedHandler(
 ) {
   return async (req: Request): Promise<NextResponse> => {
     // 개발 모드 우회
-    if (process.env.NODE_ENV !== "production") {
+    if (canBypassApprovalInDevelopment()) {
       const body =
         req.method !== "GET" ? await req.json().catch(() => ({})) : {};
       const idempotencyKey =

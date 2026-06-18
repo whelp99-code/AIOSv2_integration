@@ -1,5 +1,5 @@
 {
-  "name": "@aios/domain/mail",
+  "name": "@aios/domain-mail",
   "version": "0.1.0",
   "private": true,
   "main": "./src/index.ts",

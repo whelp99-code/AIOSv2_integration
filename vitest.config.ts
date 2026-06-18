@@ -14,13 +14,14 @@ export default defineConfig({
         __dirname,
         "packages/application/src/index.ts",
       ),
+      "@aios/db": path.resolve(__dirname, "packages/db/src/index.ts"),
     },
   },
   test: {
     globals: true,
     environment: "node",
     hookTimeout: 30_000,
-    include: ["tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}"],
+    include: ["tests/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}", "apps/**/src/**/__tests__/*.test.ts"],
     exclude: ["node_modules", "dist", ".next", "**/node_modules/**"],
     coverage: {
       provider: "v8",

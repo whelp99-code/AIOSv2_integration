@@ -176,6 +176,7 @@ describe("approval-gate", () => {
 
   it("createGatedHandler does not throw when re-wrapping GET in development", async () => {
     vi.stubEnv("NODE_ENV", "development");
+    vi.stubEnv("AIOS_ALLOW_DEV_APPROVAL_BYPASS", "true");
 
     const { createGatedHandler } =
       await import("../apps/web/src/lib/integrations/approval-middleware");

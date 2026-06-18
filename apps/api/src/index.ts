@@ -15,6 +15,7 @@ import { getIntegrationTarget } from "@aios/shared";
 import { appRouter } from "./routers";
 import { createContext } from "./context/index";
 import { authMiddleware, errorHandler, rateLimiter } from "./middleware";
+import { workflowRestRouter } from "./routes/workflow.routes";
 
 const PORT = process.env.API_PORT || 3200;
 
@@ -87,6 +88,7 @@ export function createApp(): Express {
 
   // Auth middleware for other /api routes
   app.use("/api", authMiddleware);
+  app.use("/api/v1", workflowRestRouter);
 
   // tRPC
   app.use(

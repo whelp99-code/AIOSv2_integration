@@ -1,5 +1,5 @@
 {
-  "name": "@aios/infrastructure/sandbox",
+  "name": "@aios/infrastructure-sandbox",
   "version": "0.1.0",
   "private": true,
   "main": "./src/index.ts",

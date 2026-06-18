@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getFaiosV3Url } from '../../../../lib/integrations/upstream-urls'
+import { getFaiosV3Headers, getFaiosV3Url } from '../../../../lib/integrations/upstream-urls'
 import { proxyUpstreamJson, upstreamErrorResponse, upstreamProxyResponse } from '../../../../lib/integrations/upstream-proxy'
 import { createGatedHandler } from '../../../../lib/integrations/approval-middleware'
 
@@ -14,6 +14,7 @@ export async function GET(request: Request) {
     const result = await proxyUpstreamJson({
       baseUrl: getFaiosV3Url(),
       path,
+      headers: getFaiosV3Headers(),
     })
     return upstreamProxyResponse(result)
   } catch (error) {
@@ -33,6 +34,7 @@ export const POST = createGatedHandler(
         path: '/api/knowledge',
         method: 'POST',
         body,
+        headers: getFaiosV3Headers(),
       })
 
       if (!result.ok) {

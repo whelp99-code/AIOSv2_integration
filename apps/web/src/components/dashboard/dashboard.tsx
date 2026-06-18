@@ -138,7 +138,7 @@ function StatsCard({
 }
 
 export function Dashboard() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const [mails, setMails] = useState<MailMessage[]>([]);
   const [outlookStatus, setOutlookStatus] = useState<OutlookStatus | null>(
     null,
@@ -211,21 +211,6 @@ export function Dashboard() {
 
     fetchData();
   }, []);
-
-  if (status === "loading") {
-    return (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "256px",
-        }}
-      >
-        <div style={{ fontSize: "16px", color: "#6b7280" }}>Loading...</div>
-      </div>
-    );
-  }
 
   const unreadCount = mails.filter((m) => !m.isRead).length;
   const totalCount = mails.length;
