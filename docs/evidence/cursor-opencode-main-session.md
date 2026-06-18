@@ -113,8 +113,28 @@ After fix:
 | sangfor-mcp-workflow   | `ai-workflow.test.ts` LM Studio skip              | test 44/44                                   |
 | apps/mail-intelligence | `scripts/verify-health.mjs`                       | verify:health + verify:health:full PASS      |
 
+## lifecycle phase (2026-06-16)
+
+| Milestone | Commit | Status |
+| --------- | ------ | ------ |
+| C0–C10 mail-to-maintenance foundation | `11beb86` | done |
+| PostgreSQL persistence + integration refresh | `cb4da86` | done |
+| Live ops hardening + smoke tooling | `ca0f116` | done |
+| LLM multi-provider architecture | `8cc6d1c` | committed |
+| Phase5 execution ID + AG-UI stream | `47dbdb1` | committed |
+
+## approval queue hygiene (2026-06-19)
+
+| Action | Detail |
+| ------ | ------ |
+| live-smoke pending (4) | **rejected** — dry-run artifacts, no `--execute` |
+| api-client test pollution (261) | **purged** from queue file |
+| Pending remaining | **0** |
+| collaboration-state | synced: session `active`, phase7 assignments `done`, lifecycle assignments added |
+
 ## remaining work
 
-- Cross-repo local changes uncommitted (AIOSv2, Vibe, Sangfor, Mail) — user approval for commit/push
+- WIP uncommitted changes — see `docs/evidence/commit-staging-2026-06-19.md` (Groups B–E)
 - `pnpm format:check` repo-wide legacy FAIL (scoped out)
 - Portal integration ~35–55% per blueprint-status
+- User commit/push approval for staged groups

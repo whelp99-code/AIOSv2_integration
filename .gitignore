@@ -42,3 +42,19 @@ pnpm-debug.log*
 
 # Misc
 *.tsbuildinfo
+
+# AIOS runtime / local state (do not commit)
+.aios/runtime/
+.aios/context/* 2.json
+.aios/context/* 3.json
+
+# Agent backups and duplicate artifacts
+.backups/
+packages/infrastructure/.ignored_llm*/
+packages/infrastructure/llm 2
+
+# Duplicate file patterns from agent sessions
+* 2.*
+* 3.*
+* 4.*
+* 5.*
