@@ -1006,13 +1006,14 @@
             "apps/web/src/app/api/aios-v3/__tests__/proxy-contract.test.ts"
           ],
           "requiredApprovals": [],
-          "status": "pending",
+          "status": "done",
           "createdAt": "2026-06-19T10:03:00.000Z",
-          "updatedAt": "2026-06-19T10:03:00.000Z",
+          "updatedAt": "2026-06-19T11:00:00.000Z",
           "metadata": {
             "phase": "lifecycle",
             "trigger": "commit-staging-review",
-            "summary": "Awaiting user commit approval per commit-staging manifest."
+            "completedAt": "2026-06-19T11:00:00.000Z",
+            "summary": "Committed as 48005b3 (hygiene) + c005897 (workflow/integration WIP)."
           }
         }
       ],

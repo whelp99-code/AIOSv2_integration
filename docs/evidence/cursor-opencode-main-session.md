@@ -134,7 +134,7 @@ After fix:
 
 ## remaining work
 
-- WIP uncommitted changes — see `docs/evidence/commit-staging-2026-06-19.md` (Groups B–E)
+- WIP uncommitted changes — **committed** (`48005b3` hygiene, `c005897` workflow/integration)
 - `pnpm format:check` repo-wide legacy FAIL (scoped out)
 - Portal integration ~35–55% per blueprint-status
 - User commit/push approval for staged groups
