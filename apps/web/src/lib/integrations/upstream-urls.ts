@@ -13,6 +13,15 @@ export function getFaiosV3Headers(): HeadersInit {
   return apiKey ? { 'X-API-Key': apiKey } : {};
 }
 
+export function getMailIntelligenceUrl(): string {
+  return getIntegrationBaseUrl('mail-intelligence');
+}
+
+export function getMailIntelligenceHeaders(): HeadersInit {
+  const apiKey = process.env.MAIL_INTERNAL_API_KEY;
+  return apiKey ? { 'X-Mail-Internal-Key': apiKey } : {};
+}
+
 export function getSangforMcpUrl(): string {
   return getIntegrationBaseUrl('sangfor-mcp-workflow');
 }
