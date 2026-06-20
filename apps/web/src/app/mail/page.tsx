@@ -1,368 +1,921 @@
-'use client'
+"use client";
 
-import { useEffect, useState, useCallback } from 'react'
+import { useCallback, useEffect, useState } from "react";
 
-interface MailMessage {
-  id: string
-  subject: string
-  from?: { emailAddress?: { address?: string; name?: string } }
-  toRecipients?: Array<{ emailAddress?: { address?: string; name?: string } }>
-  receivedDateTime?: string
-  bodyPreview?: string
-  isRead?: boolean
-  hasAttachments?: boolean
-  importance?: string
-  body?: { content?: string; contentType?: string }
+type HubTab =
+  | "inbox"
+  | "candidates"
+  | "insights"
+  | "attachments"
+  | "entities"
+  | "calendar"
+  | "reply";
+
+interface ThreadGroup {
+  key: string;
+  label: string;
+  count: number;
+  messageIds: string[];
+  userReplied?: boolean;
+  aiGrouped?: boolean;
+  participants?: string[];
+}
+
+interface AnalyzeMessage {
+  id: string;
+  subject?: string;
+  from?: string;
+  fromName?: string;
+  receivedAt?: string;
+  bodyPreview?: string;
+  isRead?: boolean;
+  mailFolder?: string;
+}
+
+interface AnalyzePayload {
+  connected?: boolean;
+  messages?: AnalyzeMessage[];
+  threadGroups?: ThreadGroup[];
+  sync?: {
+    mode?: string;
+    newCount?: number;
+    totalCached?: number;
+    lastSyncedAt?: string;
+    deltaLink?: boolean | string | null;
+  };
+  result?: {
+    messageInsights?: Array<{
+      id: string;
+      summary?: string[];
+      status?: string;
+    }>;
+  };
 }
 
 interface OutlookStatus {
-  connected: boolean
-  hasAccessToken: boolean
-  mailboxUser?: string
-  aiProvider?: string
-  authMode?: string
+  connected: boolean;
+  mailboxUser?: string;
+  aiProvider?: string;
 }
 
-type FilterTab = 'all' | 'unread' | 'read'
+type AttachmentRef = {
+  id?: string;
+  name?: string;
+  subject?: string;
+  fromAddress?: string;
+  category?: string;
+  proxyPath?: string;
+};
+
+interface TaskCandidate {
+  mailMessageId?: string;
+  title?: string;
+  summary?: string;
+}
+
+interface InsightThread {
+  threadKey?: string;
+  threadTitle?: string;
+  summary?: string;
+  status?: string;
+  effectiveStatus?: string;
+  messageCount?: number;
+  nextActions?: Array<{ recommendedAction?: string; owner?: string }>;
+  participantDomains?: string[];
+}
+
+interface EntityCandidate {
+  domain?: string;
+  email?: string;
+  candidateName?: string;
+  entityRole?: string;
+  confidence?: number;
+  messageCount?: number;
+  sampleSubjects?: string[];
+}
+
+interface CalendarHint {
+  title?: string;
+  when?: string;
+  owner?: string;
+  lane?: string;
+  messageId?: string;
+}
+
+interface MailAccount {
+  id: string;
+  email?: string;
+  displayName?: string;
+  isActive?: boolean;
+  connected?: boolean;
+}
+
+interface ReplyDraft {
+  subject?: string;
+  body?: string;
+  to?: string[];
+  messageId?: string;
+  tone?: string;
+}
+
+async function fetchWithFallback<T>(
+  url: string,
+  init?: RequestInit,
+): Promise<{ ok: boolean; data: T | null; error?: string }> {
+  try {
+    const res = await fetch(url, init);
+    if (!res.ok) {
+      return { ok: false, data: null, error: `HTTP ${res.status}` };
+    }
+    const data = (await res.json()) as T;
+    return { ok: true, data };
+  } catch {
+    return { ok: false, data: null, error: "Mail Intelligence unavailable" };
+  }
+}
 
 export default function MailPage() {
-  const [messages, setMessages] = useState<MailMessage[]>([])
-  const [outlookStatus, setOutlookStatus] = useState<OutlookStatus | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
-  const [selectedMail, setSelectedMail] = useState<MailMessage | null>(null)
-  const [searchQuery, setSearchQuery] = useState('')
-  const [activeTab, setActiveTab] = useState<FilterTab>('all')
-  const [refreshing, setRefreshing] = useState(false)
+  const [hubTab, setHubTab] = useState<HubTab>("inbox");
+  const [analyze, setAnalyze] = useState<AnalyzePayload | null>(null);
+  const [status, setStatus] = useState<OutlookStatus | null>(null);
+  const [candidates, setCandidates] = useState<TaskCandidate[]>([]);
+  const [insights, setInsights] = useState<InsightThread[]>([]);
+  const [attachments, setAttachments] = useState<AttachmentRef[]>([]);
+  const [entityCandidates, setEntityCandidates] = useState<EntityCandidate[]>(
+    [],
+  );
+  const [calendarHints, setCalendarHints] = useState<CalendarHint[]>([]);
+  const [replyDraft, setReplyDraft] = useState<ReplyDraft | null>(null);
+  const [accounts, setAccounts] = useState<MailAccount[]>([]);
+  const [activeAccountId, setActiveAccountId] = useState<string | null>(null);
+  const [switchingAccount, setSwitchingAccount] = useState(false);
+  const [selectedThread, setSelectedThread] = useState<ThreadGroup | null>(
+    null,
+  );
+  const [selectedMessageId, setSelectedMessageId] = useState<string | null>(
+    null,
+  );
+  const [loading, setLoading] = useState(true);
+  const [tabLoading, setTabLoading] = useState(false);
+  const [draftLoading, setDraftLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [tabError, setTabError] = useState<string | null>(null);
+  const [pendingApproval, setPendingApproval] = useState<string | null>(null);
+  const [mailUnavailable, setMailUnavailable] = useState(false);
 
-  const fetchData = useCallback(async () => {
-    try {
-      setRefreshing(true)
-      const [statusRes, messagesRes] = await Promise.all([
-        fetch('/api/proxy/outlook/status'),
-        fetch('/api/proxy/outlook/messages'),
-      ])
-
-      if (statusRes.ok) {
-        const statusData = await statusRes.json()
-        setOutlookStatus(statusData)
-      }
-
-      if (messagesRes.ok) {
-        const data = await messagesRes.json()
-        setMessages(data.messages || [])
-      } else {
-        setError('메일을 불러오는 중 오류가 발생했습니다.')
-      }
-    } catch (err) {
-      console.error('메일 로딩 실패:', err)
-      setError('메일 데이터를 가져올 수 없습니다.')
-    } finally {
-      setLoading(false)
-      setRefreshing(false)
+  const fetchAccounts = useCallback(async () => {
+    const result = await fetchWithFallback<{
+      accounts?: MailAccount[];
+      activeAccountId?: string;
+    }>("/api/proxy/outlook/accounts");
+    if (result.ok && result.data) {
+      setAccounts(result.data.accounts || []);
+      setActiveAccountId(result.data.activeAccountId || null);
     }
-  }, [])
+  }, []);
+
+  const fetchInbox = useCallback(async () => {
+    const [statusRes, analyzeRes] = await Promise.all([
+      fetchWithFallback<OutlookStatus>("/api/proxy/outlook/status"),
+      fetchWithFallback<AnalyzePayload>(
+        "/api/proxy/outlook/analyze?top=50&sync=auto",
+      ),
+    ]);
+    if (statusRes.ok && statusRes.data) setStatus(statusRes.data);
+    if (analyzeRes.ok && analyzeRes.data) {
+      setAnalyze(analyzeRes.data);
+      setMailUnavailable(false);
+      setError(null);
+    } else {
+      setAnalyze({ messages: [], threadGroups: [] });
+      setMailUnavailable(true);
+      setError(analyzeRes.error || "메일 분석을 불러오지 못했습니다.");
+    }
+    await fetchAccounts();
+  }, [fetchAccounts]);
+
+  const fetchReplyDraft = useCallback(async (messageId: string) => {
+    setDraftLoading(true);
+    setReplyDraft(null);
+    const result = await fetchWithFallback<ReplyDraft & { draft?: ReplyDraft }>(
+      `/api/proxy/outlook/reply-draft?messageId=${encodeURIComponent(messageId)}`,
+    );
+    if (result.ok && result.data) {
+      const draft = result.data.draft || result.data;
+      setReplyDraft(draft);
+    } else {
+      setReplyDraft({
+        messageId,
+        body: "",
+        subject: "(회신 초안을 불러올 수 없습니다)",
+      });
+    }
+    setDraftLoading(false);
+  }, []);
+
+  const fetchTabData = useCallback(
+    async (tab: HubTab) => {
+      setTabLoading(true);
+      setTabError(null);
+      try {
+        if (tab === "inbox") {
+          await fetchInbox();
+          return;
+        }
+        if (tab === "candidates") {
+          const result = await fetchWithFallback<{
+            candidates?: TaskCandidate[];
+          }>("/api/proxy/outlook/candidates", { method: "POST" });
+          setCandidates(result.ok ? result.data?.candidates || [] : []);
+          if (!result.ok) setTabError(result.error || "후보 로드 실패");
+          return;
+        }
+        if (tab === "insights") {
+          const result = await fetchWithFallback<{ threads?: InsightThread[] }>(
+            "/api/proxy/outlook/thread-insights",
+          );
+          setInsights(result.ok ? result.data?.threads || [] : []);
+          if (!result.ok) setTabError(result.error || "인사이트 로드 실패");
+          return;
+        }
+        if (tab === "attachments") {
+          await fetch("/api/proxy/outlook/attachments/sync?top=10", {
+            method: "POST",
+          }).catch(() => null);
+          const result = await fetchWithFallback<{
+            attachments?: AttachmentRef[];
+            entries?: AttachmentRef[];
+          }>("/api/proxy/outlook/attachments");
+          const list = result.data?.attachments || result.data?.entries || [];
+          setAttachments(result.ok ? list : []);
+          if (!result.ok) setTabError(result.error || "첨부 로드 실패");
+          return;
+        }
+        if (tab === "entities") {
+          const result = await fetchWithFallback<{
+            candidates?: EntityCandidate[];
+          }>("/api/proxy/outlook/entity-candidates");
+          setEntityCandidates(result.ok ? result.data?.candidates || [] : []);
+          if (!result.ok) setTabError(result.error || "엔티티 로드 실패");
+          return;
+        }
+        if (tab === "calendar") {
+          const result = await fetchWithFallback<{ calendar?: CalendarHint[] }>(
+            "/api/proxy/outlook/calendar-hints",
+          );
+          setCalendarHints(result.ok ? result.data?.calendar || [] : []);
+          if (!result.ok) setTabError(result.error || "일정 힌트 로드 실패");
+          return;
+        }
+      } finally {
+        setTabLoading(false);
+      }
+    },
+    [fetchInbox],
+  );
+
+  const refresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      await fetchTabData(hubTab);
+    } catch {
+      setError("데이터를 가져올 수 없습니다.");
+    } finally {
+      setRefreshing(false);
+      setLoading(false);
+    }
+  }, [fetchTabData, hubTab]);
 
   useEffect(() => {
-    fetchData()
-  }, [fetchData])
+    refresh();
+  }, [hubTab, refresh]);
 
-  const filteredMessages = messages.filter((msg) => {
-    const matchesTab =
-      activeTab === 'all' ||
-      (activeTab === 'unread' && !msg.isRead) ||
-      (activeTab === 'read' && msg.isRead)
-
-    const matchesSearch =
-      !searchQuery ||
-      msg.subject?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      msg.from?.emailAddress?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      msg.from?.emailAddress?.address?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      msg.bodyPreview?.toLowerCase().includes(searchQuery.toLowerCase())
-
-    return matchesTab && matchesSearch
-  })
-
-  const unreadCount = messages.filter((m) => !m.isRead).length
-  const readCount = messages.filter((m) => m.isRead).length
-
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return ''
-    const date = new Date(dateStr)
-    const now = new Date()
-    const isToday = date.toDateString() === now.toDateString()
-    if (isToday) {
-      return date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })
+  useEffect(() => {
+    if (selectedMessageId) {
+      fetchReplyDraft(selectedMessageId);
+    } else {
+      setReplyDraft(null);
     }
-    return date.toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' })
+  }, [selectedMessageId, fetchReplyDraft]);
+
+  const threadGroups = analyze?.threadGroups || [];
+  const messagesById = new Map((analyze?.messages || []).map((m) => [m.id, m]));
+
+  const selectedMessages = selectedThread
+    ? ((selectedThread.messageIds || [])
+        .map((id) => messagesById.get(id))
+        .filter(Boolean) as AnalyzeMessage[])
+    : [];
+
+  const threadInsight = insights.find(
+    (t) => t.threadKey === selectedThread?.key,
+  );
+  const threadEntities = entityCandidates.filter(
+    (e) =>
+      selectedThread?.participants?.some(
+        (p) => e.domain && p.includes(e.domain),
+      ) ||
+      (e.sampleSubjects || []).some((s) =>
+        selectedMessages.some(
+          (m) => m.subject && s.includes(m.subject.slice(0, 20)),
+        ),
+      ),
+  );
+  const threadCandidates = candidates.filter((c) =>
+    selectedThread?.messageIds?.includes(c.mailMessageId || ""),
+  );
+  const threadCalendar = calendarHints.filter((h) =>
+    selectedThread?.messageIds?.includes(h.messageId || ""),
+  );
+
+  async function switchAccount(accountId: string) {
+    if (!accountId || accountId === activeAccountId || switchingAccount) return;
+    setSwitchingAccount(true);
+    try {
+      const res = await fetch("/api/proxy/outlook/accounts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ accountId }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setActiveAccountId(data.activeAccountId || accountId);
+        if (data.status) setStatus(data.status);
+        await fetchTabData(hubTab);
+      }
+    } finally {
+      setSwitchingAccount(false);
+    }
+  }
+
+  async function requestSendDraft() {
+    if (!replyDraft) return;
+    setPendingApproval("발송 승인 요청 중...");
+    const res = await fetch("/api/mail/send", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        to: replyDraft.to?.[0] || "draft@example.com",
+        subject: replyDraft.subject || selectedMessages[0]?.subject || "Re:",
+        body: replyDraft.body || "",
+        requestedBy: "mail-hub",
+      }),
+    });
+    const data = await res.json();
+    if (res.status === 409) {
+      setPendingApproval(
+        `승인 대기 (409): ${data.approval?.id || data.error || "pending"}`,
+      );
+    } else if (res.ok) {
+      setPendingApproval("승인 후 발송 완료");
+    } else {
+      setPendingApproval(data.error || "발송 실패");
+    }
+  }
+
+  async function promoteEntityCandidate(entity: EntityCandidate) {
+    const res = await fetch("/api/lifecycle/customers/candidates", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        entityRole: entity.entityRole === "partner" ? "partner" : "customer",
+        domain: entity.domain,
+        candidateName: entity.candidateName,
+        sourceThreadKey: selectedThread?.key || "unknown",
+        sampleSubjects: entity.sampleSubjects,
+        confidence: entity.confidence,
+        requestedBy: "mail-hub",
+      }),
+    });
+    if (res.ok) {
+      setPendingApproval(
+        `CRM 후보 생성됨 (${entity.domain || entity.candidateName})`,
+      );
+    }
   }
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: '400px' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '32px', marginBottom: '16px' }}>📧</div>
-          <div style={{ fontSize: '16px', color: '#6b7280' }}>메일함 로딩 중...</div>
-        </div>
+      <div style={{ padding: 48, textAlign: "center", color: "#6b7280" }}>
+        메일 허브 로딩 중...
       </div>
-    )
+    );
   }
 
+  const tabStyle = (tab: HubTab) => ({
+    padding: "8px 14px",
+    borderRadius: 8,
+    border: "none",
+    cursor: "pointer" as const,
+    fontWeight: 600,
+    backgroundColor: hubTab === tab ? "#111827" : "#f3f4f6",
+    color: hubTab === tab ? "#fff" : "#374151",
+  });
+
+  const tabLabels: Record<HubTab, string> = {
+    inbox: "Inbox",
+    candidates: "Candidates",
+    insights: "Insights",
+    attachments: "첨부",
+    entities: "Entities",
+    calendar: "Calendar",
+    reply: "Reply draft",
+  };
+
   return (
-    <div style={{ display: 'flex', height: '100%', backgroundColor: '#f9fafb' }}>
-      {/* Left: Mail List Panel */}
-      <div style={{
-        width: '420px',
-        borderRight: '1px solid #e5e7eb',
-        display: 'flex',
-        flexDirection: 'column',
-        backgroundColor: 'white',
-        flexShrink: 0,
-      }}>
-        {/* Header */}
-        <div style={{ padding: '20px 24px', borderBottom: '1px solid #e5e7eb' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+    <div style={{ display: "flex", height: "100%", background: "#f9fafb" }}>
+      <div
+        style={{
+          width: 420,
+          borderRight: "1px solid #e5e7eb",
+          background: "#fff",
+          display: "flex",
+          flexDirection: "column",
+        }}
+      >
+        <div style={{ padding: 20, borderBottom: "1px solid #e5e7eb" }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
             <div>
-              <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#111827', margin: 0 }}>
-                📧 메일함
-              </h2>
-              <p style={{ fontSize: '13px', color: '#6b7280', margin: '4px 0 0 0' }}>
-                Outlook {outlookStatus?.connected ? `· ${outlookStatus.mailboxUser || '연결됨'}` : '· 연결 안됨'}
+              <h2 style={{ margin: 0, fontSize: 20 }}>메일 허브</h2>
+              <p style={{ margin: "4px 0 0", fontSize: 13, color: "#6b7280" }}>
+                {status?.connected
+                  ? status.mailboxUser || "연결됨"
+                  : "연결 안됨"}
+                {mailUnavailable ? " · Mail Intelligence degraded" : ""}
+                {analyze?.sync?.lastSyncedAt
+                  ? ` · ${analyze.sync.mode || "sync"} · 신규 ${analyze.sync.newCount ?? 0} · 캐시 ${analyze.sync.totalCached ?? 0}`
+                  : ""}
               </p>
             </div>
             <button
-              onClick={fetchData}
-              disabled={refreshing}
-              style={{
-                padding: '8px 12px',
-                backgroundColor: '#f3f4f6',
-                border: '1px solid #e5e7eb',
-                borderRadius: '8px',
-                cursor: refreshing ? 'not-allowed' : 'pointer',
-                fontSize: '13px',
-                color: '#374151',
-                opacity: refreshing ? 0.6 : 1,
-              }}
+              type="button"
+              onClick={refresh}
+              disabled={refreshing || tabLoading}
+              style={{ padding: "8px 12px" }}
             >
-              {refreshing ? '새로고침 중...' : '🔄 새로고침'}
+              {refreshing || tabLoading ? "..." : "새로고침"}
             </button>
           </div>
-
-          {/* Search */}
-          <input
-            type="text"
-            placeholder="메일 검색..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '10px 14px',
-              border: '1px solid #e5e7eb',
-              borderRadius: '8px',
-              fontSize: '14px',
-              outline: 'none',
-              backgroundColor: '#f9fafb',
-              boxSizing: 'border-box',
-            }}
-          />
-
-          {/* Filter Tabs */}
-          <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-            {([
-              { key: 'all' as FilterTab, label: '전체', count: messages.length },
-              { key: 'unread' as FilterTab, label: '읽지 않음', count: unreadCount },
-              { key: 'read' as FilterTab, label: '읽음', count: readCount },
-            ]).map((tab) => (
-              <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
+          {accounts.length > 1 && (
+            <div style={{ marginTop: 10 }}>
+              <label style={{ fontSize: 12, color: "#6b7280", marginRight: 8 }}>
+                계정
+              </label>
+              <select
+                value={activeAccountId || ""}
+                disabled={switchingAccount}
+                onChange={(e) => switchAccount(e.target.value)}
                 style={{
-                  padding: '6px 12px',
-                  borderRadius: '16px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '13px',
-                  fontWeight: '500',
-                  backgroundColor: activeTab === tab.key ? '#111827' : '#f3f4f6',
-                  color: activeTab === tab.key ? 'white' : '#6b7280',
+                  fontSize: 13,
+                  padding: "4px 8px",
+                  borderRadius: 6,
+                  border: "1px solid #e5e7eb",
                 }}
               >
-                {tab.label} ({tab.count})
+                {accounts.map((account) => (
+                  <option key={account.id} value={account.id}>
+                    {account.displayName || account.email || account.id}
+                    {account.connected === false ? " (미연결)" : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+          <div
+            style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}
+          >
+            {(
+              [
+                "inbox",
+                "candidates",
+                "insights",
+                "attachments",
+                "entities",
+                "calendar",
+                "reply",
+              ] as HubTab[]
+            ).map((tab) => (
+              <button
+                key={tab}
+                type="button"
+                style={tabStyle(tab)}
+                onClick={() => setHubTab(tab)}
+              >
+                {tabLabels[tab]}
               </button>
             ))}
           </div>
+          {error && (
+            <p style={{ color: "#dc2626", fontSize: 13, marginTop: 8 }}>
+              {error}
+            </p>
+          )}
+          {tabError && hubTab !== "inbox" && (
+            <p style={{ color: "#d97706", fontSize: 12, marginTop: 8 }}>
+              {tabError}
+            </p>
+          )}
+          {pendingApproval && (
+            <p style={{ color: "#2563eb", fontSize: 12, marginTop: 8 }}>
+              {pendingApproval}
+            </p>
+          )}
         </div>
 
-        {/* Mail List */}
-        <div style={{ flex: 1, overflowY: 'auto' }}>
-          {error && (
-            <div style={{ padding: '16px 24px', backgroundColor: '#fef2f2', borderBottom: '1px solid #fecaca' }}>
-              <p style={{ fontSize: '13px', color: '#dc2626', margin: 0 }}>⚠️ {error}</p>
-            </div>
+        <div style={{ flex: 1, overflowY: "auto" }}>
+          {tabLoading && (
+            <p style={{ padding: 24, color: "#6b7280" }}>
+              탭 데이터 로딩 중...
+            </p>
           )}
 
-          {filteredMessages.length === 0 ? (
-            <div style={{ padding: '48px 24px', textAlign: 'center' }}>
-              <div style={{ fontSize: '40px', marginBottom: '12px' }}>📭</div>
-              <p style={{ fontSize: '15px', color: '#6b7280', margin: 0 }}>
-                {searchQuery ? '검색 결과가 없습니다.' : '메일이 없습니다.'}
+          {!tabLoading &&
+            hubTab === "inbox" &&
+            (threadGroups.length === 0 ? (
+              <p style={{ padding: 24, color: "#6b7280" }}>
+                스레드가 없습니다.
               </p>
-            </div>
-          ) : (
-            filteredMessages.map((mail) => (
-              <div
-                key={mail.id}
-                onClick={() => setSelectedMail(mail)}
-                style={{
-                  padding: '16px 24px',
-                  borderBottom: '1px solid #f3f4f6',
-                  cursor: 'pointer',
-                  backgroundColor: selectedMail?.id === mail.id ? '#eff6ff' : mail.isRead ? 'white' : '#f0f9ff',
-                  transition: 'background-color 0.15s',
-                  display: 'flex',
-                  gap: '12px',
-                }}
-              >
-                <div style={{
-                  width: '8px',
-                  height: '8px',
-                  borderRadius: '50%',
-                  backgroundColor: mail.isRead ? '#d1d5db' : '#3b82f6',
-                  marginTop: '7px',
-                  flexShrink: 0,
-                }} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
-                    <p style={{
-                      fontSize: '14px',
-                      color: '#111827',
-                      margin: 0,
-                      fontWeight: mail.isRead ? 'normal' : '600',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                      flex: 1,
-                    }}>
-                      {mail.subject || '제목 없음'}
-                    </p>
-                    <span style={{ fontSize: '12px', color: '#9ca3af', flexShrink: 0 }}>
-                      {formatDate(mail.receivedDateTime)}
+            ) : (
+              threadGroups.map((group) => (
+                <button
+                  key={group.key}
+                  type="button"
+                  onClick={() => {
+                    setSelectedThread(group);
+                    const lastMsg =
+                      group.messageIds?.[group.messageIds.length - 1];
+                    setSelectedMessageId(lastMsg || null);
+                  }}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    textAlign: "left",
+                    padding: "14px 20px",
+                    border: "none",
+                    borderBottom: "1px solid #f3f4f6",
+                    background:
+                      selectedThread?.key === group.key ? "#eff6ff" : "#fff",
+                    cursor: "pointer",
+                  }}
+                >
+                  <div style={{ fontWeight: 600, fontSize: 14 }}>
+                    {group.label}
+                  </div>
+                  <div style={{ fontSize: 12, color: "#6b7280", marginTop: 4 }}>
+                    {group.count}통{group.userReplied ? " · 회신함" : ""}
+                    {group.aiGrouped ? " · AI" : ""}
+                  </div>
+                </button>
+              ))
+            ))}
+
+          {!tabLoading &&
+            hubTab === "reply" &&
+            (draftLoading ? (
+              <p style={{ padding: 24, color: "#6b7280" }}>
+                회신 초안 로딩 중...
+              </p>
+            ) : !selectedMessageId ? (
+              <p style={{ padding: 24, color: "#6b7280" }}>
+                Inbox에서 스레드를 선택하세요.
+              </p>
+            ) : (
+              <div style={{ padding: 20 }}>
+                <div style={{ fontWeight: 600, marginBottom: 8 }}>
+                  {replyDraft?.subject || "Re:"}
+                </div>
+                <pre
+                  style={{
+                    whiteSpace: "pre-wrap",
+                    fontSize: 13,
+                    color: "#374151",
+                    background: "#f9fafb",
+                    padding: 12,
+                    borderRadius: 8,
+                  }}
+                >
+                  {replyDraft?.body || "(빈 초안)"}
+                </pre>
+              </div>
+            ))}
+
+          {!tabLoading &&
+            hubTab === "candidates" &&
+            (candidates.length === 0 ? (
+              <p style={{ padding: 24, color: "#6b7280" }}>후보가 없습니다.</p>
+            ) : (
+              candidates.map((c, i) => (
+                <div
+                  key={c.mailMessageId || i}
+                  style={{
+                    padding: "14px 20px",
+                    borderBottom: "1px solid #f3f4f6",
+                  }}
+                >
+                  <div style={{ fontWeight: 600 }}>{c.title}</div>
+                  <div style={{ fontSize: 12, color: "#6b7280" }}>
+                    {c.summary}
+                  </div>
+                </div>
+              ))
+            ))}
+
+          {!tabLoading &&
+            hubTab === "insights" &&
+            (insights.length === 0 ? (
+              <p style={{ padding: 24, color: "#6b7280" }}>
+                인사이트 스레드가 없습니다.
+              </p>
+            ) : (
+              insights.map((t, i) => (
+                <div
+                  key={t.threadKey || i}
+                  style={{
+                    padding: "14px 20px",
+                    borderBottom: "1px solid #f3f4f6",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      gap: 8,
+                    }}
+                  >
+                    <div style={{ fontWeight: 600 }}>{t.threadTitle}</div>
+                    <span style={{ fontSize: 11, color: "#6b7280" }}>
+                      {t.effectiveStatus || t.status || "active"}
                     </span>
                   </div>
-                  <p style={{
-                    fontSize: '13px',
-                    color: '#6b7280',
-                    margin: '4px 0 0 0',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}>
-                    {mail.from?.emailAddress?.name || mail.from?.emailAddress?.address || '발신자 없음'}
-                  </p>
-                  <p style={{
-                    fontSize: '12px',
-                    color: '#9ca3af',
-                    margin: '4px 0 0 0',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}>
-                    {mail.bodyPreview || ''}
-                  </p>
+                  <div style={{ fontSize: 12, color: "#6b7280", marginTop: 4 }}>
+                    {t.messageCount ? `${t.messageCount}통 · ` : ""}
+                    {t.participantDomains?.length
+                      ? t.participantDomains.join(", ")
+                      : ""}
+                  </div>
+                  <div style={{ fontSize: 12, color: "#6b7280", marginTop: 6 }}>
+                    {t.summary}
+                  </div>
                 </div>
-                {mail.hasAttachments && (
-                  <span style={{ fontSize: '14px', flexShrink: 0, marginTop: '2px' }}>📎</span>
-                )}
-              </div>
-            ))
-          )}
+              ))
+            ))}
+
+          {!tabLoading &&
+            hubTab === "attachments" &&
+            (attachments.length === 0 ? (
+              <p style={{ padding: 24, color: "#6b7280" }}>
+                첨부 아카이브가 비어 있습니다.
+              </p>
+            ) : (
+              attachments.map((a, i) => (
+                <div
+                  key={a.id || i}
+                  style={{
+                    padding: "14px 20px",
+                    borderBottom: "1px solid #f3f4f6",
+                  }}
+                >
+                  <div style={{ fontWeight: 600 }}>{a.name || a.id}</div>
+                  <div style={{ fontSize: 12, color: "#6b7280" }}>
+                    {[a.fromAddress, a.subject, a.category]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </div>
+                </div>
+              ))
+            ))}
+
+          {!tabLoading &&
+            hubTab === "entities" &&
+            (entityCandidates.length === 0 ? (
+              <p style={{ padding: 24, color: "#6b7280" }}>
+                엔티티 후보가 없습니다.
+              </p>
+            ) : (
+              entityCandidates.map((entity, i) => (
+                <div
+                  key={entity.domain || entity.email || i}
+                  style={{
+                    padding: "14px 20px",
+                    borderBottom: "1px solid #f3f4f6",
+                  }}
+                >
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent: "space-between",
+                      gap: 8,
+                    }}
+                  >
+                    <div style={{ fontWeight: 600 }}>
+                      {entity.candidateName || entity.domain}
+                    </div>
+                    <span style={{ fontSize: 11, color: "#6b7280" }}>
+                      {entity.entityRole || "customer"}
+                    </span>
+                  </div>
+                  <div style={{ fontSize: 12, color: "#6b7280", marginTop: 4 }}>
+                    {entity.domain || entity.email}
+                    {entity.confidence != null
+                      ? ` · ${Math.round(entity.confidence * 100)}%`
+                      : ""}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => promoteEntityCandidate(entity)}
+                    style={{ marginTop: 8, fontSize: 12 }}
+                  >
+                    CRM 후보 생성
+                  </button>
+                </div>
+              ))
+            ))}
+
+          {!tabLoading &&
+            hubTab === "calendar" &&
+            (calendarHints.length === 0 ? (
+              <p style={{ padding: 24, color: "#6b7280" }}>
+                일정 힌트가 없습니다.
+              </p>
+            ) : (
+              calendarHints.map((item, i) => (
+                <div
+                  key={item.messageId || i}
+                  style={{
+                    padding: "14px 20px",
+                    borderBottom: "1px solid #f3f4f6",
+                  }}
+                >
+                  <div style={{ fontWeight: 600 }}>{item.title || "일정"}</div>
+                  <div style={{ fontSize: 12, color: "#6b7280", marginTop: 4 }}>
+                    {[item.when, item.owner, item.lane]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </div>
+                </div>
+              ))
+            ))}
         </div>
       </div>
 
-      {/* Right: Mail Detail Panel */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', backgroundColor: 'white' }}>
-        {selectedMail ? (
+      <div style={{ flex: 1, padding: 24, overflowY: "auto" }}>
+        {selectedThread ? (
           <>
-            <div style={{ padding: '24px 32px', borderBottom: '1px solid #e5e7eb' }}>
-              <h2 style={{ fontSize: '22px', fontWeight: '700', color: '#111827', margin: '0 0 12px 0' }}>
-                {selectedMail.subject || '제목 없음'}
-              </h2>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '50%',
-                  backgroundColor: '#dbeafe',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  color: '#2563eb',
-                }}>
-                  {(selectedMail.from?.emailAddress?.name || 'U')[0].toUpperCase()}
-                </div>
-                <div>
-                  <p style={{ fontSize: '14px', fontWeight: '600', color: '#111827', margin: 0 }}>
-                    {selectedMail.from?.emailAddress?.name || '발신자 없음'}
-                  </p>
-                  <p style={{ fontSize: '13px', color: '#6b7280', margin: '2px 0 0 0' }}>
-                    {selectedMail.from?.emailAddress?.address || ''}
-                  </p>
-                </div>
-                <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
-                  <p style={{ fontSize: '13px', color: '#6b7280', margin: 0 }}>
-                    {selectedMail.receivedDateTime
-                      ? new Date(selectedMail.receivedDateTime).toLocaleString('ko-KR')
-                      : ''}
-                  </p>
-                  {selectedMail.toRecipients && selectedMail.toRecipients.length > 0 && (
-                    <p style={{ fontSize: '12px', color: '#9ca3af', margin: '2px 0 0 0' }}>
-                      수신: {selectedMail.toRecipients.map(r => r.emailAddress?.name || r.emailAddress?.address).join(', ')}
-                    </p>
-                  )}
-                </div>
-              </div>
-              {selectedMail.importance === 'high' && (
-                <div style={{
-                  marginTop: '12px',
-                  padding: '6px 12px',
-                  backgroundColor: '#fef2f2',
-                  borderRadius: '6px',
-                  display: 'inline-block',
-                }}>
-                  <span style={{ fontSize: '12px', color: '#dc2626', fontWeight: '500' }}>🔴 중요 메일</span>
-                </div>
-              )}
-            </div>
-            <div style={{ flex: 1, padding: '24px 32px', overflowY: 'auto' }}>
-              {selectedMail.body?.content ? (
-                <div
-                  style={{ fontSize: '14px', color: '#374151', lineHeight: '1.7' }}
-                  dangerouslySetInnerHTML={{ __html: selectedMail.body.content }}
-                />
-              ) : (
-                <p style={{ fontSize: '14px', color: '#6b7280', lineHeight: '1.7' }}>
-                  {selectedMail.bodyPreview || '메일 내용이 없습니다.'}
+            <h3 style={{ marginTop: 0 }}>{selectedThread.label}</h3>
+            <p style={{ color: "#6b7280", fontSize: 13 }}>
+              참여: {(selectedThread.participants || []).join(", ")}
+            </p>
+
+            {threadInsight && (
+              <div
+                style={{
+                  marginBottom: 16,
+                  padding: 12,
+                  background: "#fff",
+                  borderRadius: 8,
+                  border: "1px solid #e5e7eb",
+                }}
+              >
+                <strong>Thread insight</strong>
+                <p
+                  style={{ fontSize: 13, color: "#374151", margin: "8px 0 0" }}
+                >
+                  {threadInsight.summary}
                 </p>
-              )}
-            </div>
+              </div>
+            )}
+
+            {threadEntities.length > 0 && (
+              <div
+                style={{
+                  marginBottom: 16,
+                  padding: 12,
+                  background: "#fff",
+                  borderRadius: 8,
+                  border: "1px solid #e5e7eb",
+                }}
+              >
+                <strong>Entity candidates ({threadEntities.length})</strong>
+                {threadEntities.map((e, i) => (
+                  <div key={i} style={{ fontSize: 12, marginTop: 4 }}>
+                    {e.candidateName || e.domain}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {threadCandidates.length > 0 && (
+              <div
+                style={{
+                  marginBottom: 16,
+                  padding: 12,
+                  background: "#fff",
+                  borderRadius: 8,
+                  border: "1px solid #e5e7eb",
+                }}
+              >
+                <strong>Task candidates ({threadCandidates.length})</strong>
+                {threadCandidates.map((c, i) => (
+                  <div key={i} style={{ fontSize: 12, marginTop: 4 }}>
+                    {c.title}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {threadCalendar.length > 0 && (
+              <div
+                style={{
+                  marginBottom: 16,
+                  padding: 12,
+                  background: "#fff",
+                  borderRadius: 8,
+                  border: "1px solid #e5e7eb",
+                }}
+              >
+                <strong>Calendar hints</strong>
+                {threadCalendar.map((c, i) => (
+                  <div key={i} style={{ fontSize: 12, marginTop: 4 }}>
+                    {c.title} — {c.when}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {replyDraft && (
+              <div
+                style={{
+                  marginBottom: 16,
+                  padding: 12,
+                  background: "#fef3c7",
+                  borderRadius: 8,
+                  border: "1px solid #fcd34d",
+                }}
+              >
+                <strong>Reply draft</strong>
+                <p style={{ fontSize: 13, margin: "8px 0 0" }}>
+                  {replyDraft.subject}
+                </p>
+                <pre
+                  style={{ whiteSpace: "pre-wrap", fontSize: 12, marginTop: 8 }}
+                >
+                  {replyDraft.body?.slice(0, 300)}
+                </pre>
+              </div>
+            )}
+
+            <h4>스레드 타임라인</h4>
+            {selectedMessages.map((m) => (
+              <button
+                key={m.id}
+                type="button"
+                onClick={() => setSelectedMessageId(m.id)}
+                style={{
+                  display: "block",
+                  width: "100%",
+                  textAlign: "left",
+                  marginBottom: 16,
+                  padding: 12,
+                  background: selectedMessageId === m.id ? "#eff6ff" : "#fff",
+                  borderRadius: 8,
+                  border: "1px solid #e5e7eb",
+                  cursor: "pointer",
+                }}
+              >
+                <div style={{ fontSize: 12, color: "#6b7280" }}>
+                  {m.mailFolder === "sentitems" ? "보낸" : "받은"} ·{" "}
+                  {m.fromName || m.from} ·{" "}
+                  {m.receivedAt
+                    ? new Date(m.receivedAt).toLocaleString("ko-KR")
+                    : ""}
+                </div>
+                <div style={{ fontWeight: 600, marginTop: 4 }}>{m.subject}</div>
+                <div style={{ fontSize: 13, color: "#374151", marginTop: 6 }}>
+                  {m.bodyPreview}
+                </div>
+              </button>
+            ))}
+            {!selectedThread.userReplied && replyDraft && (
+              <button
+                type="button"
+                onClick={requestSendDraft}
+                style={{ marginTop: 12, padding: "10px 16px" }}
+              >
+                발송 (승인 게이트)
+              </button>
+            )}
           </>
         ) : (
-          <div style={{
-            flex: 1,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexDirection: 'column',
-          }}>
-            <div style={{ fontSize: '64px', marginBottom: '16px' }}>📬</div>
-            <p style={{ fontSize: '18px', color: '#6b7280', margin: 0 }}>
-              메일을 선택하여 내용을 확인하세요
-            </p>
-          </div>
+          <p style={{ color: "#6b7280" }}>스레드를 선택하세요.</p>
         )}
       </div>
     </div>
-  )
+  );
 }

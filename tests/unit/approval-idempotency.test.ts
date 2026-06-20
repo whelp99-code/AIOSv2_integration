@@ -6,6 +6,7 @@ let clearIdempotencyCache: typeof import('@/lib/integrations/approval-middleware
 beforeEach(async () => {
   vi.resetModules();
   vi.stubEnv('NODE_ENV', 'development');
+  vi.stubEnv('AIOS_ALLOW_DEV_APPROVAL_BYPASS', 'true');
   const mod = await import('@/lib/integrations/approval-middleware');
   createGatedHandler = mod.createGatedHandler;
   clearIdempotencyCache = mod.clearIdempotencyCache;

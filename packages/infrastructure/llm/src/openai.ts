@@ -19,6 +19,7 @@ export interface OpenAIClientConfig {
 
 export class OpenAIClientAdapter implements LLMClient {
   readonly provider = 'openai' as const;
+  readonly providerId = 'openai-default';
   private client: OpenAI;
   private defaultModel: string;
 
@@ -48,6 +49,7 @@ export class OpenAIClientAdapter implements LLMClient {
     return {
       content: choice.message?.content || '',
       model: response.model,
+      provider: 'openai',
       usage: {
         promptTokens: response.usage?.prompt_tokens ?? 0,
         completionTokens: response.usage?.completion_tokens ?? 0,
@@ -82,6 +84,15 @@ export class OpenAIClientAdapter implements LLMClient {
       return true;
     } catch {
       return false;
+    }
+  }
+
+  async listModels(): Promise<string[]> {
+    try {
+      const response = await this.client.models.list();
+      return response.data.map((model) => model.id);
+    } catch {
+      return [this.defaultModel];
     }
   }
 }

@@ -19,6 +19,7 @@ export interface LMStudioConfig {
 
 export class LMStudioClient implements LLMClient {
   readonly provider = 'lm-studio' as const;
+  readonly providerId = 'lm-studio-local';
   private client: OpenAI;
   private defaultModel: string;
 
@@ -49,6 +50,7 @@ export class LMStudioClient implements LLMClient {
     return {
       content: choice.message?.content || '',
       model: response.model,
+      provider: 'lm-studio',
       usage: {
         promptTokens: response.usage?.prompt_tokens ?? 0,
         completionTokens: response.usage?.completion_tokens ?? 0,
@@ -83,6 +85,15 @@ export class LMStudioClient implements LLMClient {
       return true;
     } catch {
       return false;
+    }
+  }
+
+  async listModels(): Promise<string[]> {
+    try {
+      const response = await this.client.models.list();
+      return response.data.map((model) => model.id);
+    } catch {
+      return [this.defaultModel];
     }
   }
 }

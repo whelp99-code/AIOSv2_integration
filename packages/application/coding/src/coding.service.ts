@@ -7,8 +7,8 @@ import type {
   CodingProject, CodingProjectRepository,
   CodeGeneration, CodeGenerationRepository,
   CodeReview, CodeReviewRepository,
-} from '@aios/domain/coding';
-import type { LLMClient, LLMMessage } from '@aios/infrastructure/llm';
+} from '@aios/domain-coding';
+import type { LLMClient, LLMMessage } from '@aios/infrastructure-llm';
 
 export class CodingService {
   constructor(

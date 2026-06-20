@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "lastUpdatedAt": "2026-06-13T02:10:00.000Z",
+  "lastUpdatedAt": "2026-06-19T10:03:00.000Z",
   "approvals": [
     {
       "id": "approval-seed-collaboration",
@@ -39,6 +39,74 @@
       "resolvedAt": "2026-06-12T22:30:00.000Z",
       "resolvedBy": "admin",
       "resolution": "Approved for staging deployment"
+    },
+    {
+      "id": "approval-47c99c2e-feb9-4f11-8d1f-b3cb6a9b307d",
+      "type": "destructive-action",
+      "sessionId": "cursor-opencode-main-session",
+      "assignmentId": "slack-send-message",
+      "requester": "live-smoke",
+      "requestedBy": "live-smoke",
+      "actionType": "send",
+      "target": "slack message send",
+      "context": {},
+      "status": "rejected",
+      "createdAt": "2026-06-16T06:14:16.824Z",
+      "resolvedAt": "2026-06-19T10:03:00.000Z",
+      "resolvedBy": "cursor",
+      "resolution": "Dry-run smoke artifact — rejected during queue hygiene (no --execute)."
+    },
+    {
+      "id": "approval-824c3f87-6f81-4ed3-b882-6590f21d5fe7",
+      "type": "destructive-action",
+      "sessionId": "cursor-opencode-main-session",
+      "assignmentId": "whelp99-tool-call",
+      "requester": "live-smoke",
+      "requestedBy": "live-smoke",
+      "actionType": "device-control",
+      "target": "whelp99 tool call: sangfor.products",
+      "context": {
+        "toolName": "sangfor.products"
+      },
+      "status": "rejected",
+      "createdAt": "2026-06-16T06:14:23.462Z",
+      "resolvedAt": "2026-06-19T10:03:00.000Z",
+      "resolvedBy": "cursor",
+      "resolution": "Dry-run smoke artifact — rejected during queue hygiene (no --execute)."
+    },
+    {
+      "id": "approval-dc207198-ec42-47b0-9921-67081144e035",
+      "type": "destructive-action",
+      "sessionId": "cursor-opencode-main-session",
+      "assignmentId": "slack-send-message",
+      "requester": "live-smoke",
+      "requestedBy": "live-smoke",
+      "actionType": "send",
+      "target": "slack message send",
+      "context": {},
+      "status": "rejected",
+      "createdAt": "2026-06-16T06:23:36.012Z",
+      "resolvedAt": "2026-06-19T10:03:00.000Z",
+      "resolvedBy": "cursor",
+      "resolution": "Dry-run smoke artifact — rejected during queue hygiene (duplicate smoke run)."
+    },
+    {
+      "id": "approval-7155dff4-a7d9-4a46-bbc1-6c3b0f0f29aa",
+      "type": "destructive-action",
+      "sessionId": "cursor-opencode-main-session",
+      "assignmentId": "whelp99-tool-call",
+      "requester": "live-smoke",
+      "requestedBy": "live-smoke",
+      "actionType": "device-control",
+      "target": "whelp99 tool call: sangfor.products",
+      "context": {
+        "toolName": "sangfor.products"
+      },
+      "status": "rejected",
+      "createdAt": "2026-06-16T06:23:36.059Z",
+      "resolvedAt": "2026-06-19T10:03:00.000Z",
+      "resolvedBy": "cursor",
+      "resolution": "Dry-run smoke artifact — rejected during queue hygiene (duplicate smoke run)."
     }
   ]
 }

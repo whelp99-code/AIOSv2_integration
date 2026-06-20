@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { proxyUpstreamJson } from '../../../../lib/integrations/upstream-proxy'
-import { getFaiosV3Url } from '../../../../lib/integrations/upstream-urls'
+import { getFaiosV3Headers, getFaiosV3Url } from '../../../../lib/integrations/upstream-urls'
 
 export async function GET() {
   try {
@@ -8,6 +8,7 @@ export async function GET() {
       baseUrl: getFaiosV3Url(),
       path: '/health',
       timeoutMs: 5000,
+      headers: getFaiosV3Headers(),
     })
 
     if (result.ok) {

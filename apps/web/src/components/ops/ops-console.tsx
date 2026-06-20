@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
+import { ExecutionTracker } from "./execution-tracker";
 
 interface ServiceHealth {
   name: string;
@@ -446,7 +447,7 @@ export function OpsConsole() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<
-    "health" | "approvals" | "dispatch" | "evidence"
+    "health" | "approvals" | "executions" | "dispatch" | "evidence"
   >("health");
   const eventSourceRef = useRef<EventSource | null>(null);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
@@ -741,6 +742,11 @@ export function OpsConsole() {
               count: pendingApprovals.length,
             },
             {
+              id: "executions",
+              label: "⚡ 실행 추적",
+              count: null,
+            },
+            {
               id: "dispatch",
               label: "🚀 디스패치",
               count:
@@ -818,6 +824,13 @@ export function OpsConsole() {
               />
             ))}
           </div>
+        </div>
+      )}
+
+      {/* Executions Tab */}
+      {activeTab === "executions" && (
+        <div>
+          <ExecutionTracker />
         </div>
       )}
 

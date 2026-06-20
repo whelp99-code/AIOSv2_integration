@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getFaiosV3Url } from '../../../../lib/integrations/upstream-urls'
+import { getFaiosV3Headers, getFaiosV3Url } from '../../../../lib/integrations/upstream-urls'
 import { proxyUpstreamJson, upstreamErrorResponse, upstreamProxyResponse } from '../../../../lib/integrations/upstream-proxy'
 import { createGatedHandler } from '../../../../lib/integrations/approval-middleware'
 
@@ -8,6 +8,7 @@ export async function GET() {
     const result = await proxyUpstreamJson({
       baseUrl: getFaiosV3Url(),
       path: '/api/workflows',
+      headers: getFaiosV3Headers(),
     })
     return upstreamProxyResponse(result)
   } catch (error) {
@@ -29,6 +30,7 @@ export const POST = createGatedHandler(
         path: `/api/workflows/${workflowId}/execute`,
         method: 'POST',
         body: { input },
+        headers: getFaiosV3Headers(),
       })
 
       if (!result.ok) {

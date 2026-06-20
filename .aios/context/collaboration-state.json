@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "workspaceRoot": "/Users/jmpark/Documents/Playground/AIOSv2_integration",
-  "lastUpdatedAt": "2026-06-13T11:21:33.807Z",
+  "lastUpdatedAt": "2026-06-19T10:03:00.000Z",
   "projects": [
     {
       "name": "AIOS v1",
@@ -44,7 +44,7 @@
       "id": "cursor-opencode-main-session",
       "title": "Cursor + opencode multi-session collaboration",
       "objective": "Cursor와 opencode가 같은 상태를 읽고 서로 넘겨받으며 AIOS v1, F-aios-v3-core, sangfor-mcp-workflow, vibe-coding-os, whelp99-code-sangfor-engineer-mcp 연동을 진행한다.",
-      "status": "blocked",
+      "status": "active",
       "owner": "cursor",
       "participants": [
         {
@@ -851,13 +851,15 @@
             "tests/approval-gate.test.ts"
           ],
           "requiredApprovals": [],
-          "status": "completed",
+          "status": "done",
           "createdAt": "2026-06-13T11:01:22.151Z",
-          "updatedAt": "2026-06-13T11:06:33.752Z",
+          "updatedAt": "2026-06-19T10:03:00.000Z",
           "metadata": {
             "trigger": "phase7-remediation-dispatch",
             "cwd": "/Users/jmpark/Documents/Playground/AIOSv2_integration",
-            "auditDoc": "docs/reports/phase7-final-report.md"
+            "auditDoc": "docs/reports/phase7-final-report.md",
+            "completedAt": "2026-06-13T20:27:00.000Z",
+            "summary": "Phase7 report + evidence corrected; Cursor completed when opencode dispatch stalled."
           }
         },
         {
@@ -868,13 +870,15 @@
           "role": "implementer",
           "targetFiles": ["tests/ai-workflow.test.ts"],
           "requiredApprovals": [],
-          "status": "failed",
+          "status": "done",
           "createdAt": "2026-06-13T11:06:33.753Z",
-          "updatedAt": "2026-06-13T11:21:33.792Z",
+          "updatedAt": "2026-06-19T10:03:00.000Z",
           "metadata": {
             "trigger": "phase7-remediation-dispatch",
             "cwd": "/Users/jmpark/Documents/Playground/sangfor-mcp-workflow",
-            "auditDoc": "docs/reports/phase7-final-report.md"
+            "auditDoc": "docs/reports/phase7-final-report.md",
+            "completedAt": "2026-06-13T20:27:00.000Z",
+            "summary": "isLmStudioReady() skip guards applied; pnpm test 44/44 verified."
           }
         },
         {
@@ -890,13 +894,126 @@
             "app/[locale]/projects/page.tsx"
           ],
           "requiredApprovals": [],
-          "status": "running",
+          "status": "done",
           "createdAt": "2026-06-13T11:21:33.802Z",
-          "updatedAt": "2026-06-13T11:21:33.807Z",
+          "updatedAt": "2026-06-19T10:03:00.000Z",
           "metadata": {
             "trigger": "phase7-remediation-dispatch",
             "cwd": "/Users/jmpark/Documents/Playground/vibe-coding-os",
-            "auditDoc": "docs/reports/phase7-final-report.md"
+            "auditDoc": "docs/reports/phase7-final-report.md",
+            "completedAt": "2026-06-13T20:27:00.000Z",
+            "summary": "messages/ko.json + en.json keys added; pnpm build MISSING_MESSAGE 0."
+          }
+        },
+        {
+          "id": "assignment-lifecycle-c0-c10-foundation",
+          "title": "Lifecycle C0–C10 mail-to-maintenance workflow",
+          "description": "Implement lifecycle domain, API routes, mail hub reply draft, and workflow tests per lifecycle-phase-completion-2026-06-16.md.",
+          "assignedTo": "cursor",
+          "role": "orchestrator",
+          "targetFiles": [
+            "packages/domain/src/models/lifecycle.ts",
+            "packages/application/src/lifecycle/",
+            "apps/web/src/app/api/lifecycle/",
+            "tests/lifecycle-workflow.test.ts",
+            "docs/reports/lifecycle-phase-completion-2026-06-16.md"
+          ],
+          "requiredApprovals": [],
+          "status": "done",
+          "createdAt": "2026-06-16T00:00:00.000Z",
+          "updatedAt": "2026-06-19T10:03:00.000Z",
+          "metadata": {
+            "phase": "lifecycle",
+            "commit": "11beb86",
+            "completedAt": "2026-06-16T00:00:00.000Z",
+            "summary": "C0–C10 foundation committed; 80 targeted tests PASS."
+          }
+        },
+        {
+          "id": "assignment-lifecycle-db-persistence",
+          "title": "Lifecycle PostgreSQL persistence",
+          "description": "Prisma operational workflow foundation + repository hydration.",
+          "assignedTo": "cursor",
+          "role": "orchestrator",
+          "targetFiles": [
+            "packages/db/prisma/schema.prisma",
+            "packages/infrastructure/workflow/src/prisma-repositories.ts",
+            "packages/db/prisma/migrations/20260618153000_operational_workflow_foundation/"
+          ],
+          "requiredApprovals": [],
+          "status": "done",
+          "createdAt": "2026-06-16T12:00:00.000Z",
+          "updatedAt": "2026-06-19T10:03:00.000Z",
+          "metadata": {
+            "phase": "lifecycle",
+            "commit": "cb4da86",
+            "completedAt": "2026-06-16T16:00:00.000Z",
+            "summary": "PostgreSQL persistence + integration status refresh."
+          }
+        },
+        {
+          "id": "assignment-lifecycle-live-ops-hardening",
+          "title": "Lifecycle live ops hardening",
+          "description": "DB hydrate, health probes, lifecycle-ops-smoke tooling.",
+          "assignedTo": "cursor",
+          "role": "orchestrator",
+          "targetFiles": [
+            "scripts/lifecycle-ops-smoke.mjs",
+            "tests/lifecycle-read.test.ts",
+            "apps/web/src/components/dashboard/dashboard.tsx"
+          ],
+          "requiredApprovals": [],
+          "status": "done",
+          "createdAt": "2026-06-16T16:00:00.000Z",
+          "updatedAt": "2026-06-19T10:03:00.000Z",
+          "metadata": {
+            "phase": "lifecycle",
+            "commit": "ca0f116",
+            "completedAt": "2026-06-16T16:11:00.000Z",
+            "summary": "Live ops smoke + health probes hardened."
+          }
+        },
+        {
+          "id": "assignment-approval-queue-hygiene",
+          "title": "Approval queue hygiene + state sync",
+          "description": "Reject live-smoke dry-run pending items; purge api-client test pollution; sync collaboration-state.json.",
+          "assignedTo": "cursor",
+          "role": "orchestrator",
+          "targetFiles": [
+            ".aios/context/approval-queue.json",
+            ".aios/context/collaboration-state.json",
+            "docs/evidence/commit-staging-2026-06-19.md"
+          ],
+          "requiredApprovals": [],
+          "status": "done",
+          "createdAt": "2026-06-19T10:00:00.000Z",
+          "updatedAt": "2026-06-19T10:03:00.000Z",
+          "metadata": {
+            "phase": "lifecycle",
+            "completedAt": "2026-06-19T10:03:00.000Z",
+            "summary": "4 live-smoke rejected; 261 api-client test entries purged; 0 pending remaining."
+          }
+        },
+        {
+          "id": "assignment-lifecycle-wip-uncommitted",
+          "title": "Lifecycle WIP — uncommitted integration changes",
+          "description": "Working tree changes: workflow Prisma repos, aios-v3 proxy contract tests, API workflow routes, LLM package guards. See docs/evidence/commit-staging-2026-06-19.md.",
+          "assignedTo": "cursor",
+          "role": "orchestrator",
+          "targetFiles": [
+            "packages/infrastructure/workflow/src/prisma-repositories.ts",
+            "apps/api/src/routes/workflow.routes.ts",
+            "apps/web/src/app/api/aios-v3/__tests__/proxy-contract.test.ts"
+          ],
+          "requiredApprovals": [],
+          "status": "done",
+          "createdAt": "2026-06-19T10:03:00.000Z",
+          "updatedAt": "2026-06-19T11:00:00.000Z",
+          "metadata": {
+            "phase": "lifecycle",
+            "trigger": "commit-staging-review",
+            "completedAt": "2026-06-19T11:00:00.000Z",
+            "summary": "Committed as 48005b3 (hygiene) + c005897 (workflow/integration WIP)."
           }
         }
       ],
@@ -1193,7 +1310,7 @@
         }
       ],
       "createdAt": "2026-06-13T00:00:00.000Z",
-      "updatedAt": "2026-06-13T11:21:33.807Z",
+      "updatedAt": "2026-06-19T10:03:00.000Z",
       "metadata": {
         "activeProjects": [
           "AIOS v1",
@@ -1203,12 +1320,15 @@
           "whelp99-code-sangfor-engineer-mcp"
         ],
         "contractVersion": "cursor-opencode-collaboration-v1",
-        "lastOrchestrationAt": "2026-06-12T17:03:28.835Z",
-        "phase": "phase7-remediation",
-        "lastContinueAt": "2026-06-13T00:42:33.059Z",
+        "lastOrchestrationAt": "2026-06-19T10:03:00.000Z",
+        "phase": "lifecycle",
+        "lastContinueAt": "2026-06-16T16:11:00.000Z",
         "lastOpencodeDispatchAt": "2026-06-13T11:01:22.145Z",
-        "objective": "diagnostic-fix-all-build-blockers",
-        "lastPhase6DispatchResult": "all-completed"
+        "objective": "lifecycle-integration-and-commit-hygiene",
+        "lastPhase6DispatchResult": "all-completed",
+        "lastPhase7RemediationResult": "all-completed",
+        "pendingApprovals": 0,
+        "approvalQueueHygieneAt": "2026-06-19T10:03:00.000Z"
       }
     }
   ]

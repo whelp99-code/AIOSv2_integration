@@ -1,4 +1,4 @@
-import type { Workflow, WorkflowExecution } from './entities';
+import type { Workflow, WorkflowExecution, WorkflowExecutionEvent } from './entities';
 
 export interface WorkflowRepository {
   findById(id: string): Promise<Workflow | null>;
@@ -10,7 +10,10 @@ export interface WorkflowRepository {
 
 export interface WorkflowExecutionRepository {
   findById(id: string): Promise<WorkflowExecution | null>;
+  findByIdempotencyKey(idempotencyKey: string): Promise<WorkflowExecution | null>;
   findByWorkflowId(workflowId: string): Promise<WorkflowExecution[]>;
   save(execution: WorkflowExecution): Promise<void>;
   update(id: string, updates: Partial<WorkflowExecution>): Promise<void>;
+  appendEvent(event: WorkflowExecutionEvent): Promise<void>;
+  listEvents(executionId: string, afterSequence?: number): Promise<WorkflowExecutionEvent[]>;
 }

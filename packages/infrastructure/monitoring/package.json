@@ -1,5 +1,5 @@
 {
-  "name": "@aios/infrastructure/monitoring",
+  "name": "@aios/infrastructure-monitoring",
   "version": "0.1.0",
   "private": true,
   "main": "./src/index.ts",

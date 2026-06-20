@@ -1,16 +1,99 @@
 /**
  * Mail Service
- * 메일 유스케이스 서비스 (AIOS v1 재활용)
+ * 메일 유스케이스 서비스 (AIOS v1 재활용 + mail-intelligence bridge)
  */
 
-import type { AnalyzedMail, AIAnalysis, MailRepository } from '@aios/domain/mail';
-import type { LLMClient, LLMMessage } from '@aios/infrastructure/llm';
+import type { AnalyzedMail, AIAnalysis, MailRepository } from '@aios/domain-mail';
+import type { ClassificationFeedback, ThreadGroup } from '@aios/domain-mail';
+import type { LLMClient, LLMMessage } from '@aios/infrastructure-llm';
+import { createGraphMailAdapter, createJsonMailRepository } from '@aios/infrastructure/mail';
 
 export class MailService {
+  private graph = createGraphMailAdapter();
+  private jsonRepo = process.env.MAIL_JSON_REPO_PATH
+    ? createJsonMailRepository()
+    : null;
+
   constructor(
     private mailRepo: MailRepository,
     private llm: LLMClient
   ) {}
+
+  /** Optional JSON cache repository when MAIL_JSON_REPO_PATH is configured. */
+  getJsonRepository() {
+    return this.jsonRepo;
+  }
+
+  async syncInboxToJsonCache(options?: { top?: number; sync?: 'cache' | 'auto' | 'initial' }) {
+    if (!this.jsonRepo) {
+      throw new Error('MAIL_JSON_REPO_PATH is not configured');
+    }
+    const payload = await this.graph.syncInbox(options);
+    const rawMessages = (payload as { messages?: Array<Record<string, unknown>> }).messages ?? [];
+    const mails: AnalyzedMail[] = rawMessages
+      .filter((message) => typeof message.id === 'string')
+      .map((message) => ({
+        id: String(message.id),
+        subject: String(message.subject ?? '(제목 없음)'),
+        from: {
+          address: String((message.from as string | undefined) ?? 'unknown@local'),
+          name: String(message.fromName ?? ''),
+        },
+        to: [],
+        body: String(message.body ?? message.bodyPreview ?? ''),
+        bodyPreview: String(message.bodyPreview ?? ''),
+        receivedAt: String(message.receivedAt ?? new Date().toISOString()),
+        isRead: Boolean(message.isRead),
+        importance: 'normal',
+        attachments: [],
+        groupKey: typeof message.groupKey === 'string' ? message.groupKey : undefined,
+        status: 'analyzed',
+      }));
+    await this.jsonRepo.replaceAll(mails);
+    return { saved: mails.length, sync: payload.sync, connected: payload.connected };
+  }
+
+  async syncInbox(options?: { top?: number; sync?: 'cache' | 'auto' | 'initial' }) {
+    return this.graph.syncInbox(options);
+  }
+
+  async analyzeInbox(options?: { top?: number }) {
+    const payload = await this.graph.syncInbox({ top: options?.top ?? 50, sync: 'auto' });
+    return {
+      threadGroups: (payload.threadGroups || []) as ThreadGroup[],
+      sync: payload.sync,
+      connected: payload.connected,
+    };
+  }
+
+  async saveClassificationFeedback(feedback: ClassificationFeedback) {
+    const base = process.env.MAIL_INTELLIGENCE_URL || 'http://localhost:3010';
+    const response = await fetch(`${base.replace(/\/$/, '')}/api/portal/feedback-sync`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messageId: feedback.messageId,
+        userStatus: feedback.userStatus,
+        reasonCode: feedback.reasonCode,
+      }),
+      signal: AbortSignal.timeout(15_000),
+    });
+    if (!response.ok) {
+      throw new Error(`saveClassificationFeedback failed: ${response.status}`);
+    }
+    return response.json();
+  }
+
+  async requestSendApproval(_payload: Record<string, unknown>) {
+    return {
+      approvalStatus: 'pending' as const,
+      note: 'Call apps/web /api/mail/send without approvalId to create pending approval',
+    };
+  }
+
+  async sendApprovedMail(payload: Record<string, unknown>, approvalId: string) {
+    return this.graph.sendApprovedMail(payload, approvalId);
+  }
 
   async getMails(options?: { limit?: number; offset?: number }): Promise<AnalyzedMail[]> {
     return this.mailRepo.findAll(options);

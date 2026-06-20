@@ -4,6 +4,7 @@ describe('AIOS v1 Routes Integration', () => {
   beforeEach(() => {
     vi.stubEnv('NODE_ENV', 'development');
     vi.stubEnv('NEXT_PUBLIC_AIOS_V1_REAL_LOGIC', 'false');
+    vi.stubEnv('AIOS_ALLOW_DEV_APPROVAL_BYPASS', 'true');
   });
 
   afterEach(() => {

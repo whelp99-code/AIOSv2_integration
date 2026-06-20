@@ -3,6 +3,7 @@ import { PORTS } from "./ports";
 export type IntegrationProjectId =
   | "aios-v1"
   | "f-aios-v3-core"
+  | "mail-intelligence"
   | "sangfor-mcp-workflow"
   | "vibe-coding-os"
   | "whelp99-code-sangfor-engineer-mcp";
@@ -35,6 +36,15 @@ export const INTEGRATION_TARGETS: IntegrationTarget[] = [
     defaultUrl: `http://localhost:${PORTS.F_AIOS_V3}`,
     healthPath: "/api/health",
     integrationRole: "workflow engine",
+    probeMode: "http",
+  },
+  {
+    id: "mail-intelligence",
+    name: "Mail Intelligence",
+    envKey: "MAIL_INTELLIGENCE_URL",
+    defaultUrl: `http://localhost:${PORTS.MAIL_INTELLIGENCE}`,
+    healthPath: "/api/outlook/health",
+    integrationRole: "mail analysis and intelligence",
     probeMode: "http",
   },
   {

@@ -7,6 +7,7 @@ export interface ProxyUpstreamOptions {
   body?: unknown;
   timeoutMs?: number;
   fetchImpl?: typeof fetch;
+  headers?: HeadersInit;
 }
 
 export interface ProxyUpstreamResult<T = unknown> {
@@ -26,9 +27,13 @@ export async function proxyUpstreamJson<T = unknown>(
   const url = `${normalizeBaseUrl(options.baseUrl)}${options.path.startsWith('/') ? options.path : `/${options.path}`}`;
   const method = options.method ?? 'GET';
 
+  const headers = new Headers(options.headers);
+  headers.set('Content-Type', 'application/json');
+  headers.set('Accept', 'application/json');
+
   const response = await fetchImpl(url, {
     method,
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    headers,
     body: method === 'GET' || method === 'DELETE' ? undefined : JSON.stringify(options.body ?? {}),
     signal: AbortSignal.timeout(options.timeoutMs ?? 10_000),
   });

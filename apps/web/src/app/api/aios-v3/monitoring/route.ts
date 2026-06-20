@@ -1,4 +1,7 @@
-import { getFaiosV3Url } from "../../../../lib/integrations/upstream-urls";
+import {
+  getFaiosV3Headers,
+  getFaiosV3Url,
+} from "../../../../lib/integrations/upstream-urls";
 import {
   proxyUpstreamJson,
   upstreamErrorResponse,
@@ -11,6 +14,7 @@ export async function GET(request: Request) {
     const result = await proxyUpstreamJson({
       baseUrl: getFaiosV3Url(),
       path: `/api/monitoring${search}`,
+      headers: getFaiosV3Headers(),
     });
     return upstreamProxyResponse(result);
   } catch (error) {

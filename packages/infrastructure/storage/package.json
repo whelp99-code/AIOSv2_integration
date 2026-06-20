@@ -1,5 +1,5 @@
 {
-  "name": "@aios/infrastructure/storage",
+  "name": "@aios/infrastructure-storage",
   "version": "0.1.0",
   "private": true,
   "main": "./src/index.ts",

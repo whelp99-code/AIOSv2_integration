@@ -19,6 +19,7 @@ export interface AnthropicClientConfig {
 
 export class AnthropicClientAdapter implements LLMClient {
   readonly provider = 'anthropic' as const;
+  readonly providerId = 'anthropic-default';
   private client: Anthropic;
   private defaultModel: string;
 
@@ -53,6 +54,7 @@ export class AnthropicClientAdapter implements LLMClient {
     return {
       content: textBlock?.text || '',
       model: response.model,
+      provider: 'anthropic',
       usage: {
         promptTokens: response.usage.input_tokens,
         completionTokens: response.usage.output_tokens,
@@ -101,5 +103,10 @@ export class AnthropicClientAdapter implements LLMClient {
     } catch {
       return false;
     }
+  }
+
+  async listModels(): Promise<string[]> {
+    // Anthropic API는 모델 목록을 직접 제공하지 않음
+    return [this.defaultModel];
   }
 }

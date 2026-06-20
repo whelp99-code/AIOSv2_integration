@@ -7,3 +7,4 @@ export * from './github';
 export * from './collaboration';
 export * from './agents';
 export * from './integrations';
+export * from './mail';

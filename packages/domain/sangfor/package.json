@@ -1,5 +1,5 @@
 {
-  "name": "@aios/domain/sangfor",
+  "name": "@aios/domain-sangfor",
   "version": "0.1.0",
   "private": true,
   "main": "./src/index.ts",
