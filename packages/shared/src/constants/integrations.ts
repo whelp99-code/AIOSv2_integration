@@ -5,7 +5,9 @@ export type IntegrationProjectId =
   | "f-aios-v3-core"
   | "sangfor-mcp-workflow"
   | "vibe-coding-os"
-  | "whelp99-code-sangfor-engineer-mcp";
+  | "whelp99-code-sangfor-engineer-mcp"
+  | "mail-intelligence"
+  | "aios-v2-api";
 
 export interface IntegrationTarget {
   id: IntegrationProjectId;
@@ -65,6 +67,24 @@ export const INTEGRATION_TARGETS: IntegrationTarget[] = [
     probeMode: "filesystem",
     readinessNote:
       "Filesystem probe remains in the shared registry; Phase 6 web routes use WHELP99_MCP_HTTP_URL for health, tools list, and approval-gated tool calls.",
+  },
+  {
+    id: "mail-intelligence",
+    name: "Mail Intelligence",
+    envKey: "MAIL_INTELLIGENCE_URL",
+    defaultUrl: `http://localhost:${PORTS.MAIL_INTELLIGENCE}`,
+    healthPath: "/api/outlook/status",
+    integrationRole: "email and outlook integration",
+    probeMode: "http",
+  },
+  {
+    id: "aios-v2-api",
+    name: "AIOSv2 API",
+    envKey: "AIOS_V2_API_URL",
+    defaultUrl: `http://localhost:${PORTS.API}`,
+    healthPath: "/api/health",
+    integrationRole: "backend api",
+    probeMode: "http",
   },
 ];
 

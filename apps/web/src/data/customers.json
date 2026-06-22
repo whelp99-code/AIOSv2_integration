@@ -1,0 +1,52 @@
+[
+  {
+    "id": "cust-001",
+    "name": "삼성전자",
+    "industry": "반도체",
+    "status": "active",
+    "contact": "김철수",
+    "email": "chulsoo@samsung.com",
+    "phone": "+82-2-2255-0114",
+    "notes": "메모리 반도체 공급 계약 진행 중"
+  },
+  {
+    "id": "cust-002",
+    "name": "LG전자",
+    "industry": "가전",
+    "status": "active",
+    "contact": "박영희",
+    "email": "yhhee@lge.com",
+    "phone": "+82-2-3777-1114",
+    "notes": "스마트홈 플랫폼 제휴"
+  },
+  {
+    "id": "cust-003",
+    "name": "현대자동차",
+    "industry": "자동차",
+    "status": "active",
+    "contact": "이지훈",
+    "email": "jihun@hyundai.com",
+    "phone": "+82-2-3464-1114",
+    "notes": "자율주행 AI 시스템 컨설팅"
+  },
+  {
+    "id": "cust-004",
+    "name": "SK하이닉스",
+    "industry": "반도체",
+    "status": "pending",
+    "contact": "최민수",
+    "email": "minsuc@skhynix.com",
+    "phone": "+82-31-709-4114",
+    "notes": "HBM 메모리 공급 협의 중"
+  },
+  {
+    "id": "cust-005",
+    "name": "네이버",
+    "industry": "IT",
+    "status": "active",
+    "contact": "정해원",
+    "email": "haewon@naver.com",
+    "phone": "+82-31-784-1114",
+    "notes": "AI 검색 엔진 공동 개발"
+  }
+]

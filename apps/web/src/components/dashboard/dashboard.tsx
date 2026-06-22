@@ -131,10 +131,10 @@ export function Dashboard() {
   const [integrationProjects, setIntegrationProjects] = useState<
     IntegrationProjectHealth[]
   >([
-    { id: "aios-v1", name: "AIOS v1", status: "unreachable" },
-    { id: "f-aios-v3-core", name: "F-aios-v3", status: "unreachable" },
-    { id: "outlook", name: "Outlook", status: "unreachable" },
-    { id: "github", name: "GitHub", status: "unreachable" },
+    { id: "sangfor-mcp", name: "Sangfor MCP", status: "unreachable" },
+    { id: "mail-intelligence", name: "Mail Intelligence", status: "unreachable" },
+    { id: "aios-v2-api", name: "AIOSv2 API", status: "unreachable" },
+    { id: "vibe-coding-os", name: "Vibe Coding OS", status: "unreachable" },
   ]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -220,13 +220,12 @@ export function Dashboard() {
   ).length;
 
 
-
   const unreadCount = mails.filter((m) => !m.isRead).length;
   const totalCount = mails.length;
   const recentMails = mails.slice(0, 15);
-  const faiosHealth = integrationProjects.find(
-    (project) => project.id === "f-aios-v3-core",
-  );
+  const healthyIntegrations = integrationProjects.filter(
+    (project) => project.status === "ok"
+  ).length;
 
   function integrationStatusLabel(status: IntegrationReachability): string {
     if (status === "ok") return "✅ 연결됨";
@@ -273,8 +272,8 @@ export function Dashboard() {
     {
       title: "워크플로우",
       value: workflows.length,
-      change: faiosHealth?.status === "ok" ? "F-aios-v3 연결됨" : "연결 안됨",
-      trend: faiosHealth?.status === "ok" ? ("up" as const) : ("down" as const),
+      change: `${healthyIntegrations}/${integrationProjects.length} 서비스 연결`,
+      trend: healthyIntegrations > 0 ? ("up" as const) : ("down" as const),
       icon: "⚡",
       color: "#e0e7ff",
       loading,

@@ -4,7 +4,8 @@ import { useSession, signOut } from 'next-auth/react'
 import Link from 'next/link'
 
 export function Header() {
-  const { data: session } = useSession()
+  const { data } = useSession();
+  const session = data as any;
 
   return (
     <header className="bg-white border-b border-gray-200 px-6 py-4">

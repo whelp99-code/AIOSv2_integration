@@ -72,6 +72,22 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     needs: [test]
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ai_portal
+          POSTGRES_PASSWORD: ai_portal
+          POSTGRES_DB: blro_operating_os
+        ports:
+          - 5435:5432
+        options: >-
+          --health-cmd "pg_isready -U ai_portal -d blro_operating_os"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://ai_portal:ai_portal@127.0.0.1:5435/blro_operating_os
     steps:
       - uses: actions/checkout@v4
 
@@ -86,8 +102,16 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - name: Prisma migrate deploy
+        run: pnpm --filter @aios/db exec prisma migrate deploy
+
       - name: Build All Packages
         run: pnpm build
+
+      - name: C-Stack health smoke
+        run: node ../scripts/c-stack-health.mjs
+        working-directory: AIOSv2_integration
+        continue-on-error: true
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v4
