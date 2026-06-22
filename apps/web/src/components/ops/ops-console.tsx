@@ -91,36 +91,16 @@ function HealthBadge({
     HealthStatus,
     { bg: string; text: string; dot: string }
   > = {
-    healthy: { bg: "#d1fae5", text: "#059669", dot: "#059669" },
-    degraded: { bg: "#fef3c7", text: "#d97706", dot: "#d97706" },
-    unreachable: { bg: "#fee2e2", text: "#dc2626", dot: "#dc2626" },
-    planned: { bg: "#e0e7ff", text: "#4f46e5", dot: "#4f46e5" },
-    unknown: { bg: "#f3f4f6", text: "#6b7280", dot: "#9ca3af" },
+    healthy: { bg: "bg-emerald-100", text: "text-emerald-600", dot: "bg-emerald-600" },
+    degraded: { bg: "bg-amber-100", text: "text-amber-600", dot: "bg-amber-600" },
+    unreachable: { bg: "bg-red-100", text: "text-red-600", dot: "bg-red-600" },
+    planned: { bg: "bg-indigo-100", text: "text-indigo-600", dot: "bg-indigo-600" },
+    unknown: { bg: "bg-gray-100", text: "text-gray-500", dot: "bg-gray-400" },
   };
   const c = colors[status];
   return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        gap: "6px",
-        padding: "4px 10px",
-        borderRadius: "9999px",
-        fontSize: "12px",
-        fontWeight: 500,
-        backgroundColor: c.bg,
-        color: c.text,
-      }}
-    >
-      <span
-        style={{
-          width: "8px",
-          height: "8px",
-          borderRadius: "50%",
-          backgroundColor: c.dot,
-          boxShadow: `0 0 0 2px ${c.bg}`,
-        }}
-      />
+    <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${c.bg} ${c.text}`}>
+      <span className={`h-2 w-2 rounded-full ${c.dot}`} />
       {label || status}
     </span>
   );
@@ -137,125 +117,48 @@ function ServiceCard({
   const isCritical = service.critical;
 
   return (
-    <div
-      style={{
-        backgroundColor: "white",
-        borderRadius: "12px",
-        padding: "20px",
-        boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-        border: "1px solid #e5e7eb",
-        transition: "border-color 0.2s, box-shadow 0.2s",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          marginBottom: "12px",
-        }}
-      >
+    <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm">
+      <div className="mb-3 flex items-start justify-between">
         <div>
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              marginBottom: "4px",
-            }}
-          >
-            <h3
-              style={{
-                fontSize: "16px",
-                fontWeight: "600",
-                color: "#111827",
-                margin: 0,
-              }}
-            >
+          <div className="mb-1 flex items-center gap-2">
+            <h3 className="text-base font-semibold text-gray-900">
               {service.displayName}
             </h3>
             {isCritical && (
-              <span
-                style={{
-                  fontSize: "10px",
-                  fontWeight: "700",
-                  color: "#dc2626",
-                  backgroundColor: "#fef2f2",
-                  padding: "2px 6px",
-                  borderRadius: "4px",
-                }}
-              >
+              <span className="rounded bg-red-50 px-1.5 py-0.5 text-[10px] font-bold text-red-600">
                 CRITICAL
               </span>
             )}
           </div>
-          <p style={{ fontSize: "12px", color: "#6b7280", margin: 0 }}>
+          <p className="text-xs text-gray-500">
             {service.baseUrl} : {service.port}
           </p>
         </div>
         <HealthBadge status={service.liveness} label="Liveness" />
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "1fr 1fr",
-          gap: "12px",
-          marginBottom: "16px",
-        }}
-      >
+      <div className="mb-4 grid grid-cols-2 gap-3">
         <div>
-          <p
-            style={{
-              fontSize: "11px",
-              color: "#9ca3af",
-              margin: "0 0 4px 0",
-              textTransform: "uppercase",
-            }}
-          >
-            Liveness
-          </p>
+          <p className="mb-1 text-[11px] uppercase text-gray-400">Liveness</p>
           <HealthBadge status={service.liveness} />
         </div>
         <div>
-          <p
-            style={{
-              fontSize: "11px",
-              color: "#9ca3af",
-              margin: "0 0 4px 0",
-              textTransform: "uppercase",
-            }}
-          >
-            Readiness
-          </p>
+          <p className="mb-1 text-[11px] uppercase text-gray-400">Readiness</p>
           <HealthBadge status={service.readiness} />
         </div>
       </div>
 
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <div style={{ fontSize: "12px", color: "#6b7280" }}>
+      <div className="flex items-center justify-between">
+        <div className="text-xs text-gray-500">
           Latency: {service.latencyMs ? `${service.latencyMs}ms` : "N/A"} •
           Last: {formatTime(service.lastChecked)}
         </div>
         <button
           onClick={onCheckNow}
           disabled={systemDown}
-          style={{
-            fontSize: "12px",
-            padding: "6px 12px",
-            borderRadius: "6px",
-            border: "1px solid #d1d5db",
-            backgroundColor: "white",
-            color: "#374151",
-            cursor: systemDown ? "not-allowed" : "pointer",
-            opacity: systemDown ? 0.5 : 1,
-          }}
+          className={`rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs text-gray-700 ${
+            systemDown ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+          }`}
         >
           재확인
         </button>
@@ -276,149 +179,58 @@ function ApprovalCard({
   onDefer: () => void;
 }) {
   const statusColors = {
-    pending: { bg: "#fef3c7", text: "#d97706" },
-    approved: { bg: "#d1fae5", text: "#059669" },
-    rejected: { bg: "#fee2e2", text: "#dc2626" },
-    deferred: { bg: "#e0e7ff", text: "#4f46e5" },
+    pending: { bg: "bg-amber-100", text: "text-amber-600" },
+    approved: { bg: "bg-emerald-100", text: "text-emerald-600" },
+    rejected: { bg: "bg-red-100", text: "text-red-600" },
+    deferred: { bg: "bg-indigo-100", text: "text-indigo-600" },
   };
   const c = statusColors[approval.status];
 
   return (
-    <div
-      style={{
-        backgroundColor: "white",
-        borderRadius: "12px",
-        padding: "20px",
-        boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-        border: "1px solid #e5e7eb",
-        borderLeft: `4px solid ${c.text}`,
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-          marginBottom: "12px",
-        }}
-      >
+    <div className={`rounded-xl border border-gray-200 bg-white p-5 shadow-sm border-l-4 ${c.text.replace("text-", "border-l-")}`}>
+      <div className="mb-3 flex items-start justify-between">
         <div>
-          <p
-            style={{
-              fontSize: "14px",
-              fontWeight: "600",
-              color: "#111827",
-              margin: "0 0 4px 0",
-            }}
-          >
+          <p className="mb-1 text-sm font-semibold text-gray-900">
             {approval.actionType.toUpperCase()}: {approval.target}
           </p>
-          <p style={{ fontSize: "12px", color: "#6b7280", margin: 0 }}>
+          <p className="text-xs text-gray-500">
             Session: {approval.sessionId} • Assignment: {approval.assignmentId}
           </p>
         </div>
-        <span
-          style={{
-            padding: "4px 10px",
-            borderRadius: "9999px",
-            fontSize: "11px",
-            fontWeight: 600,
-            backgroundColor: c.bg,
-            color: c.text,
-            textTransform: "capitalize",
-          }}
-        >
+        <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold capitalize ${c.bg} ${c.text}`}>
           {approval.status}
         </span>
       </div>
 
-      <div
-        style={{
-          display: "flex",
-          gap: "8px",
-          flexWrap: "wrap",
-          marginBottom: "12px",
-        }}
-      >
-        <span
-          style={{
-            fontSize: "12px",
-            color: "#6b7280",
-            backgroundColor: "#f3f4f6",
-            padding: "4px 8px",
-            borderRadius: "4px",
-          }}
-        >
+      <div className="mb-3 flex flex-wrap gap-2">
+        <span className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-500">
           Type: {approval.type}
         </span>
-        <span
-          style={{
-            fontSize: "12px",
-            color: "#6b7280",
-            backgroundColor: "#f3f4f6",
-            padding: "4px 8px",
-            borderRadius: "4px",
-          }}
-        >
+        <span className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-500">
           Requested by: {approval.requestedBy}
         </span>
-        <span
-          style={{
-            fontSize: "12px",
-            color: "#6b7280",
-            backgroundColor: "#f3f4f6",
-            padding: "4px 8px",
-            borderRadius: "4px",
-          }}
-        >
+        <span className="rounded bg-gray-100 px-2 py-1 text-xs text-gray-500">
           {new Date(approval.createdAt).toLocaleString("ko-KR")}
         </span>
       </div>
 
       {approval.status === "pending" && (
-        <div style={{ display: "flex", gap: "8px" }}>
+        <div className="flex gap-2">
           <button
             onClick={onApprove}
-            style={{
-              flex: 1,
-              padding: "8px 16px",
-              borderRadius: "6px",
-              border: "none",
-              backgroundColor: "#059669",
-              color: "white",
-              fontWeight: 500,
-              cursor: "pointer",
-            }}
+            className="flex-1 cursor-pointer rounded-md bg-emerald-600 px-4 py-2 text-sm font-medium text-white"
           >
             승인
           </button>
           <button
             onClick={onReject}
-            style={{
-              flex: 1,
-              padding: "8px 16px",
-              borderRadius: "6px",
-              border: "1px solid #d1d5db",
-              backgroundColor: "white",
-              color: "#dc2626",
-              fontWeight: 500,
-              cursor: "pointer",
-            }}
+            className="flex-1 cursor-pointer rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-red-600"
           >
             반려
           </button>
           <button
             onClick={onDefer}
-            style={{
-              flex: 1,
-              padding: "8px 16px",
-              borderRadius: "6px",
-              border: "1px solid #d1d5db",
-              backgroundColor: "white",
-              color: "#4f46e5",
-              fontWeight: 500,
-              cursor: "pointer",
-            }}
+            className="flex-1 cursor-pointer rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-indigo-600"
           >
             보류
           </button>
@@ -620,17 +432,8 @@ export function OpsConsole() {
 
   if (loading) {
     return (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "400px",
-        }}
-      >
-        <div style={{ fontSize: "16px", color: "#6b7280" }}>
-          Ops Console 로딩 중...
-        </div>
+      <div className="flex h-[400px] items-center justify-center">
+        <div className="text-base text-gray-500">Ops Console 로딩 중...</div>
       </div>
     );
   }
@@ -639,40 +442,20 @@ export function OpsConsole() {
   const resolvedApprovals = approvals.filter((a) => a.status !== "pending");
 
   return (
-    <div
-      style={{
-        padding: "32px",
-        backgroundColor: "#f9fafb",
-        minHeight: "100vh",
-      }}
-    >
+    <div className="min-h-screen bg-gray-50 p-8">
       {/* Header */}
-      <div style={{ marginBottom: "32px" }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "8px",
-          }}
-        >
+      <div className="mb-8">
+        <div className="mb-2 flex items-center justify-between">
           <div>
-            <h1
-              style={{
-                fontSize: "28px",
-                fontWeight: "700",
-                color: "#111827",
-                margin: "0 0 8px 0",
-              }}
-            >
+            <h1 className="mb-2 text-2xl font-bold text-gray-900">
               🎛️ Unified Ops Console
             </h1>
-            <p style={{ fontSize: "15px", color: "#6b7280", margin: 0 }}>
+            <p className="text-sm text-gray-500">
               헬스 모니터링 • 승인 게이트 • 디스패치 • Evidence 통합 관리
             </p>
           </div>
-          <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-            <span style={{ fontSize: "13px", color: "#6b7280" }}>
+          <div className="flex items-center gap-4">
+            <span className="text-xs text-gray-500">
               마지막 업데이트:{" "}
               {lastUpdate ? lastUpdate.toLocaleTimeString("ko-KR") : "—"}
             </span>
@@ -680,14 +463,7 @@ export function OpsConsole() {
               onClick={() =>
                 Promise.all([fetchHealth(), fetchApprovals(), fetchSummary()])
               }
-              style={{
-                padding: "8px 16px",
-                borderRadius: "6px",
-                border: "1px solid #d1d5db",
-                backgroundColor: "white",
-                fontSize: "13px",
-                cursor: "pointer",
-              }}
+              className="cursor-pointer rounded-md border border-gray-300 bg-white px-4 py-2 text-xs"
             >
               전체 새로고침
             </button>
@@ -697,22 +473,16 @@ export function OpsConsole() {
         {/* System Status Summary */}
         {systemHealth && (
           <div
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "12px",
-              padding: "12px 20px",
-              borderRadius: "10px",
-              backgroundColor:
-                systemHealth.status === "healthy"
-                  ? "#d1fae5"
-                  : systemHealth.status === "degraded"
-                    ? "#fef3c7"
-                    : "#fee2e2",
-            }}
+            className={`inline-flex items-center gap-3 rounded-lg px-5 py-3 ${
+              systemHealth.status === "healthy"
+                ? "bg-emerald-100"
+                : systemHealth.status === "degraded"
+                  ? "bg-amber-100"
+                  : "bg-red-100"
+            }`}
           >
             <HealthBadge status={systemHealth.status} label="전체 시스템" />
-            <span style={{ fontSize: "13px", color: "#374151" }}>
+            <span className="text-xs text-gray-700">
               {systemHealth.services.filter((s) => s.critical).length}개
               크리티컬 서비스 중
               {
@@ -727,8 +497,8 @@ export function OpsConsole() {
       </div>
 
       {/* Tabs */}
-      <div style={{ marginBottom: "24px", borderBottom: "1px solid #e5e7eb" }}>
-        <div style={{ display: "flex", gap: "4px" }}>
+      <div className="mb-6 border-b border-gray-200">
+        <div className="flex gap-1">
           {[
             {
               id: "health",
@@ -762,35 +532,20 @@ export function OpsConsole() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as typeof activeTab)}
-              style={{
-                padding: "10px 20px",
-                border: "none",
-                backgroundColor: activeTab === tab.id ? "white" : "transparent",
-                borderBottom:
-                  activeTab === tab.id
-                    ? "2px solid #3b82f6"
-                    : "2px solid transparent",
-                color: activeTab === tab.id ? "#3b82f6" : "#6b7280",
-                fontWeight: activeTab === tab.id ? 600 : 500,
-                fontSize: "14px",
-                cursor: "pointer",
-                position: "relative",
-                bottom: "-1px",
-              }}
+              className={`relative -mb-px cursor-pointer border-b-2 px-5 py-2.5 text-sm font-medium ${
+                activeTab === tab.id
+                  ? "border-blue-500 bg-white text-blue-500 font-semibold"
+                  : "border-transparent text-gray-500"
+              }`}
             >
               {tab.label}
               {tab.count !== null && (
                 <span
-                  style={{
-                    marginLeft: "8px",
-                    padding: "2px 8px",
-                    borderRadius: "9999px",
-                    fontSize: "11px",
-                    fontWeight: 600,
-                    backgroundColor:
-                      activeTab === tab.id ? "#dbeafe" : "#f3f4f6",
-                    color: activeTab === tab.id ? "#3b82f6" : "#6b7280",
-                  }}
+                  className={`ml-2 rounded-full px-2 py-0.5 text-[11px] font-semibold ${
+                    activeTab === tab.id
+                      ? "bg-blue-100 text-blue-500"
+                      : "bg-gray-100 text-gray-500"
+                  }`}
                 >
                   {tab.count}
                 </span>
@@ -803,13 +558,7 @@ export function OpsConsole() {
       {/* Health Tab */}
       {activeTab === "health" && systemHealth && (
         <div>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(380px, 1fr))",
-              gap: "20px",
-            }}
-          >
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(380px,1fr))] gap-5">
             {systemHealth.services.map((service) => (
               <ServiceCard
                 key={service.name}
@@ -825,42 +574,18 @@ export function OpsConsole() {
       {activeTab === "approvals" && (
         <div>
           {pendingApprovals.length === 0 ? (
-            <div
-              style={{
-                textAlign: "center",
-                padding: "60px 20px",
-                backgroundColor: "white",
-                borderRadius: "12px",
-                border: "1px solid #e5e7eb",
-              }}
-            >
-              <div style={{ fontSize: "48px", marginBottom: "16px" }}>✅</div>
-              <h3
-                style={{
-                  fontSize: "18px",
-                  fontWeight: "600",
-                  color: "#111827",
-                  margin: "0 0 8px 0",
-                }}
-              >
+            <div className="rounded-xl border border-gray-200 bg-white p-15 text-center">
+              <div className="mb-4 text-5xl">✅</div>
+              <h3 className="mb-2 text-lg font-semibold text-gray-900">
                 대기 중인 승인 없음
               </h3>
-              <p style={{ fontSize: "14px", color: "#6b7280", margin: 0 }}>
+              <p className="text-sm text-gray-500">
                 모든 승인 요청이 처리되었습니다.
               </p>
             </div>
           ) : (
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "16px" }}
-            >
-              <h3
-                style={{
-                  fontSize: "18px",
-                  fontWeight: "600",
-                  color: "#111827",
-                  margin: 0,
-                }}
-              >
+            <div className="flex flex-col gap-4">
+              <h3 className="text-lg font-semibold text-gray-900">
                 ⏳ 대기 중인 승인 ({pendingApprovals.length}건)
               </h3>
               {pendingApprovals.map((approval) => (
@@ -878,28 +603,11 @@ export function OpsConsole() {
           )}
 
           {resolvedApprovals.length > 0 && (
-            <details style={{ marginTop: "32px" }}>
-              <summary
-                style={{
-                  cursor: "pointer",
-                  fontSize: "16px",
-                  fontWeight: "600",
-                  color: "#374151",
-                  padding: "12px 0",
-                  borderTop: "1px solid #e5e7eb",
-                  marginTop: "20px",
-                }}
-              >
+            <details className="mt-8">
+              <summary className="cursor-pointer border-t border-gray-200 pt-5 text-base font-semibold text-gray-700">
                 처리된 승인 내역 ({resolvedApprovals.length}건)
               </summary>
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "12px",
-                  marginTop: "16px",
-                }}
-              >
+              <div className="mt-4 flex flex-col gap-3">
                 {resolvedApprovals.slice(0, 20).map((approval) => (
                   <ApprovalCard
                     key={approval.id}
@@ -917,88 +625,38 @@ export function OpsConsole() {
 
       {/* Dispatch Tab */}
       {activeTab === "dispatch" && (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(400px, 1fr))",
-            gap: "24px",
-          }}
-        >
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(400px,1fr))] gap-6">
           {/* Agent Dispatch */}
-          <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: "12px",
-              padding: "24px",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-              border: "1px solid #e5e7eb",
-            }}
-          >
-            <h3
-              style={{
-                fontSize: "18px",
-                fontWeight: "600",
-                color: "#111827",
-                margin: "0 0 8px 0",
-              }}
-            >
+          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <h3 className="mb-2 text-lg font-semibold text-gray-900">
               🤖 Agent Dispatch
             </h3>
-            <p
-              style={{
-                fontSize: "13px",
-                color: "#6b7280",
-                margin: "0 0 20px 0",
-              }}
-            >
+            <p className="mb-5 text-xs text-gray-500">
               opencode 또는 Cursor Agent에 repo-local 작업을 전달합니다. 위험
               action은 승인 대기 상태로 전환됩니다.
             </p>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "12px",
-                marginBottom: "12px",
-              }}
-            >
-              <label
-                style={{ fontSize: "13px", color: "#374151", fontWeight: 500 }}
-              >
+            <div className="mb-3 grid grid-cols-2 gap-3">
+              <label className="text-xs font-medium text-gray-700">
                 Tool
                 <select
                   value={dispatchTool}
                   onChange={(event) =>
                     setDispatchTool(event.target.value as typeof dispatchTool)
                   }
-                  style={{
-                    width: "100%",
-                    marginTop: "6px",
-                    padding: "8px",
-                    borderRadius: "6px",
-                    border: "1px solid #d1d5db",
-                  }}
+                  className="mt-1.5 w-full rounded-md border border-gray-300 px-2 py-2"
                 >
                   <option value="cursor-agent">Cursor Agent</option>
                   <option value="opencode">opencode</option>
                 </select>
               </label>
-              <label
-                style={{ fontSize: "13px", color: "#374151", fontWeight: 500 }}
-              >
+              <label className="text-xs font-medium text-gray-700">
                 Mode
                 <select
                   value={dispatchMode}
                   onChange={(event) =>
                     setDispatchMode(event.target.value as typeof dispatchMode)
                   }
-                  style={{
-                    width: "100%",
-                    marginTop: "6px",
-                    padding: "8px",
-                    borderRadius: "6px",
-                    border: "1px solid #d1d5db",
-                  }}
+                  className="mt-1.5 w-full rounded-md border border-gray-300 px-2 py-2"
                 >
                   <option value="verify">verify</option>
                   <option value="plan">plan</option>
@@ -1006,76 +664,33 @@ export function OpsConsole() {
                 </select>
               </label>
             </div>
-            <label
-              style={{
-                display: "block",
-                fontSize: "13px",
-                color: "#374151",
-                fontWeight: 500,
-                marginBottom: "12px",
-              }}
-            >
+            <label className="mb-3 block text-xs font-medium text-gray-700">
               Prompt
               <textarea
                 value={dispatchPrompt}
                 onChange={(event) => setDispatchPrompt(event.target.value)}
                 placeholder="예: Verify Phase 1 Ops Console summary route and report issues only."
                 rows={5}
-                style={{
-                  width: "100%",
-                  marginTop: "6px",
-                  padding: "10px",
-                  borderRadius: "8px",
-                  border: "1px solid #d1d5db",
-                  resize: "vertical",
-                }}
+                className="mt-1.5 w-full resize-y rounded-lg border border-gray-300 px-2.5 py-2.5"
               />
             </label>
-            <label
-              style={{
-                display: "block",
-                fontSize: "13px",
-                color: "#374151",
-                fontWeight: 500,
-                marginBottom: "12px",
-              }}
-            >
+            <label className="mb-3 block text-xs font-medium text-gray-700">
               Target files
               <input
                 value={dispatchTargets}
                 onChange={(event) => setDispatchTargets(event.target.value)}
                 placeholder="apps/web/src/app/api/ops/summary/route.ts, tests/integration.test.ts"
-                style={{
-                  width: "100%",
-                  marginTop: "6px",
-                  padding: "8px",
-                  borderRadius: "6px",
-                  border: "1px solid #d1d5db",
-                }}
+                className="mt-1.5 w-full rounded-md border border-gray-300 px-2 py-2"
               />
             </label>
-            <label
-              style={{
-                display: "block",
-                fontSize: "13px",
-                color: "#374151",
-                fontWeight: 500,
-                marginBottom: "16px",
-              }}
-            >
+            <label className="mb-4 block text-xs font-medium text-gray-700">
               Approval action
               <select
                 value={dispatchApprovalAction}
                 onChange={(event) =>
                   setDispatchApprovalAction(event.target.value)
                 }
-                style={{
-                  width: "100%",
-                  marginTop: "6px",
-                  padding: "8px",
-                  borderRadius: "6px",
-                  border: "1px solid #d1d5db",
-                }}
+                className="mt-1.5 w-full rounded-md border border-gray-300 px-2 py-2"
               >
                 <option value="">none</option>
                 <option value="delete">delete</option>
@@ -1094,39 +709,15 @@ export function OpsConsole() {
                 (dispatchTool === "opencode" &&
                   opsSummary?.dispatch.opencodeAvailable === false)
               }
-              style={{
-                width: "100%",
-                padding: "10px 16px",
-                borderRadius: "8px",
-                border: "none",
-                backgroundColor: "#111827",
-                color: "white",
-                fontWeight: 600,
-                cursor: "pointer",
-              }}
+              className="w-full cursor-pointer rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-semibold text-white"
             >
               Dispatch 실행
             </button>
             {dispatchStatus && (
-              <p
-                style={{
-                  fontSize: "13px",
-                  color: "#374151",
-                  margin: "12px 0 0 0",
-                }}
-              >
-                {dispatchStatus}
-              </p>
+              <p className="mt-3 text-xs text-gray-700">{dispatchStatus}</p>
             )}
             {opsSummary && (
-              <div
-                style={{
-                  display: "flex",
-                  gap: "8px",
-                  marginTop: "16px",
-                  flexWrap: "wrap",
-                }}
-              >
+              <div className="mt-4 flex flex-wrap gap-2">
                 <HealthBadge
                   status={
                     opsSummary.dispatch.cursorAgentAvailable
@@ -1148,75 +739,25 @@ export function OpsConsole() {
           </div>
 
           {/* Quick Actions */}
-          <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: "12px",
-              padding: "24px",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-              border: "1px solid #e5e7eb",
-            }}
-          >
-            <h3
-              style={{
-                fontSize: "18px",
-                fontWeight: "600",
-                color: "#111827",
-                margin: "0 0 20px 0",
-              }}
-            >
+          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <h3 className="mb-5 text-lg font-semibold text-gray-900">
               ⚡ 빠른 실행
             </h3>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "12px",
-              }}
-            >
+            <div className="grid grid-cols-2 gap-3">
               {[
                 { label: "메일 동기화", action: "mail-sync", icon: "📧" },
-                {
-                  label: "워크플로우 실행",
-                  action: "workflow-execute",
-                  icon: "⚡",
-                },
-                {
-                  label: "상그포 컴플라이언스",
-                  action: "sangfor-compliance",
-                  icon: "🛡️",
-                },
+                { label: "워크플로우 실행", action: "workflow-execute", icon: "⚡" },
+                { label: "상그포 컴플라이언스", action: "sangfor-compliance", icon: "🛡️" },
                 { label: "GitHub 동기화", action: "github-sync", icon: "🐙" },
-                {
-                  label: "AIOS v1 헬스체크",
-                  action: "aios-v1-health",
-                  icon: "🏥",
-                },
+                { label: "AIOS v1 헬스체크", action: "aios-v1-health", icon: "🏥" },
                 { label: "전체 서비스 체크", action: "all-health", icon: "🔄" },
               ].map((item) => (
                 <button
                   key={item.action}
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    gap: "8px",
-                    padding: "20px",
-                    borderRadius: "10px",
-                    border: "1px solid #e5e7eb",
-                    backgroundColor: "#fafafa",
-                    cursor: "pointer",
-                    transition: "all 0.2s",
-                  }}
+                  className="flex cursor-pointer flex-col items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 p-5 transition-all hover:bg-gray-100"
                 >
-                  <span style={{ fontSize: "24px" }}>{item.icon}</span>
-                  <span
-                    style={{
-                      fontSize: "13px",
-                      fontWeight: 500,
-                      color: "#374151",
-                    }}
-                  >
+                  <span className="text-2xl">{item.icon}</span>
+                  <span className="text-xs font-medium text-gray-700">
                     {item.label}
                   </span>
                 </button>
@@ -1225,81 +766,30 @@ export function OpsConsole() {
           </div>
 
           {/* Service Management */}
-          <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: "12px",
-              padding: "24px",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-              border: "1px solid #e5e7eb",
-            }}
-          >
-            <h3
-              style={{
-                fontSize: "18px",
-                fontWeight: "600",
-                color: "#111827",
-                margin: "0 0 20px 0",
-              }}
-            >
+          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <h3 className="mb-5 text-lg font-semibold text-gray-900">
               🔧 서비스 관리
             </h3>
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "12px" }}
-            >
+            <div className="flex flex-col gap-3">
               {systemHealth?.services.map((service) => (
                 <div
                   key={service.name}
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: "12px 16px",
-                    backgroundColor: "#f9fafb",
-                    borderRadius: "8px",
-                    border: "1px solid #e5e7eb",
-                  }}
+                  className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 px-4 py-3"
                 >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "12px",
-                    }}
-                  >
+                  <div className="flex items-center gap-3">
                     <HealthBadge status={service.liveness} />
                     <div>
-                      <p
-                        style={{
-                          fontSize: "14px",
-                          fontWeight: 500,
-                          color: "#111827",
-                          margin: 0,
-                        }}
-                      >
+                      <p className="text-sm font-medium text-gray-900">
                         {service.displayName}
                       </p>
-                      <p
-                        style={{
-                          fontSize: "12px",
-                          color: "#6b7280",
-                          margin: 0,
-                        }}
-                      >
+                      <p className="text-xs text-gray-500">
                         {service.baseUrl}:{service.port}
                       </p>
                     </div>
                   </div>
                   <button
                     onClick={() => checkService(service.name)}
-                    style={{
-                      padding: "6px 14px",
-                      borderRadius: "6px",
-                      border: "1px solid #d1d5db",
-                      backgroundColor: "white",
-                      fontSize: "12px",
-                      cursor: "pointer",
-                    }}
+                    className="cursor-pointer rounded-md border border-gray-300 bg-white px-3.5 py-1.5 text-xs"
                   >
                     체크 실행
                   </button>
@@ -1312,59 +802,20 @@ export function OpsConsole() {
 
       {/* Evidence Tab */}
       {activeTab === "evidence" && (
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(420px, 1fr))",
-            gap: "24px",
-          }}
-        >
-          <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: "12px",
-              padding: "24px",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-              border: "1px solid #e5e7eb",
-            }}
-          >
-            <h3
-              style={{
-                fontSize: "18px",
-                fontWeight: "600",
-                color: "#111827",
-                margin: "0 0 20px 0",
-              }}
-            >
+        <div className="grid grid-cols-[repeat(auto-fit,minmax(420px,1fr))] gap-6">
+          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <h3 className="mb-5 text-lg font-semibold text-gray-900">
               📎 최신 Evidence
             </h3>
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "12px" }}
-            >
+            <div className="flex flex-col gap-3">
               {(opsSummary?.evidence ?? []).map((item) => (
                 <Link
                   key={item.path}
                   href={`/${item.path}`}
-                  style={{
-                    display: "block",
-                    padding: "14px 16px",
-                    borderRadius: "8px",
-                    border: "1px solid #e5e7eb",
-                    textDecoration: "none",
-                    color: "#111827",
-                    backgroundColor: "#f9fafb",
-                  }}
+                  className="block rounded-lg border border-gray-200 bg-gray-50 px-4 py-3.5 no-underline text-gray-900"
                 >
-                  <div style={{ fontSize: "14px", fontWeight: 600 }}>
-                    {item.title}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      color: "#6b7280",
-                      marginTop: "4px",
-                    }}
-                  >
+                  <div className="text-sm font-semibold">{item.title}</div>
+                  <div className="mt-1 text-xs text-gray-500">
                     {item.path} •{" "}
                     {item.updatedAt
                       ? new Date(item.updatedAt).toLocaleString("ko-KR")
@@ -1373,73 +824,33 @@ export function OpsConsole() {
                 </Link>
               ))}
               {(opsSummary?.evidence.length ?? 0) === 0 && (
-                <p style={{ fontSize: "14px", color: "#6b7280", margin: 0 }}>
+                <p className="text-sm text-gray-500">
                   표시할 evidence 문서가 없습니다.
                 </p>
               )}
             </div>
           </div>
 
-          <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: "12px",
-              padding: "24px",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-              border: "1px solid #e5e7eb",
-            }}
-          >
-            <h3
-              style={{
-                fontSize: "18px",
-                fontWeight: "600",
-                color: "#111827",
-                margin: "0 0 20px 0",
-              }}
-            >
+          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <h3 className="mb-5 text-lg font-semibold text-gray-900">
               🧭 최근 Assignments
             </h3>
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "12px" }}
-            >
+            <div className="flex flex-col gap-3">
               {(opsSummary?.sessions ?? []).flatMap((session) =>
                 session.assignments.slice(0, 5).map((assignment) => (
                   <div
                     key={`${session.id}-${assignment.id}`}
-                    style={{
-                      padding: "14px 16px",
-                      borderRadius: "8px",
-                      border: "1px solid #e5e7eb",
-                      backgroundColor: "#f9fafb",
-                    }}
+                    className="rounded-lg border border-gray-200 bg-gray-50 px-4 py-3.5"
                   >
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        gap: "12px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontSize: "14px",
-                          fontWeight: 600,
-                          color: "#111827",
-                        }}
-                      >
+                    <div className="flex justify-between gap-3">
+                      <div className="text-sm font-semibold text-gray-900">
                         {assignment.title}
                       </div>
-                      <span style={{ fontSize: "12px", color: "#6b7280" }}>
+                      <span className="text-xs text-gray-500">
                         {assignment.status}
                       </span>
                     </div>
-                    <div
-                      style={{
-                        fontSize: "12px",
-                        color: "#6b7280",
-                        marginTop: "4px",
-                      }}
-                    >
+                    <div className="mt-1 text-xs text-gray-500">
                       {session.title} • {assignment.assignedTo} •{" "}
                       {new Date(assignment.updatedAt).toLocaleString("ko-KR")}
                     </div>
@@ -1447,7 +858,7 @@ export function OpsConsole() {
                 )),
               )}
               {(opsSummary?.sessions.length ?? 0) === 0 && (
-                <p style={{ fontSize: "14px", color: "#6b7280", margin: 0 }}>
+                <p className="text-sm text-gray-500">
                   표시할 collaboration session이 없습니다.
                 </p>
               )}

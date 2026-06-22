@@ -138,17 +138,17 @@ export default function SangforPage() {
 
   const getStatusStyle = (status: Device['status']) => {
     switch (status) {
-      case 'online': return { bg: '#d1fae5', text: '#059669', label: '온라인' }
-      case 'offline': return { bg: '#fee2e2', text: '#dc2626', label: '오프라인' }
-      case 'warning': return { bg: '#fef3c7', text: '#d97706', label: '경고' }
+      case 'online': return { bg: 'bg-emerald-100', text: 'text-emerald-600', label: '온라인' }
+      case 'offline': return { bg: 'bg-red-100', text: 'text-red-600', label: '오프라인' }
+      case 'warning': return { bg: 'bg-amber-100', text: 'text-amber-600', label: '경고' }
     }
   }
 
   const getSeverityStyle = (severity: SecurityEvent['severity']) => {
     switch (severity) {
-      case 'high': return { bg: '#fef2f2', text: '#dc2626', label: '높음' }
-      case 'medium': return { bg: '#fef3c7', text: '#d97706', label: '중간' }
-      case 'low': return { bg: '#dbeafe', text: '#2563eb', label: '낮음' }
+      case 'high': return { bg: 'bg-red-50', text: 'text-red-600', label: '높음' }
+      case 'medium': return { bg: 'bg-amber-50', text: 'text-amber-600', label: '중간' }
+      case 'low': return { bg: 'bg-blue-50', text: 'text-blue-600', label: '낮음' }
     }
   }
 
@@ -165,57 +165,39 @@ export default function SangforPage() {
   const offlineDevices = devices.filter(d => d.status === 'offline').length
 
   return (
-    <div style={{ padding: '32px', minHeight: '100%', backgroundColor: '#f9fafb' }}>
+    <div className="min-h-full bg-gray-50 p-8">
       {/* Header */}
-      <div style={{ marginBottom: '28px' }}>
-        <h1 style={{ fontSize: '28px', fontWeight: '700', color: '#111827', margin: '0 0 8px 0' }}>
+      <div className="mb-7">
+        <h1 className="mb-2 text-2xl font-bold text-gray-900">
           🛡️ Sangfor 보안 관리
         </h1>
-        <p style={{ fontSize: '15px', color: '#6b7280', margin: 0 }}>
+        <p className="text-sm text-gray-500">
           네트워크 보안 어플라이언스 모니터링 및 관리 {liveConnected ? '(live)' : '(mock fallback)'}
         </p>
       </div>
 
       {/* Overview Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '28px' }}>
+      <div className="mb-7 grid grid-cols-4 gap-4">
         {[
-          { label: '총 디바이스', value: devices.length, icon: '🖥️', color: '#dbeafe' },
-          { label: '온라인', value: onlineDevices, icon: '✅', color: '#d1fae5' },
-          { label: '경고', value: warningDevices, icon: '⚠️', color: '#fef3c7' },
-          { label: '오프라인', value: offlineDevices, icon: '❌', color: '#fee2e2' },
+          { label: '총 디바이스', value: devices.length, icon: '🖥️', color: 'bg-blue-100' },
+          { label: '온라인', value: onlineDevices, icon: '✅', color: 'bg-emerald-100' },
+          { label: '경고', value: warningDevices, icon: '⚠️', color: 'bg-amber-100' },
+          { label: '오프라인', value: offlineDevices, icon: '❌', color: 'bg-red-100' },
         ].map((card) => (
-          <div key={card.label} style={{
-            backgroundColor: 'white',
-            borderRadius: '10px',
-            padding: '20px',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-            border: '1px solid #e5e7eb',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '16px',
-          }}>
-            <div style={{
-              width: '48px',
-              height: '48px',
-              borderRadius: '10px',
-              backgroundColor: card.color,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '22px',
-            }}>
+          <div key={card.label} className="flex items-center gap-4 rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+            <div className={`flex h-12 w-12 items-center justify-center rounded-lg ${card.color} text-xl`}>
               {card.icon}
             </div>
             <div>
-              <p style={{ fontSize: '13px', color: '#6b7280', margin: 0 }}>{card.label}</p>
-              <p style={{ fontSize: '28px', fontWeight: '700', color: '#111827', margin: '4px 0 0 0' }}>{card.value}</p>
+              <p className="text-xs text-gray-500">{card.label}</p>
+              <p className="mt-1 text-3xl font-bold text-gray-900">{card.value}</p>
             </div>
           </div>
         ))}
       </div>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: '4px', marginBottom: '24px', backgroundColor: 'white', borderRadius: '10px', padding: '4px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', border: '1px solid #e5e7eb', width: 'fit-content' }}>
+      <div className="mb-6 flex w-fit gap-1 rounded-lg border border-gray-200 bg-white p-1 shadow-sm">
         {([
           { key: 'devices' as TabKey, label: '디바이스 현황', icon: '🖥️' },
           { key: 'security' as TabKey, label: '보안 이벤트', icon: '🛡️' },
@@ -225,19 +207,11 @@ export default function SangforPage() {
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            style={{
-              padding: '10px 20px',
-              borderRadius: '8px',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: '14px',
-              fontWeight: '500',
-              backgroundColor: activeTab === tab.key ? '#111827' : 'transparent',
-              color: activeTab === tab.key ? 'white' : '#6b7280',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-            }}
+            className={`flex items-center gap-1.5 rounded-md px-5 py-2.5 text-sm font-medium ${
+              activeTab === tab.key
+                ? 'bg-gray-900 text-white'
+                : 'text-gray-500'
+            }`}
           >
             {tab.icon} {tab.label}
           </button>
@@ -246,53 +220,33 @@ export default function SangforPage() {
 
       {/* Tab Content */}
       {activeTab === 'devices' && (
-        <div style={{ display: 'grid', gridTemplateColumns: selectedDevice ? '1fr 380px' : '1fr', gap: '24px' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div className={`grid gap-6 ${selectedDevice ? 'grid-cols-[1fr_380px]' : 'grid-cols-1'}`}>
+          <div className="flex flex-col gap-3">
             {devices.map((device) => {
               const statusStyle = getStatusStyle(device.status)
               return (
                 <div
                   key={device.id}
                   onClick={() => setSelectedDevice(device)}
-                  style={{
-                    backgroundColor: 'white',
-                    borderRadius: '10px',
-                    padding: '20px 24px',
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-                    border: selectedDevice?.id === device.id ? '2px solid #3b82f6' : '1px solid #e5e7eb',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '16px',
-                    cursor: 'pointer',
-                    transition: 'border-color 0.15s',
-                  }}
+                  className={`flex cursor-pointer items-center gap-4 rounded-lg bg-white p-5 shadow-sm transition-colors ${
+                    selectedDevice?.id === device.id
+                      ? 'border-2 border-blue-500'
+                      : 'border border-gray-200'
+                  }`}
                 >
-                  <div style={{
-                    width: '48px',
-                    height: '48px',
-                    borderRadius: '10px',
-                    backgroundColor: statusStyle.bg,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '20px',
-                  }}>
+                  <div className={`flex h-12 w-12 items-center justify-center rounded-lg ${statusStyle.bg} text-xl`}>
                     {device.type === '방화벽' ? '🔥' : device.type === 'WAF' ? '🌐' : device.type === 'VPN' ? '🔒' : '⚖️'}
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <p style={{ fontSize: '15px', fontWeight: '600', color: '#111827', margin: '0 0 4px 0' }}>{device.name}</p>
-                    <p style={{ fontSize: '13px', color: '#6b7280', margin: 0 }}>{device.type} · {device.ip}</p>
+                  <div className="flex-1">
+                    <p className="mb-1 text-sm font-semibold text-gray-900">{device.name}</p>
+                    <p className="text-xs text-gray-500">{device.type} · {device.ip}</p>
                   </div>
-                  <div style={{ textAlign: 'right', marginRight: '8px' }}>
-                    <p style={{ fontSize: '13px', color: '#6b7280', margin: '0 0 2px 0' }}>처리량</p>
-                    <p style={{ fontSize: '15px', fontWeight: '600', color: '#111827', margin: 0 }}>{device.throughput}</p>
+                  <div className="mr-2 text-right">
+                    <p className="mb-0.5 text-xs text-gray-500">처리량</p>
+                    <p className="text-sm font-semibold text-gray-900">{device.throughput}</p>
                   </div>
-                  <div style={{
-                    padding: '6px 14px',
-                    borderRadius: '16px',
-                    backgroundColor: statusStyle.bg,
-                  }}>
-                    <span style={{ fontSize: '13px', fontWeight: '500', color: statusStyle.text }}>{statusStyle.label}</span>
+                  <div className={`rounded-full px-3.5 py-1.5 ${statusStyle.bg}`}>
+                    <span className={`text-xs font-medium ${statusStyle.text}`}>{statusStyle.label}</span>
                   </div>
                 </div>
               )
@@ -300,50 +254,41 @@ export default function SangforPage() {
           </div>
 
           {selectedDevice && (
-            <div style={{
-              backgroundColor: 'white',
-              borderRadius: '12px',
-              padding: '24px',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-              border: '1px solid #e5e7eb',
-              height: 'fit-content',
-              position: 'sticky',
-              top: '20px',
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#111827', margin: 0 }}>디바이스 상세</h3>
-                <button onClick={() => setSelectedDevice(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '18px', color: '#9ca3af' }}>✕</button>
+            <div className="sticky top-5 h-fit rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+              <div className="mb-5 flex items-center justify-between">
+                <h3 className="text-lg font-bold text-gray-900">디바이스 상세</h3>
+                <button onClick={() => setSelectedDevice(null)} className="cursor-pointer border-none bg-none text-lg text-gray-400">✕</button>
               </div>
-              <div style={{ marginBottom: '16px' }}>
-                <p style={{ fontSize: '18px', fontWeight: '600', color: '#111827', margin: '0 0 4px 0' }}>{selectedDevice.name}</p>
-                <p style={{ fontSize: '14px', color: '#6b7280', margin: 0 }}>{selectedDevice.type} · {selectedDevice.ip}</p>
+              <div className="mb-4">
+                <p className="mb-1 text-lg font-semibold text-gray-900">{selectedDevice.name}</p>
+                <p className="text-sm text-gray-500">{selectedDevice.type} · {selectedDevice.ip}</p>
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div className="flex flex-col gap-4">
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                    <span style={{ fontSize: '13px', color: '#6b7280' }}>CPU</span>
-                    <span style={{ fontSize: '13px', fontWeight: '600', color: (selectedDevice.cpu || 0) > 70 ? '#dc2626' : '#111827' }}>{selectedDevice.cpu}%</span>
+                  <div className="mb-1.5 flex justify-between">
+                    <span className="text-xs text-gray-500">CPU</span>
+                    <span className={`text-xs font-semibold ${(selectedDevice.cpu || 0) > 70 ? 'text-red-600' : 'text-gray-900'}`}>{selectedDevice.cpu}%</span>
                   </div>
-                  <div style={{ height: '8px', backgroundColor: '#f3f4f6', borderRadius: '4px', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${selectedDevice.cpu}%`, backgroundColor: (selectedDevice.cpu || 0) > 70 ? '#dc2626' : '#3b82f6', borderRadius: '4px', transition: 'width 0.3s' }} />
+                  <div className="h-2 overflow-hidden rounded bg-gray-100">
+                    <div className={`h-full rounded transition-all ${(selectedDevice.cpu || 0) > 70 ? 'bg-red-600' : 'bg-blue-500'}`} style={{ width: `${selectedDevice.cpu}%` }} />
                   </div>
                 </div>
                 <div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                    <span style={{ fontSize: '13px', color: '#6b7280' }}>메모리</span>
-                    <span style={{ fontSize: '13px', fontWeight: '600', color: (selectedDevice.memory || 0) > 80 ? '#dc2626' : '#111827' }}>{selectedDevice.memory}%</span>
+                  <div className="mb-1.5 flex justify-between">
+                    <span className="text-xs text-gray-500">메모리</span>
+                    <span className={`text-xs font-semibold ${(selectedDevice.memory || 0) > 80 ? 'text-red-600' : 'text-gray-900'}`}>{selectedDevice.memory}%</span>
                   </div>
-                  <div style={{ height: '8px', backgroundColor: '#f3f4f6', borderRadius: '4px', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${selectedDevice.memory}%`, backgroundColor: (selectedDevice.memory || 0) > 80 ? '#dc2626' : '#059669', borderRadius: '4px', transition: 'width 0.3s' }} />
+                  <div className="h-2 overflow-hidden rounded bg-gray-100">
+                    <div className={`h-full rounded transition-all ${(selectedDevice.memory || 0) > 80 ? 'bg-red-600' : 'bg-emerald-600'}`} style={{ width: `${selectedDevice.memory}%` }} />
                   </div>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderTop: '1px solid #f3f4f6' }}>
-                  <span style={{ fontSize: '13px', color: '#6b7280' }}>처리량</span>
-                  <span style={{ fontSize: '14px', fontWeight: '600', color: '#111827' }}>{selectedDevice.throughput}</span>
+                <div className="flex justify-between border-t border-gray-100 py-3">
+                  <span className="text-xs text-gray-500">처리량</span>
+                  <span className="text-sm font-semibold text-gray-900">{selectedDevice.throughput}</span>
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderTop: '1px solid #f3f4f6' }}>
-                  <span style={{ fontSize: '13px', color: '#6b7280' }}>가동 시간</span>
-                  <span style={{ fontSize: '14px', fontWeight: '600', color: '#111827' }}>{selectedDevice.uptime}</span>
+                <div className="flex justify-between border-t border-gray-100 py-3">
+                  <span className="text-xs text-gray-500">가동 시간</span>
+                  <span className="text-sm font-semibold text-gray-900">{selectedDevice.uptime}</span>
                 </div>
               </div>
             </div>
@@ -352,55 +297,37 @@ export default function SangforPage() {
       )}
 
       {activeTab === 'security' && (
-        <div style={{
-          backgroundColor: 'white',
-          borderRadius: '12px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-          border: '1px solid #e5e7eb',
-          overflow: 'hidden',
-        }}>
-          <div style={{ padding: '16px 24px', borderBottom: '1px solid #e5e7eb', backgroundColor: '#f9fafb' }}>
-            <div style={{ display: 'flex', gap: '24px' }}>
-              <div>
-                <span style={{ fontSize: '13px', color: '#6b7280' }}>총 이벤트: </span>
-                <span style={{ fontSize: '14px', fontWeight: '600', color: '#111827' }}>{events.length}</span>
-              </div>
-              <div>
-                <span style={{ fontSize: '13px', color: '#dc2626' }}>🔴 높음: </span>
-                <span style={{ fontSize: '14px', fontWeight: '600', color: '#dc2626' }}>{events.filter(e => e.severity === 'high').length}</span>
-              </div>
-              <div>
-                <span style={{ fontSize: '13px', color: '#d97706' }}>🟡 중간: </span>
-                <span style={{ fontSize: '14px', fontWeight: '600', color: '#d97706' }}>{events.filter(e => e.severity === 'medium').length}</span>
-              </div>
+        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+          <div className="flex gap-6 border-b border-gray-200 bg-gray-50 px-6 py-4">
+            <div>
+              <span className="text-xs text-gray-500">총 이벤트: </span>
+              <span className="text-sm font-semibold text-gray-900">{events.length}</span>
+            </div>
+            <div>
+              <span className="text-xs text-red-600">🔴 높음: </span>
+              <span className="text-sm font-semibold text-red-600">{events.filter(e => e.severity === 'high').length}</span>
+            </div>
+            <div>
+              <span className="text-xs text-amber-600">🟡 중간: </span>
+              <span className="text-sm font-semibold text-amber-600">{events.filter(e => e.severity === 'medium').length}</span>
             </div>
           </div>
           {events.map((event) => {
             const sevStyle = getSeverityStyle(event.severity)
             return (
-              <div key={event.id} style={{
-                padding: '16px 24px',
-                borderBottom: '1px solid #f3f4f6',
-                display: 'flex',
-                alignItems: 'flex-start',
-                gap: '16px',
-              }}>
-                <span style={{ fontSize: '20px', marginTop: '2px' }}>{getEventTypeIcon(event.type)}</span>
-                <div style={{ flex: 1 }}>
-                  <p style={{ fontSize: '14px', fontWeight: '500', color: '#111827', margin: '0 0 4px 0' }}>{event.description}</p>
-                  <div style={{ display: 'flex', gap: '16px', fontSize: '12px', color: '#9ca3af' }}>
+              <div key={event.id} className="flex items-start gap-4 border-b border-gray-100 px-6 py-4">
+                <span className="mt-0.5 text-xl">{getEventTypeIcon(event.type)}</span>
+                <div className="flex-1">
+                  <p className="mb-1 text-sm font-medium text-gray-900">{event.description}</p>
+                  <div className="flex gap-4 text-xs text-gray-400">
                     <span>출발: {event.source}</span>
                     <span>도착: {event.destination}</span>
                   </div>
                 </div>
-                <div style={{
-                  padding: '4px 10px',
-                  borderRadius: '12px',
-                  backgroundColor: sevStyle.bg,
-                }}>
-                  <span style={{ fontSize: '12px', fontWeight: '500', color: sevStyle.text }}>{sevStyle.label}</span>
+                <div className={`rounded-full px-2.5 py-1 ${sevStyle.bg}`}>
+                  <span className={`text-xs font-medium ${sevStyle.text}`}>{sevStyle.label}</span>
                 </div>
-                <span style={{ fontSize: '12px', color: '#9ca3af', flexShrink: 0 }}>{event.time}</span>
+                <span className="shrink-0 text-xs text-gray-400">{event.time}</span>
               </div>
             )
           })}
@@ -408,52 +335,24 @@ export default function SangforPage() {
       )}
 
       {activeTab === 'topology' && (
-        <div style={{
-          backgroundColor: 'white',
-          borderRadius: '12px',
-          padding: '48px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-          border: '1px solid #e5e7eb',
-          textAlign: 'center',
-        }}>
-          <div style={{ fontSize: '64px', marginBottom: '20px' }}>🔗</div>
-          <h3 style={{ fontSize: '20px', fontWeight: '600', color: '#111827', margin: '0 0 12px 0' }}>
+        <div className="rounded-xl border border-gray-200 bg-white p-12 text-center shadow-sm">
+          <div className="mb-5 text-6xl">🔗</div>
+          <h3 className="mb-3 text-xl font-semibold text-gray-900">
             네트워크 토폴로지
           </h3>
-          <p style={{ fontSize: '15px', color: '#6b7280', margin: '0 0 32px 0' }}>
+          <p className="mb-8 text-sm text-gray-500">
             네트워크 토폴로지 뷰는 Sangfor API 연동 시 활성화됩니다.
           </p>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, 1fr)',
-            gap: '16px',
-            maxWidth: '600px',
-            margin: '0 auto',
-          }}>
+          <div className="mx-auto grid max-w-[600px] grid-cols-3 gap-4">
             {devices.map((device) => {
               const statusStyle = getStatusStyle(device.status)
               return (
-                <div key={device.id} style={{
-                  padding: '16px',
-                  borderRadius: '10px',
-                  border: '1px solid #e5e7eb',
-                  backgroundColor: '#f9fafb',
-                }}>
-                  <div style={{
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '8px',
-                    backgroundColor: statusStyle.bg,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    margin: '0 auto 8px auto',
-                    fontSize: '14px',
-                  }}>
+                <div key={device.id} className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                  <div className={`mx-auto mb-2 flex h-8 w-8 items-center justify-center rounded-lg ${statusStyle.bg} text-sm`}>
                     {device.status === 'online' ? '🟢' : device.status === 'warning' ? '🟡' : '🔴'}
                   </div>
-                  <p style={{ fontSize: '13px', fontWeight: '600', color: '#111827', margin: '0 0 2px 0' }}>{device.name}</p>
-                  <p style={{ fontSize: '11px', color: '#9ca3af', margin: 0 }}>{device.ip}</p>
+                  <p className="mb-0.5 text-xs font-semibold text-gray-900">{device.name}</p>
+                  <p className="text-[11px] text-gray-400">{device.ip}</p>
                 </div>
               )
             })}
@@ -462,49 +361,30 @@ export default function SangforPage() {
       )}
 
       {activeTab === 'workflows' && (
-        <div style={{
-          backgroundColor: 'white',
-          borderRadius: '12px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.08)',
-          border: '1px solid #e5e7eb',
-          padding: '24px',
-        }}>
-          <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#111827', margin: '0 0 16px 0' }}>
+        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+          <h3 className="mb-4 text-lg font-semibold text-gray-900">
             Sangfor 워크플로우
           </h3>
           {workflows.length === 0 ? (
-            <p style={{ fontSize: '14px', color: '#6b7280' }}>연결된 워크플로우가 없습니다. sangfor-mcp-workflow 서버를 확인하세요.</p>
+            <p className="text-sm text-gray-500">연결된 워크플로우가 없습니다. sangfor-mcp-workflow 서버를 확인하세요.</p>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div className="flex flex-col gap-3">
               {workflows.map((workflow) => (
-                <div key={workflow.id} style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '16px',
-                  borderRadius: '10px',
-                  border: '1px solid #e5e7eb',
-                }}>
+                <div key={workflow.id} className="flex items-center justify-between rounded-lg border border-gray-200 p-4">
                   <div>
-                    <p style={{ fontSize: '15px', fontWeight: '600', color: '#111827', margin: 0 }}>
+                    <p className="text-sm font-semibold text-gray-900">
                       {workflow.name ?? workflow.title ?? workflow.id}
                     </p>
-                    <p style={{ fontSize: '12px', color: '#6b7280', margin: '4px 0 0 0' }}>
+                    <p className="mt-1 text-xs text-gray-500">
                       {workflow.status ?? 'unknown'}
                     </p>
                   </div>
                   <button
                     onClick={() => void executeWorkflow(workflow.id)}
                     disabled={executeBusy === workflow.id}
-                    style={{
-                      padding: '8px 16px',
-                      borderRadius: '8px',
-                      border: 'none',
-                      backgroundColor: '#111827',
-                      color: 'white',
-                      cursor: executeBusy === workflow.id ? 'wait' : 'pointer',
-                      fontSize: '13px',
-                    }}
+                    className={`rounded-lg bg-gray-900 px-4 py-2 text-xs text-white ${
+                      executeBusy === workflow.id ? 'cursor-wait' : 'cursor-pointer'
+                    }`}
                   >
                     {executeBusy === workflow.id ? '실행 중...' : '실행'}
                   </button>

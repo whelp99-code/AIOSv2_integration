@@ -6,7 +6,7 @@ import { OpsConsole } from '@/components/ops/ops-console'
 export default function OpsConsolePage() {
   return (
     <SessionProvider>
-      <div style={{ backgroundColor: '#f9fafb', minHeight: '100vh' }}>
+      <div className="min-h-screen bg-gray-50">
         <OpsConsole />
       </div>
     </SessionProvider>

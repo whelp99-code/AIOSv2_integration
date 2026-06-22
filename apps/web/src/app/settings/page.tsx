@@ -127,10 +127,10 @@ export default function SettingsPage() {
   }
 
   function statusColors(status: IntegrationReachability | null) {
-    if (status === "ok") return { bg: "#d1fae5", color: "#059669" };
-    if (status === "degraded") return { bg: "#fef3c7", color: "#d97706" };
-    if (status === "planned") return { bg: "#e0e7ff", color: "#4f46e5" };
-    return { bg: "#f3f4f6", color: "#6b7280" };
+    if (status === "ok") return { bg: "bg-emerald-100", color: "text-emerald-600" };
+    if (status === "degraded") return { bg: "bg-amber-100", color: "text-amber-600" };
+    if (status === "planned") return { bg: "bg-indigo-100", color: "text-indigo-600" };
+    return { bg: "bg-gray-100", color: "text-gray-500" };
   }
 
   const handleSave = async () => {
@@ -151,30 +151,14 @@ export default function SettingsPage() {
   }) => (
     <button
       onClick={() => onChange(!enabled)}
-      style={{
-        width: "48px",
-        height: "26px",
-        borderRadius: "13px",
-        border: "none",
-        cursor: "pointer",
-        backgroundColor: enabled ? "#3b82f6" : "#d1d5db",
-        position: "relative",
-        transition: "background-color 0.2s",
-        flexShrink: 0,
-      }}
+      className={`relative h-[26px] w-12 shrink-0 cursor-pointer rounded-full border-none transition-colors ${
+        enabled ? "bg-blue-500" : "bg-gray-300"
+      }`}
     >
       <div
-        style={{
-          width: "22px",
-          height: "22px",
-          borderRadius: "50%",
-          backgroundColor: "white",
-          position: "absolute",
-          top: "2px",
-          left: enabled ? "24px" : "2px",
-          transition: "left 0.2s",
-          boxShadow: "0 1px 3px rgba(0,0,0,0.2)",
-        }}
+        className={`absolute top-0.5 h-[22px] w-[22px] rounded-full bg-white shadow-md transition-all ${
+          enabled ? "left-6" : "left-0.5"
+        }`}
       />
     </button>
   );
@@ -188,32 +172,11 @@ export default function SettingsPage() {
     description?: string;
     children: React.ReactNode;
   }) => (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        padding: "16px 0",
-        borderBottom: "1px solid #f3f4f6",
-      }}
-    >
-      <div style={{ flex: 1, marginRight: "24px" }}>
-        <p
-          style={{
-            fontSize: "14px",
-            fontWeight: "500",
-            color: "#111827",
-            margin: 0,
-          }}
-        >
-          {label}
-        </p>
+    <div className="flex items-center justify-between border-b border-gray-100 py-4">
+      <div className="mr-6 flex-1">
+        <p className="text-sm font-medium text-gray-900">{label}</p>
         {description && (
-          <p
-            style={{ fontSize: "13px", color: "#6b7280", margin: "4px 0 0 0" }}
-          >
-            {description}
-          </p>
+          <p className="mt-1 text-xs text-gray-500">{description}</p>
         )}
       </div>
       {children}
@@ -221,51 +184,22 @@ export default function SettingsPage() {
   );
 
   return (
-    <div
-      style={{ display: "flex", height: "100%", backgroundColor: "#f9fafb" }}
-    >
+    <div className="flex h-full bg-gray-50">
       {/* Sidebar */}
-      <div
-        style={{
-          width: "260px",
-          backgroundColor: "white",
-          borderRight: "1px solid #e5e7eb",
-          padding: "24px 16px",
-          flexShrink: 0,
-        }}
-      >
-        <h2
-          style={{
-            fontSize: "20px",
-            fontWeight: "700",
-            color: "#111827",
-            margin: "0 0 24px 16px",
-          }}
-        >
-          ⚙️ 설정
-        </h2>
-        <nav style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+      <div className="w-[260px] shrink-0 border-r border-gray-200 bg-white p-6">
+        <h2 className="mb-6 ml-4 text-xl font-bold text-gray-900">⚙️ 설정</h2>
+        <nav className="flex flex-col gap-1">
           {sections.map((section) => (
             <button
               key={section.id}
               onClick={() => setActiveSection(section.id)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "10px",
-                padding: "10px 16px",
-                borderRadius: "8px",
-                border: "none",
-                cursor: "pointer",
-                fontSize: "14px",
-                fontWeight: "500",
-                backgroundColor:
-                  activeSection === section.id ? "#f3f4f6" : "transparent",
-                color: activeSection === section.id ? "#111827" : "#6b7280",
-                textAlign: "left",
-              }}
+              className={`flex items-center gap-2.5 rounded-lg px-4 py-2.5 text-left text-sm font-medium ${
+                activeSection === section.id
+                  ? "bg-gray-100 text-gray-900"
+                  : "text-gray-500"
+              }`}
             >
-              <span style={{ fontSize: "16px" }}>{section.icon}</span>
+              <span className="text-base">{section.icon}</span>
               {section.title}
             </button>
           ))}
@@ -273,136 +207,45 @@ export default function SettingsPage() {
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, padding: "32px 40px", overflowY: "auto" }}>
+      <div className="flex-1 overflow-y-auto p-8 px-10">
         {/* Profile */}
         {activeSection === "profile" && (
           <div>
-            <h3
-              style={{
-                fontSize: "24px",
-                fontWeight: "700",
-                color: "#111827",
-                margin: "0 0 8px 0",
-              }}
-            >
-              프로필 설정
-            </h3>
-            <p
-              style={{
-                fontSize: "15px",
-                color: "#6b7280",
-                margin: "0 0 32px 0",
-              }}
-            >
-              계정 정보를 관리합니다.
-            </p>
+            <h3 className="mb-2 text-2xl font-bold text-gray-900">프로필 설정</h3>
+            <p className="mb-8 text-sm text-gray-500">계정 정보를 관리합니다.</p>
 
-            <div
-              style={{
-                backgroundColor: "white",
-                borderRadius: "12px",
-                padding: "24px",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-                border: "1px solid #e5e7eb",
-                marginBottom: "24px",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "20px",
-                  marginBottom: "24px",
-                }}
-              >
-                <div
-                  style={{
-                    width: "72px",
-                    height: "72px",
-                    borderRadius: "50%",
-                    backgroundColor: "#dbeafe",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "28px",
-                    fontWeight: "700",
-                    color: "#2563eb",
-                  }}
-                >
+            <div className="mb-6 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+              <div className="mb-6 flex items-center gap-5">
+                <div className="flex h-[72px] w-[72px] items-center justify-center rounded-full bg-blue-100 text-3xl font-bold text-blue-600">
                   {(session?.user?.name || "U")[0].toUpperCase()}
                 </div>
                 <div>
-                  <p
-                    style={{
-                      fontSize: "18px",
-                      fontWeight: "600",
-                      color: "#111827",
-                      margin: "0 0 4px 0",
-                    }}
-                  >
+                  <p className="mb-1 text-lg font-semibold text-gray-900">
                     {session?.user?.name || "사용자"}
                   </p>
-                  <p style={{ fontSize: "14px", color: "#6b7280", margin: 0 }}>
+                  <p className="text-sm text-gray-500">
                     {session?.user?.email || ""}
                   </p>
                 </div>
               </div>
 
-              <div style={{ marginBottom: "20px" }}>
-                <label
-                  style={{
-                    fontSize: "14px",
-                    fontWeight: "500",
-                    color: "#374151",
-                    display: "block",
-                    marginBottom: "6px",
-                  }}
-                >
-                  표시 이름
-                </label>
+              <div className="mb-5">
+                <label className="mb-1.5 block text-sm font-medium text-gray-700">표시 이름</label>
                 <input
                   type="text"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
-                  style={{
-                    width: "100%",
-                    maxWidth: "400px",
-                    padding: "10px 14px",
-                    border: "1px solid #e5e7eb",
-                    borderRadius: "8px",
-                    fontSize: "14px",
-                    outline: "none",
-                    boxSizing: "border-box",
-                  }}
+                  className="w-full max-w-[400px] rounded-lg border border-gray-200 px-3.5 py-2.5 text-sm outline-none"
                 />
               </div>
 
-              <div style={{ marginBottom: "20px" }}>
-                <label
-                  style={{
-                    fontSize: "14px",
-                    fontWeight: "500",
-                    color: "#374151",
-                    display: "block",
-                    marginBottom: "6px",
-                  }}
-                >
-                  이메일
-                </label>
+              <div className="mb-5">
+                <label className="mb-1.5 block text-sm font-medium text-gray-700">이메일</label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  style={{
-                    width: "100%",
-                    maxWidth: "400px",
-                    padding: "10px 14px",
-                    border: "1px solid #e5e7eb",
-                    borderRadius: "8px",
-                    fontSize: "14px",
-                    outline: "none",
-                    boxSizing: "border-box",
-                  }}
+                  className="w-full max-w-[400px] rounded-lg border border-gray-200 px-3.5 py-2.5 text-sm outline-none"
                 />
               </div>
             </div>
@@ -412,70 +255,21 @@ export default function SettingsPage() {
         {/* Notifications */}
         {activeSection === "notifications" && (
           <div>
-            <h3
-              style={{
-                fontSize: "24px",
-                fontWeight: "700",
-                color: "#111827",
-                margin: "0 0 8px 0",
-              }}
-            >
-              알림 설정
-            </h3>
-            <p
-              style={{
-                fontSize: "15px",
-                color: "#6b7280",
-                margin: "0 0 32px 0",
-              }}
-            >
-              알림 수신 방법을 설정합니다.
-            </p>
+            <h3 className="mb-2 text-2xl font-bold text-gray-900">알림 설정</h3>
+            <p className="mb-8 text-sm text-gray-500">알림 수신 방법을 설정합니다.</p>
 
-            <div
-              style={{
-                backgroundColor: "white",
-                borderRadius: "12px",
-                padding: "8px 24px",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-                border: "1px solid #e5e7eb",
-              }}
-            >
-              <SettingRow
-                label="이메일 알림"
-                description="중요한 업데이트를 이메일로 받습니다."
-              >
-                <ToggleSwitch
-                  enabled={emailNotifications}
-                  onChange={setEmailNotifications}
-                />
+            <div className="rounded-xl border border-gray-200 bg-white px-6 py-2 shadow-sm">
+              <SettingRow label="이메일 알림" description="중요한 업데이트를 이메일로 받습니다.">
+                <ToggleSwitch enabled={emailNotifications} onChange={setEmailNotifications} />
               </SettingRow>
-              <SettingRow
-                label="푸시 알림"
-                description="브라우저 푸시 알림을 받습니다."
-              >
-                <ToggleSwitch
-                  enabled={pushNotifications}
-                  onChange={setPushNotifications}
-                />
+              <SettingRow label="푸시 알림" description="브라우저 푸시 알림을 받습니다.">
+                <ToggleSwitch enabled={pushNotifications} onChange={setPushNotifications} />
               </SettingRow>
-              <SettingRow
-                label="워크플로우 알림"
-                description="워크플로우 상태 변경 시 알림을 받습니다."
-              >
-                <ToggleSwitch
-                  enabled={workflowAlerts}
-                  onChange={setWorkflowAlerts}
-                />
+              <SettingRow label="워크플로우 알림" description="워크플로우 상태 변경 시 알림을 받습니다.">
+                <ToggleSwitch enabled={workflowAlerts} onChange={setWorkflowAlerts} />
               </SettingRow>
-              <SettingRow
-                label="보안 알림"
-                description="보안 이벤트 발생 시 즉시 알림을 받습니다."
-              >
-                <ToggleSwitch
-                  enabled={securityAlerts}
-                  onChange={setSecurityAlerts}
-                />
+              <SettingRow label="보안 알림" description="보안 이벤트 발생 시 즉시 알림을 받습니다.">
+                <ToggleSwitch enabled={securityAlerts} onChange={setSecurityAlerts} />
               </SettingRow>
             </div>
           </div>
@@ -484,98 +278,40 @@ export default function SettingsPage() {
         {/* Appearance */}
         {activeSection === "appearance" && (
           <div>
-            <h3
-              style={{
-                fontSize: "24px",
-                fontWeight: "700",
-                color: "#111827",
-                margin: "0 0 8px 0",
-              }}
-            >
-              외관 설정
-            </h3>
-            <p
-              style={{
-                fontSize: "15px",
-                color: "#6b7280",
-                margin: "0 0 32px 0",
-              }}
-            >
-              인터페이스 모양을 사용자 정의합니다.
-            </p>
+            <h3 className="mb-2 text-2xl font-bold text-gray-900">외관 설정</h3>
+            <p className="mb-8 text-sm text-gray-500">인터페이스 모양을 사용자 정의합니다.</p>
 
-            <div
-              style={{
-                backgroundColor: "white",
-                borderRadius: "12px",
-                padding: "8px 24px",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-                border: "1px solid #e5e7eb",
-                marginBottom: "24px",
-              }}
-            >
-              <SettingRow
-                label="테마"
-                description="인터페이스 색상 테마를 선택합니다."
-              >
-                <div style={{ display: "flex", gap: "8px" }}>
+            <div className="mb-6 rounded-xl border border-gray-200 bg-white px-6 py-2 shadow-sm">
+              <SettingRow label="테마" description="인터페이스 색상 테마를 선택합니다.">
+                <div className="flex gap-2">
                   {(["light", "dark", "system"] as const).map((t) => (
                     <button
                       key={t}
                       onClick={() => setTheme(t)}
-                      style={{
-                        padding: "8px 16px",
-                        borderRadius: "8px",
-                        border:
-                          theme === t
-                            ? "2px solid #3b82f6"
-                            : "1px solid #e5e7eb",
-                        cursor: "pointer",
-                        fontSize: "13px",
-                        fontWeight: "500",
-                        backgroundColor: theme === t ? "#eff6ff" : "white",
-                        color: theme === t ? "#2563eb" : "#6b7280",
-                      }}
+                      className={`rounded-lg px-4 py-2 text-xs font-medium ${
+                        theme === t
+                          ? "border-2 border-blue-500 bg-blue-50 text-blue-600"
+                          : "border border-gray-200 bg-white text-gray-500"
+                      }`}
                     >
-                      {t === "light"
-                        ? "☀️ 라이트"
-                        : t === "dark"
-                          ? "🌙 다크"
-                          : "💻 시스템"}
+                      {t === "light" ? "☀️ 라이트" : t === "dark" ? "🌙 다크" : "💻 시스템"}
                     </button>
                   ))}
                 </div>
               </SettingRow>
-              <SettingRow
-                label="언어"
-                description="인터페이스 표시 언어를 선택합니다."
-              >
+              <SettingRow label="언어" description="인터페이스 표시 언어를 선택합니다.">
                 <select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
-                  style={{
-                    padding: "8px 12px",
-                    border: "1px solid #e5e7eb",
-                    borderRadius: "8px",
-                    fontSize: "14px",
-                    outline: "none",
-                    backgroundColor: "white",
-                    cursor: "pointer",
-                  }}
+                  className="cursor-pointer rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none"
                 >
                   <option value="ko">한국어</option>
                   <option value="en">English</option>
                   <option value="ja">日本語</option>
                 </select>
               </SettingRow>
-              <SettingRow
-                label="사이드바 접기"
-                description="사이드바를 기본적으로 접힌 상태로 표시합니다."
-              >
-                <ToggleSwitch
-                  enabled={sidebarCollapsed}
-                  onChange={setSidebarCollapsed}
-                />
+              <SettingRow label="사이드바 접기" description="사이드바를 기본적으로 접힌 상태로 표시합니다.">
+                <ToggleSwitch enabled={sidebarCollapsed} onChange={setSidebarCollapsed} />
               </SettingRow>
             </div>
           </div>
@@ -584,180 +320,37 @@ export default function SettingsPage() {
         {/* Integrations */}
         {activeSection === "integrations" && (
           <div>
-            <h3
-              style={{
-                fontSize: "24px",
-                fontWeight: "700",
-                color: "#111827",
-                margin: "0 0 8px 0",
-              }}
-            >
-              연동 관리
-            </h3>
-            <p
-              style={{
-                fontSize: "15px",
-                color: "#6b7280",
-                margin: "0 0 32px 0",
-              }}
-            >
-              외부 서비스 연동을 관리합니다.
-            </p>
+            <h3 className="mb-2 text-2xl font-bold text-gray-900">연동 관리</h3>
+            <p className="mb-8 text-sm text-gray-500">외부 서비스 연동을 관리합니다.</p>
 
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "12px" }}
-            >
+            <div className="flex flex-col gap-3">
               {integrationsLoading && (
-                <p style={{ fontSize: "14px", color: "#6b7280", margin: 0 }}>
-                  연동 상태를 불러오는 중...
-                </p>
+                <p className="text-sm text-gray-500">연동 상태를 불러오는 중...</p>
               )}
               {[
-                {
-                  key: "outlook",
-                  name: "Microsoft Outlook",
-                  desc: "이메일 연동",
-                  icon: "📧",
-                  status: outlookConnected ? ("ok" as const) : null,
-                },
-                {
-                  key: "aios-v1",
-                  name: "AIOS v1",
-                  desc: "태스크 및 고객 관리",
-                  icon: "🤖",
-                  status: getProjectStatus("aios-v1"),
-                },
-                {
-                  key: "f-aios-v3-core",
-                  name: "F-aios-v3",
-                  desc: "AI 엔진 연동",
-                  icon: "⚡",
-                  status: getProjectStatus("f-aios-v3-core"),
-                },
-                {
-                  key: "sangfor-mcp-workflow",
-                  name: "Sangfor",
-                  desc: "보안 어플라이언스 관리",
-                  icon: "🛡️",
-                  status: getProjectStatus("sangfor-mcp-workflow"),
-                },
-                {
-                  key: "vibe-coding-os",
-                  name: "vibe-coding-os",
-                  desc: "지식 및 에이전트 프레임워크",
-                  icon: "🧠",
-                  status: getProjectStatus("vibe-coding-os"),
-                },
-                {
-                  key: "whelp99",
-                  name: "whelp99 MCP",
-                  desc: "MCP 확장 (filesystem probe)",
-                  icon: "🔧",
-                  status: getProjectStatus("whelp99-code-sangfor-engineer-mcp"),
-                },
-                {
-                  key: "github",
-                  name: "GitHub",
-                  desc: "코드 저장소 연동",
-                  icon: "🐙",
-                  status:
-                    githubConnected === null
-                      ? null
-                      : githubConnected
-                        ? ("ok" as const)
-                        : ("unreachable" as const),
-                },
-                {
-                  key: "slack",
-                  name: "Slack",
-                  desc: "팀 커뮤니케이션",
-                  icon: "💬",
-                  status:
-                    slackConnected === null
-                      ? null
-                      : slackConnected
-                        ? ("ok" as const)
-                        : ("unreachable" as const),
-                },
+                { key: "outlook", name: "Microsoft Outlook", desc: "이메일 연동", icon: "📧", status: outlookConnected ? ("ok" as const) : null },
+                { key: "aios-v1", name: "AIOS v1", desc: "태스크 및 고객 관리", icon: "🤖", status: getProjectStatus("aios-v1") },
+                { key: "f-aios-v3-core", name: "F-aios-v3", desc: "AI 엔진 연동", icon: "⚡", status: getProjectStatus("f-aios-v3-core") },
+                { key: "sangfor-mcp-workflow", name: "Sangfor", desc: "보안 어플라이언스 관리", icon: "🛡️", status: getProjectStatus("sangfor-mcp-workflow") },
+                { key: "vibe-coding-os", name: "vibe-coding-os", desc: "지식 및 에이전트 프레임워크", icon: "🧠", status: getProjectStatus("vibe-coding-os") },
+                { key: "whelp99", name: "whelp99 MCP", desc: "MCP 확장 (filesystem probe)", icon: "🔧", status: getProjectStatus("whelp99-code-sangfor-engineer-mcp") },
+                { key: "github", name: "GitHub", desc: "코드 저장소 연동", icon: "🐙", status: githubConnected === null ? null : githubConnected ? ("ok" as const) : ("unreachable" as const) },
+                { key: "slack", name: "Slack", desc: "팀 커뮤니케이션", icon: "💬", status: slackConnected === null ? null : slackConnected ? ("ok" as const) : ("unreachable" as const) },
               ].map((integration) => {
                 const colors = statusColors(integration.status);
                 return (
-                  <div
-                    key={integration.key}
-                    style={{
-                      backgroundColor: "white",
-                      borderRadius: "10px",
-                      padding: "20px 24px",
-                      boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-                      border: "1px solid #e5e7eb",
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "16px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: "48px",
-                        height: "48px",
-                        borderRadius: "10px",
-                        backgroundColor: "#f3f4f6",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "22px",
-                      }}
-                    >
+                  <div key={integration.key} className="flex items-center gap-4 rounded-lg border border-gray-200 bg-white p-5 shadow-sm">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-gray-100 text-xl">
                       {integration.icon}
                     </div>
-                    <div style={{ flex: 1 }}>
-                      <p
-                        style={{
-                          fontSize: "15px",
-                          fontWeight: "600",
-                          color: "#111827",
-                          margin: "0 0 2px 0",
-                        }}
-                      >
-                        {integration.name}
-                      </p>
-                      <p
-                        style={{
-                          fontSize: "13px",
-                          color: "#6b7280",
-                          margin: 0,
-                        }}
-                      >
-                        {integration.desc}
-                      </p>
+                    <div className="flex-1">
+                      <p className="mb-0.5 text-sm font-semibold text-gray-900">{integration.name}</p>
+                      <p className="text-xs text-gray-500">{integration.desc}</p>
                     </div>
-                    <div
-                      style={{
-                        padding: "6px 14px",
-                        borderRadius: "16px",
-                        backgroundColor: colors.bg,
-                      }}
-                    >
-                      <span
-                        style={{
-                          fontSize: "13px",
-                          fontWeight: "500",
-                          color: colors.color,
-                        }}
-                      >
-                        {statusLabel(integration.status)}
-                      </span>
+                    <div className={`rounded-full px-3.5 py-1.5 ${colors.bg}`}>
+                      <span className={`text-xs font-medium ${colors.color}`}>{statusLabel(integration.status)}</span>
                     </div>
-                    <button
-                      style={{
-                        padding: "8px 16px",
-                        borderRadius: "8px",
-                        border: "1px solid #e5e7eb",
-                        cursor: "pointer",
-                        fontSize: "13px",
-                        backgroundColor: "white",
-                        color: "#374151",
-                      }}
-                    >
+                    <button className="cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs text-gray-700">
                       {integration.status === "ok" ? "관리" : "연결"}
                     </button>
                   </div>
@@ -770,95 +363,21 @@ export default function SettingsPage() {
         {/* Security */}
         {activeSection === "security" && (
           <div>
-            <h3
-              style={{
-                fontSize: "24px",
-                fontWeight: "700",
-                color: "#111827",
-                margin: "0 0 8px 0",
-              }}
-            >
-              보안 설정
-            </h3>
-            <p
-              style={{
-                fontSize: "15px",
-                color: "#6b7280",
-                margin: "0 0 32px 0",
-              }}
-            >
-              계정 보안을 관리합니다.
-            </p>
+            <h3 className="mb-2 text-2xl font-bold text-gray-900">보안 설정</h3>
+            <p className="mb-8 text-sm text-gray-500">계정 보안을 관리합니다.</p>
 
-            <div
-              style={{
-                backgroundColor: "white",
-                borderRadius: "12px",
-                padding: "8px 24px",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-                border: "1px solid #e5e7eb",
-                marginBottom: "24px",
-              }}
-            >
-              <SettingRow
-                label="비밀번호 변경"
-                description="마지막 변경: 30일 전"
-              >
-                <button
-                  style={{
-                    padding: "8px 16px",
-                    borderRadius: "8px",
-                    border: "1px solid #e5e7eb",
-                    cursor: "pointer",
-                    fontSize: "13px",
-                    backgroundColor: "white",
-                    color: "#374151",
-                  }}
-                >
-                  변경
-                </button>
+            <div className="mb-6 rounded-xl border border-gray-200 bg-white px-6 py-2 shadow-sm">
+              <SettingRow label="비밀번호 변경" description="마지막 변경: 30일 전">
+                <button className="cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs text-gray-700">변경</button>
               </SettingRow>
-              <SettingRow
-                label="2단계 인증"
-                description="추가 보안 계층을 활성화합니다."
-              >
+              <SettingRow label="2단계 인증" description="추가 보안 계층을 활성화합니다.">
                 <ToggleSwitch enabled={false} onChange={() => {}} />
               </SettingRow>
-              <SettingRow
-                label="세션 관리"
-                description="활성 세션을 확인하고 관리합니다."
-              >
-                <button
-                  style={{
-                    padding: "8px 16px",
-                    borderRadius: "8px",
-                    border: "1px solid #e5e7eb",
-                    cursor: "pointer",
-                    fontSize: "13px",
-                    backgroundColor: "white",
-                    color: "#374151",
-                  }}
-                >
-                  세션 보기
-                </button>
+              <SettingRow label="세션 관리" description="활성 세션을 확인하고 관리합니다.">
+                <button className="cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs text-gray-700">세션 보기</button>
               </SettingRow>
-              <SettingRow
-                label="API 키 관리"
-                description="외부 서비스 접근을 위한 API 키를 관리합니다."
-              >
-                <button
-                  style={{
-                    padding: "8px 16px",
-                    borderRadius: "8px",
-                    border: "1px solid #e5e7eb",
-                    cursor: "pointer",
-                    fontSize: "13px",
-                    backgroundColor: "white",
-                    color: "#374151",
-                  }}
-                >
-                  관리
-                </button>
+              <SettingRow label="API 키 관리" description="외부 서비스 접근을 위한 API 키를 관리합니다.">
+                <button className="cursor-pointer rounded-lg border border-gray-200 bg-white px-4 py-2 text-xs text-gray-700">관리</button>
               </SettingRow>
             </div>
           </div>
@@ -867,83 +386,21 @@ export default function SettingsPage() {
         {/* About */}
         {activeSection === "about" && (
           <div>
-            <h3
-              style={{
-                fontSize: "24px",
-                fontWeight: "700",
-                color: "#111827",
-                margin: "0 0 8px 0",
-              }}
-            >
-              정보
-            </h3>
-            <p
-              style={{
-                fontSize: "15px",
-                color: "#6b7280",
-                margin: "0 0 32px 0",
-              }}
-            >
-              시스템 정보 및 라이선스.
-            </p>
+            <h3 className="mb-2 text-2xl font-bold text-gray-900">정보</h3>
+            <p className="mb-8 text-sm text-gray-500">시스템 정보 및 라이선스.</p>
 
-            <div
-              style={{
-                backgroundColor: "white",
-                borderRadius: "12px",
-                padding: "24px",
-                boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-                border: "1px solid #e5e7eb",
-              }}
-            >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "16px",
-                  marginBottom: "24px",
-                }}
-              >
-                <div
-                  style={{
-                    width: "56px",
-                    height: "56px",
-                    borderRadius: "12px",
-                    backgroundColor: "#111827",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "24px",
-                    color: "white",
-                    fontWeight: "700",
-                  }}
-                >
+            <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+              <div className="mb-6 flex items-center gap-4">
+                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gray-900 text-2xl font-bold text-white">
                   AI
                 </div>
                 <div>
-                  <p
-                    style={{
-                      fontSize: "20px",
-                      fontWeight: "700",
-                      color: "#111827",
-                      margin: "0 0 4px 0",
-                    }}
-                  >
-                    AIOSv2 Integration
-                  </p>
-                  <p style={{ fontSize: "14px", color: "#6b7280", margin: 0 }}>
-                    AIOS 통합 플랫폼
-                  </p>
+                  <p className="mb-1 text-xl font-bold text-gray-900">AIOSv2 Integration</p>
+                  <p className="text-sm text-gray-500">AIOS 통합 플랫폼</p>
                 </div>
               </div>
 
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "12px",
-                }}
-              >
+              <div className="flex flex-col gap-3">
                 {[
                   { label: "버전", value: "v2.1.0" },
                   { label: "빌드", value: "2026.06.11" },
@@ -951,27 +408,9 @@ export default function SettingsPage() {
                   { label: "런타임", value: "Node.js 20" },
                   { label: "라이선스", value: "Enterprise" },
                 ].map((item) => (
-                  <div
-                    key={item.label}
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                      padding: "10px 0",
-                      borderBottom: "1px solid #f3f4f6",
-                    }}
-                  >
-                    <span style={{ fontSize: "14px", color: "#6b7280" }}>
-                      {item.label}
-                    </span>
-                    <span
-                      style={{
-                        fontSize: "14px",
-                        fontWeight: "500",
-                        color: "#111827",
-                      }}
-                    >
-                      {item.value}
-                    </span>
+                  <div key={item.label} className="flex justify-between border-b border-gray-100 py-2.5">
+                    <span className="text-sm text-gray-500">{item.label}</span>
+                    <span className="text-sm font-medium text-gray-900">{item.value}</span>
                   </div>
                 ))}
               </div>
@@ -981,40 +420,18 @@ export default function SettingsPage() {
 
         {/* Save Button (for applicable sections) */}
         {["profile", "notifications", "appearance"].includes(activeSection) && (
-          <div
-            style={{
-              marginTop: "28px",
-              display: "flex",
-              alignItems: "center",
-              gap: "16px",
-            }}
-          >
+          <div className="mt-7 flex items-center gap-4">
             <button
               onClick={handleSave}
               disabled={saving}
-              style={{
-                padding: "12px 24px",
-                backgroundColor: saving ? "#9ca3af" : "#111827",
-                color: "white",
-                border: "none",
-                borderRadius: "8px",
-                cursor: saving ? "not-allowed" : "pointer",
-                fontSize: "14px",
-                fontWeight: "600",
-              }}
+              className={`rounded-lg px-6 py-3 text-sm font-semibold text-white ${
+                saving ? "cursor-not-allowed bg-gray-400" : "bg-gray-900"
+              }`}
             >
               {saving ? "저장 중..." : "저장"}
             </button>
             {saved && (
-              <span
-                style={{
-                  fontSize: "14px",
-                  color: "#059669",
-                  fontWeight: "500",
-                }}
-              >
-                ✅ 저장되었습니다
-              </span>
+              <span className="text-sm font-medium text-emerald-600">✅ 저장되었습니다</span>
             )}
           </div>
         )}

@@ -3,7 +3,7 @@ import Link from 'next/link'
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <h1 className="text-4xl font-bold mb-8">AIOSv2 Integration</h1>
+      <h1 className="text-2xl font-bold mb-8">AIOSv2 Integration</h1>
       <p className="text-xl text-gray-600 mb-8">Unified Development Platform</p>
       <div className="flex gap-4">
         <Link

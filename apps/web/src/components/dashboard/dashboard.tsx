@@ -72,59 +72,27 @@ function StatsCard({
   loading,
 }: StatsCardProps) {
   return (
-    <div
-      style={{
-        backgroundColor: "white",
-        borderRadius: "12px",
-        padding: "24px",
-        boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-        border: "1px solid #e5e7eb",
-        display: "flex",
-        alignItems: "flex-start",
-        gap: "16px",
-      }}
-    >
+    <div className="flex items-start gap-4 rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
       <div
-        style={{
-          backgroundColor: color,
-          borderRadius: "10px",
-          width: "48px",
-          height: "48px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: "24px",
-        }}
+        className="flex h-12 w-12 items-center justify-center rounded-lg text-2xl"
+        style={{ backgroundColor: color }}
       >
         {loading ? "⏳" : icon}
       </div>
-      <div style={{ flex: 1 }}>
-        <p style={{ fontSize: "14px", color: "#6b7280", margin: 0 }}>{title}</p>
-        <p
-          style={{
-            fontSize: "32px",
-            fontWeight: "700",
-            color: "#111827",
-            margin: "8px 0 4px 0",
-          }}
-        >
+      <div className="flex-1">
+        <p className="text-sm text-gray-500">{title}</p>
+        <p className="mt-2 text-3xl font-bold text-gray-900">
           {loading ? "..." : value}
         </p>
         {change && !loading && (
           <p
-            style={{
-              fontSize: "13px",
-              color:
-                trend === "up"
-                  ? "#059669"
-                  : trend === "down"
-                    ? "#dc2626"
-                    : "#6b7280",
-              margin: 0,
-              display: "flex",
-              alignItems: "center",
-              gap: "4px",
-            }}
+            className={`mt-1 flex items-center gap-1 text-xs ${
+              trend === "up"
+                ? "text-emerald-600"
+                : trend === "down"
+                  ? "text-red-600"
+                  : "text-gray-500"
+            }`}
           >
             {trend === "up" && "↑"}
             {trend === "down" && "↓"}
@@ -213,15 +181,8 @@ export function Dashboard() {
 
   if (status === "loading") {
     return (
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "256px",
-        }}
-      >
-        <div style={{ fontSize: "16px", color: "#6b7280" }}>Loading...</div>
+      <div className="flex h-64 items-center justify-center">
+        <div className="text-base text-gray-500">Loading...</div>
       </div>
     );
   }
@@ -241,10 +202,10 @@ export function Dashboard() {
   }
 
   function integrationStatusColor(status: IntegrationReachability): string {
-    if (status === "ok") return "#059669";
-    if (status === "degraded") return "#d97706";
-    if (status === "planned") return "#4f46e5";
-    return "#dc2626";
+    if (status === "ok") return "text-emerald-600";
+    if (status === "degraded") return "text-amber-600";
+    if (status === "planned") return "text-indigo-600";
+    return "text-red-600";
   }
 
   const stats: StatsCardProps[] = [
@@ -287,175 +248,77 @@ export function Dashboard() {
   ];
 
   return (
-    <div
-      style={{
-        padding: "32px",
-        backgroundColor: "#f9fafb",
-        minHeight: "100vh",
-      }}
-    >
-      <div style={{ marginBottom: "32px" }}>
-        <h1
-          style={{
-            fontSize: "28px",
-            fontWeight: "700",
-            color: "#111827",
-            margin: "0 0 8px 0",
-          }}
-        >
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="mb-8">
+        <h1 className="mb-2 text-2xl font-bold text-gray-900">
           Welcome back, {session?.user?.name || "User"}! 👋
         </h1>
-        <p style={{ fontSize: "15px", color: "#6b7280", margin: 0 }}>
+        <p className="text-sm text-gray-500">
           AIOS 통합 대시보드 - 모든 프로젝트 통합 관리
         </p>
         {error && (
-          <p style={{ fontSize: "14px", color: "#dc2626", marginTop: "8px" }}>
-            ⚠️ {error}
-          </p>
+          <p className="mt-2 text-sm text-red-600">⚠️ {error}</p>
         )}
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(4, 1fr)",
-          gap: "20px",
-          marginBottom: "32px",
-        }}
-      >
+      <div className="mb-8 grid grid-cols-4 gap-5">
         {stats.map((stat) => (
           <StatsCard key={stat.title} {...stat} />
         ))}
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "2fr 1fr",
-          gap: "24px",
-        }}
-      >
-        <div
-          style={{
-            backgroundColor: "white",
-            borderRadius: "12px",
-            boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-            border: "1px solid #e5e7eb",
-            overflow: "hidden",
-          }}
-        >
-          <div
-            style={{
-              padding: "20px 24px",
-              borderBottom: "1px solid #e5e7eb",
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <h3
-              style={{
-                fontSize: "18px",
-                fontWeight: "600",
-                color: "#111827",
-                margin: 0,
-              }}
-            >
+      <div className="grid grid-cols-[2fr_1fr] gap-6">
+        <div className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
+          <div className="flex items-center justify-between border-b border-gray-200 px-6 py-5">
+            <h3 className="text-lg font-semibold text-gray-900">
               📧 실제 메일 목록 ({totalCount}건)
             </h3>
             <a
               href={MAIL_INTELLIGENCE_URL}
               target="_blank"
               rel="noopener noreferrer"
-              style={{
-                fontSize: "14px",
-                color: "#3b82f6",
-                textDecoration: "none",
-              }}
+              className="text-sm text-blue-500 no-underline"
             >
               Mail Intelligence 열기 →
             </a>
           </div>
-          <div style={{ maxHeight: "600px", overflowY: "auto" }}>
+          <div className="max-h-[600px] overflow-y-auto">
             {loading ? (
-              <div
-                style={{
-                  padding: "40px",
-                  textAlign: "center",
-                  color: "#6b7280",
-                }}
-              >
+              <div className="p-10 text-center text-gray-500">
                 📥 메일 데이터 로딩 중...
               </div>
             ) : recentMails.length === 0 ? (
-              <div
-                style={{
-                  padding: "40px",
-                  textAlign: "center",
-                  color: "#6b7280",
-                }}
-              >
+              <div className="p-10 text-center text-gray-500">
                 메일이 없습니다.
               </div>
             ) : (
               recentMails.map((mail, idx) => (
                 <div
                   key={mail.id || idx}
-                  style={{
-                    padding: "16px 24px",
-                    borderBottom: "1px solid #f3f4f6",
-                    display: "flex",
-                    alignItems: "flex-start",
-                    gap: "16px",
-                    backgroundColor: mail.isRead ? "transparent" : "#f0f9ff",
-                  }}
+                  className={`flex items-start gap-4 border-b border-gray-100 px-6 py-4 ${
+                    mail.isRead ? "" : "bg-blue-50"
+                  }`}
                 >
                   <div
-                    style={{
-                      backgroundColor: mail.isRead ? "#e5e7eb" : "#3b82f6",
-                      borderRadius: "50%",
-                      width: "10px",
-                      height: "10px",
-                      marginTop: "6px",
-                      flexShrink: 0,
-                    }}
+                    className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${
+                      mail.isRead ? "bg-gray-300" : "bg-blue-500"
+                    }`}
                   />
-                  <div style={{ flex: 1, minWidth: 0 }}>
+                  <div className="min-w-0 flex-1">
                     <p
-                      style={{
-                        fontSize: "14px",
-                        color: "#111827",
-                        margin: "0 0 4px 0",
-                        fontWeight: mail.isRead ? "normal" : "600",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
+                      className={`truncate text-sm text-gray-900 ${
+                        mail.isRead ? "font-normal" : "font-semibold"
+                      }`}
                     >
                       {mail.subject || "제목 없음"}
                     </p>
-                    <p
-                      style={{
-                        fontSize: "13px",
-                        color: "#6b7280",
-                        margin: 0,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
+                    <p className="truncate text-xs text-gray-500">
                       {mail.from?.emailAddress?.name ||
                         mail.from?.emailAddress?.address ||
                         "발신자 없음"}
                     </p>
                   </div>
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      color: "#9ca3af",
-                      flexShrink: 0,
-                    }}
-                  >
+                  <div className="shrink-0 text-xs text-gray-400">
                     {mail.receivedDateTime
                       ? new Date(mail.receivedDateTime).toLocaleDateString(
                           "ko-KR",
@@ -468,142 +331,71 @@ export function Dashboard() {
           </div>
         </div>
 
-        <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
-          <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: "12px",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-              border: "1px solid #e5e7eb",
-              padding: "24px",
-            }}
-          >
-            <h3
-              style={{
-                fontSize: "18px",
-                fontWeight: "600",
-                color: "#111827",
-                margin: "0 0 16px 0",
-              }}
-            >
+        <div className="flex flex-col gap-6">
+          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <h3 className="mb-4 text-lg font-semibold text-gray-900">
               🔗 시스템 상태
             </h3>
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "12px" }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ fontSize: "14px", color: "#6b7280" }}>
-                  Outlook
-                </span>
+            <div className="flex flex-col gap-3">
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-500">Outlook</span>
                 <span
-                  style={{
-                    fontSize: "14px",
-                    color: outlookStatus?.connected ? "#059669" : "#dc2626",
-                    fontWeight: "500",
-                  }}
+                  className={`text-sm font-medium ${
+                    outlookStatus?.connected
+                      ? "text-emerald-600"
+                      : "text-red-600"
+                  }`}
                 >
                   {outlookStatus?.connected ? "✅ 연결됨" : "❌ 연결 안됨"}
                 </span>
               </div>
               {integrationProjects.map((project) => (
-                <div
-                  key={project.id}
-                  style={{ display: "flex", justifyContent: "space-between" }}
-                >
-                  <span style={{ fontSize: "14px", color: "#6b7280" }}>
+                <div key={project.id} className="flex justify-between">
+                  <span className="text-sm text-gray-500">
                     {project.name}
                   </span>
                   <span
-                    style={{
-                      fontSize: "14px",
-                      color: integrationStatusColor(project.status),
-                      fontWeight: "500",
-                    }}
+                    className={`text-sm font-medium ${integrationStatusColor(project.status)}`}
                   >
                     {integrationStatusLabel(project.status)}
                   </span>
                 </div>
               ))}
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ fontSize: "14px", color: "#6b7280" }}>
-                  AI 프로바이더
-                </span>
-                <span style={{ fontSize: "14px", color: "#111827" }}>
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-500">AI 프로바이더</span>
+                <span className="text-sm text-gray-900">
                   {outlookStatus?.aiProvider || "N/A"}
                 </span>
               </div>
             </div>
           </div>
 
-          <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: "12px",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-              border: "1px solid #e5e7eb",
-              padding: "24px",
-            }}
-          >
-            <h3
-              style={{
-                fontSize: "18px",
-                fontWeight: "600",
-                color: "#111827",
-                margin: "0 0 16px 0",
-              }}
-            >
+          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <h3 className="mb-4 text-lg font-semibold text-gray-900">
               👥 고객/파트너
             </h3>
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "12px" }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ fontSize: "14px", color: "#6b7280" }}>고객</span>
-                <span
-                  style={{
-                    fontSize: "14px",
-                    color: "#111827",
-                    fontWeight: "600",
-                  }}
-                >
+            <div className="flex flex-col gap-3">
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-500">고객</span>
+                <span className="text-sm font-semibold text-gray-900">
                   {customers.length}명
                 </span>
               </div>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ fontSize: "14px", color: "#6b7280" }}>
-                  파트너
-                </span>
-                <span
-                  style={{
-                    fontSize: "14px",
-                    color: "#111827",
-                    fontWeight: "600",
-                  }}
-                >
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-500">파트너</span>
+                <span className="text-sm font-semibold text-gray-900">
                   {partners.length}명
                 </span>
               </div>
             </div>
-            <div style={{ marginTop: "16px" }}>
-              <h4
-                style={{
-                  fontSize: "14px",
-                  fontWeight: "600",
-                  color: "#111827",
-                  margin: "0 0 8px 0",
-                }}
-              >
+            <div className="mt-4">
+              <h4 className="mb-2 text-sm font-semibold text-gray-900">
                 최근 고객
               </h4>
               {customers.slice(0, 5).map((customer) => (
                 <div
                   key={customer.id}
-                  style={{
-                    padding: "8px 0",
-                    borderBottom: "1px solid #f3f4f6",
-                    fontSize: "13px",
-                    color: "#374151",
-                  }}
+                  className="border-b border-gray-100 py-2 text-xs text-gray-700"
                 >
                   {customer.name} - {customer.industry || "N/A"}
                 </div>
@@ -611,64 +403,27 @@ export function Dashboard() {
             </div>
           </div>
 
-          <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: "12px",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-              border: "1px solid #e5e7eb",
-              padding: "24px",
-            }}
-          >
-            <h3
-              style={{
-                fontSize: "18px",
-                fontWeight: "600",
-                color: "#111827",
-                margin: "0 0 16px 0",
-              }}
-            >
+          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <h3 className="mb-4 text-lg font-semibold text-gray-900">
               ⚡ 워크플로우
             </h3>
-            <div
-              style={{ display: "flex", flexDirection: "column", gap: "12px" }}
-            >
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ fontSize: "14px", color: "#6b7280" }}>
-                  워크플로우 수
-                </span>
-                <span
-                  style={{
-                    fontSize: "14px",
-                    color: "#111827",
-                    fontWeight: "600",
-                  }}
-                >
+            <div className="flex flex-col gap-3">
+              <div className="flex justify-between">
+                <span className="text-sm text-gray-500">워크플로우 수</span>
+                <span className="text-sm font-semibold text-gray-900">
                   {workflows.length}개
                 </span>
               </div>
             </div>
             {workflows.length > 0 && (
-              <div style={{ marginTop: "16px" }}>
-                <h4
-                  style={{
-                    fontSize: "14px",
-                    fontWeight: "600",
-                    color: "#111827",
-                    margin: "0 0 8px 0",
-                  }}
-                >
+              <div className="mt-4">
+                <h4 className="mb-2 text-sm font-semibold text-gray-900">
                   워크플로우 목록
                 </h4>
                 {workflows.slice(0, 5).map((workflow) => (
                   <div
                     key={workflow.id}
-                    style={{
-                      padding: "8px 0",
-                      borderBottom: "1px solid #f3f4f6",
-                      fontSize: "13px",
-                      color: "#374151",
-                    }}
+                    className="border-b border-gray-100 py-2 text-xs text-gray-700"
                   >
                     {workflow.name} - {workflow.status || "active"}
                   </div>
@@ -677,32 +432,11 @@ export function Dashboard() {
             )}
           </div>
 
-          <div
-            style={{
-              backgroundColor: "white",
-              borderRadius: "12px",
-              boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-              border: "1px solid #e5e7eb",
-              padding: "24px",
-            }}
-          >
-            <h3
-              style={{
-                fontSize: "18px",
-                fontWeight: "600",
-                color: "#111827",
-                margin: "0 0 16px 0",
-              }}
-            >
+          <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+            <h3 className="mb-4 text-lg font-semibold text-gray-900">
               ⚡ 빠른 실행
             </h3>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "12px",
-              }}
-            >
+            <div className="grid grid-cols-2 gap-3">
               {[
                 { icon: "📧", label: "메일 가져오기", action: "import" },
                 { icon: "👥", label: "고객 관리", action: "customers" },
@@ -711,33 +445,15 @@ export function Dashboard() {
               ].map((item) => (
                 <button
                   key={item.action}
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    padding: "16px 12px",
-                    backgroundColor: "#f9fafb",
-                    border: "1px solid #e5e7eb",
-                    borderRadius: "10px",
-                    cursor: "pointer",
-                    transition: "all 0.2s",
-                    gap: "8px",
-                  }}
+                  className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-4 transition-all hover:bg-gray-100"
                   onClick={() => {
                     if (item.action === "import") {
                       window.open(MAIL_INTELLIGENCE_URL, "_blank");
                     }
                   }}
                 >
-                  <span style={{ fontSize: "24px" }}>{item.icon}</span>
-                  <span
-                    style={{
-                      fontSize: "13px",
-                      color: "#374151",
-                      fontWeight: "500",
-                    }}
-                  >
+                  <span className="text-2xl">{item.icon}</span>
+                  <span className="text-xs font-medium text-gray-700">
                     {item.label}
                   </span>
                 </button>

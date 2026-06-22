@@ -99,50 +99,36 @@ export default function MailPage() {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%', minHeight: '400px' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '32px', marginBottom: '16px' }}>📧</div>
-          <div style={{ fontSize: '16px', color: '#6b7280' }}>메일함 로딩 중...</div>
+      <div className="flex h-full min-h-[400px] items-center justify-center">
+        <div className="text-center">
+          <div className="mb-4 text-4xl">📧</div>
+          <div className="text-base text-gray-500">메일함 로딩 중...</div>
         </div>
       </div>
     )
   }
 
   return (
-    <div style={{ display: 'flex', height: '100%', backgroundColor: '#f9fafb' }}>
+    <div className="flex h-full bg-gray-50">
       {/* Left: Mail List Panel */}
-      <div style={{
-        width: '420px',
-        borderRight: '1px solid #e5e7eb',
-        display: 'flex',
-        flexDirection: 'column',
-        backgroundColor: 'white',
-        flexShrink: 0,
-      }}>
+      <div className="flex w-[420px] shrink-0 flex-col border-r border-gray-200 bg-white">
         {/* Header */}
-        <div style={{ padding: '20px 24px', borderBottom: '1px solid #e5e7eb' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <div className="border-b border-gray-200 p-5">
+          <div className="mb-4 flex items-center justify-between">
             <div>
-              <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#111827', margin: 0 }}>
+              <h2 className="text-xl font-bold text-gray-900">
                 📧 메일함
               </h2>
-              <p style={{ fontSize: '13px', color: '#6b7280', margin: '4px 0 0 0' }}>
+              <p className="mt-1 text-xs text-gray-500">
                 Outlook {outlookStatus?.connected ? `· ${outlookStatus.mailboxUser || '연결됨'}` : '· 연결 안됨'}
               </p>
             </div>
             <button
               onClick={fetchData}
               disabled={refreshing}
-              style={{
-                padding: '8px 12px',
-                backgroundColor: '#f3f4f6',
-                border: '1px solid #e5e7eb',
-                borderRadius: '8px',
-                cursor: refreshing ? 'not-allowed' : 'pointer',
-                fontSize: '13px',
-                color: '#374151',
-                opacity: refreshing ? 0.6 : 1,
-              }}
+              className={`rounded-lg border border-gray-200 bg-gray-100 px-3 py-2 text-xs text-gray-700 ${
+                refreshing ? 'cursor-not-allowed opacity-60' : 'cursor-pointer'
+              }`}
             >
               {refreshing ? '새로고침 중...' : '🔄 새로고침'}
             </button>
@@ -154,20 +140,11 @@ export default function MailPage() {
             placeholder="메일 검색..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '10px 14px',
-              border: '1px solid #e5e7eb',
-              borderRadius: '8px',
-              fontSize: '14px',
-              outline: 'none',
-              backgroundColor: '#f9fafb',
-              boxSizing: 'border-box',
-            }}
+            className="w-full rounded-lg border border-gray-200 bg-gray-50 px-3.5 py-2.5 text-sm outline-none"
           />
 
           {/* Filter Tabs */}
-          <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+          <div className="mt-3 flex gap-2">
             {([
               { key: 'all' as FilterTab, label: '전체', count: messages.length },
               { key: 'unread' as FilterTab, label: '읽지 않음', count: unreadCount },
@@ -176,16 +153,11 @@ export default function MailPage() {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                style={{
-                  padding: '6px 12px',
-                  borderRadius: '16px',
-                  border: 'none',
-                  cursor: 'pointer',
-                  fontSize: '13px',
-                  fontWeight: '500',
-                  backgroundColor: activeTab === tab.key ? '#111827' : '#f3f4f6',
-                  color: activeTab === tab.key ? 'white' : '#6b7280',
-                }}
+                className={`rounded-full px-3 py-1.5 text-xs font-medium ${
+                  activeTab === tab.key
+                    ? 'bg-gray-900 text-white'
+                    : 'bg-gray-100 text-gray-500'
+                }`}
               >
                 {tab.label} ({tab.count})
               </button>
@@ -194,17 +166,17 @@ export default function MailPage() {
         </div>
 
         {/* Mail List */}
-        <div style={{ flex: 1, overflowY: 'auto' }}>
+        <div className="flex-1 overflow-y-auto">
           {error && (
-            <div style={{ padding: '16px 24px', backgroundColor: '#fef2f2', borderBottom: '1px solid #fecaca' }}>
-              <p style={{ fontSize: '13px', color: '#dc2626', margin: 0 }}>⚠️ {error}</p>
+            <div className="border-b border-red-200 bg-red-50 px-6 py-4">
+              <p className="text-xs text-red-600">⚠️ {error}</p>
             </div>
           )}
 
           {filteredMessages.length === 0 ? (
-            <div style={{ padding: '48px 24px', textAlign: 'center' }}>
-              <div style={{ fontSize: '40px', marginBottom: '12px' }}>📭</div>
-              <p style={{ fontSize: '15px', color: '#6b7280', margin: 0 }}>
+            <div className="px-6 py-12 text-center">
+              <div className="mb-3 text-5xl">📭</div>
+              <p className="text-sm text-gray-500">
                 {searchQuery ? '검색 결과가 없습니다.' : '메일이 없습니다.'}
               </p>
             </div>
@@ -213,65 +185,41 @@ export default function MailPage() {
               <div
                 key={mail.id}
                 onClick={() => setSelectedMail(mail)}
-                style={{
-                  padding: '16px 24px',
-                  borderBottom: '1px solid #f3f4f6',
-                  cursor: 'pointer',
-                  backgroundColor: selectedMail?.id === mail.id ? '#eff6ff' : mail.isRead ? 'white' : '#f0f9ff',
-                  transition: 'background-color 0.15s',
-                  display: 'flex',
-                  gap: '12px',
-                }}
+                className={`flex cursor-pointer gap-3 border-b border-gray-100 px-6 py-4 transition-colors ${
+                  selectedMail?.id === mail.id
+                    ? 'bg-blue-50'
+                    : mail.isRead
+                      ? 'bg-white'
+                      : 'bg-blue-50/50'
+                }`}
               >
-                <div style={{
-                  width: '8px',
-                  height: '8px',
-                  borderRadius: '50%',
-                  backgroundColor: mail.isRead ? '#d1d5db' : '#3b82f6',
-                  marginTop: '7px',
-                  flexShrink: 0,
-                }} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
-                    <p style={{
-                      fontSize: '14px',
-                      color: '#111827',
-                      margin: 0,
-                      fontWeight: mail.isRead ? 'normal' : '600',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                      flex: 1,
-                    }}>
+                <div
+                  className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${
+                    mail.isRead ? 'bg-gray-300' : 'bg-blue-500'
+                  }`}
+                />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <p
+                      className={`flex-1 truncate text-sm text-gray-900 ${
+                        mail.isRead ? 'font-normal' : 'font-semibold'
+                      }`}
+                    >
                       {mail.subject || '제목 없음'}
                     </p>
-                    <span style={{ fontSize: '12px', color: '#9ca3af', flexShrink: 0 }}>
+                    <span className="shrink-0 text-xs text-gray-400">
                       {formatDate(mail.receivedDateTime)}
                     </span>
                   </div>
-                  <p style={{
-                    fontSize: '13px',
-                    color: '#6b7280',
-                    margin: '4px 0 0 0',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}>
+                  <p className="mt-1 truncate text-xs text-gray-500">
                     {mail.from?.emailAddress?.name || mail.from?.emailAddress?.address || '발신자 없음'}
                   </p>
-                  <p style={{
-                    fontSize: '12px',
-                    color: '#9ca3af',
-                    margin: '4px 0 0 0',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    whiteSpace: 'nowrap',
-                  }}>
+                  <p className="mt-1 truncate text-xs text-gray-400">
                     {mail.bodyPreview || ''}
                   </p>
                 </div>
                 {mail.hasAttachments && (
-                  <span style={{ fontSize: '14px', flexShrink: 0, marginTop: '2px' }}>📎</span>
+                  <span className="mt-0.5 shrink-0 text-sm">📎</span>
                 )}
               </div>
             ))
@@ -280,84 +228,61 @@ export default function MailPage() {
       </div>
 
       {/* Right: Mail Detail Panel */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', backgroundColor: 'white' }}>
+      <div className="flex flex-1 flex-col bg-white">
         {selectedMail ? (
           <>
-            <div style={{ padding: '24px 32px', borderBottom: '1px solid #e5e7eb' }}>
-              <h2 style={{ fontSize: '22px', fontWeight: '700', color: '#111827', margin: '0 0 12px 0' }}>
+            <div className="border-b border-gray-200 px-8 py-6">
+              <h2 className="mb-3 text-xl font-bold text-gray-900">
                 {selectedMail.subject || '제목 없음'}
               </h2>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                <div style={{
-                  width: '40px',
-                  height: '40px',
-                  borderRadius: '50%',
-                  backgroundColor: '#dbeafe',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  color: '#2563eb',
-                }}>
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-100 text-base font-semibold text-blue-600">
                   {(selectedMail.from?.emailAddress?.name || 'U')[0].toUpperCase()}
                 </div>
                 <div>
-                  <p style={{ fontSize: '14px', fontWeight: '600', color: '#111827', margin: 0 }}>
+                  <p className="text-sm font-semibold text-gray-900">
                     {selectedMail.from?.emailAddress?.name || '발신자 없음'}
                   </p>
-                  <p style={{ fontSize: '13px', color: '#6b7280', margin: '2px 0 0 0' }}>
+                  <p className="mt-0.5 text-xs text-gray-500">
                     {selectedMail.from?.emailAddress?.address || ''}
                   </p>
                 </div>
-                <div style={{ marginLeft: 'auto', textAlign: 'right' }}>
-                  <p style={{ fontSize: '13px', color: '#6b7280', margin: 0 }}>
+                <div className="ml-auto text-right">
+                  <p className="text-xs text-gray-500">
                     {selectedMail.receivedDateTime
                       ? new Date(selectedMail.receivedDateTime).toLocaleString('ko-KR')
                       : ''}
                   </p>
                   {selectedMail.toRecipients && selectedMail.toRecipients.length > 0 && (
-                    <p style={{ fontSize: '12px', color: '#9ca3af', margin: '2px 0 0 0' }}>
+                    <p className="mt-0.5 text-xs text-gray-400">
                       수신: {selectedMail.toRecipients.map(r => r.emailAddress?.name || r.emailAddress?.address).join(', ')}
                     </p>
                   )}
                 </div>
               </div>
               {selectedMail.importance === 'high' && (
-                <div style={{
-                  marginTop: '12px',
-                  padding: '6px 12px',
-                  backgroundColor: '#fef2f2',
-                  borderRadius: '6px',
-                  display: 'inline-block',
-                }}>
-                  <span style={{ fontSize: '12px', color: '#dc2626', fontWeight: '500' }}>🔴 중요 메일</span>
+                <div className="mt-3 inline-block rounded-md bg-red-50 px-3 py-1.5">
+                  <span className="text-xs font-medium text-red-600">🔴 중요 메일</span>
                 </div>
               )}
             </div>
-            <div style={{ flex: 1, padding: '24px 32px', overflowY: 'auto' }}>
+            <div className="flex-1 overflow-y-auto px-8 py-6">
               {selectedMail.body?.content ? (
                 <div
-                  style={{ fontSize: '14px', color: '#374151', lineHeight: '1.7' }}
+                  className="text-sm leading-7 text-gray-700"
                   dangerouslySetInnerHTML={{ __html: selectedMail.body.content }}
                 />
               ) : (
-                <p style={{ fontSize: '14px', color: '#6b7280', lineHeight: '1.7' }}>
+                <p className="text-sm leading-7 text-gray-500">
                   {selectedMail.bodyPreview || '메일 내용이 없습니다.'}
                 </p>
               )}
             </div>
           </>
         ) : (
-          <div style={{
-            flex: 1,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexDirection: 'column',
-          }}>
-            <div style={{ fontSize: '64px', marginBottom: '16px' }}>📬</div>
-            <p style={{ fontSize: '18px', color: '#6b7280', margin: 0 }}>
+          <div className="flex flex-1 flex-col items-center justify-center">
+            <div className="mb-4 text-7xl">📬</div>
+            <p className="text-lg text-gray-500">
               메일을 선택하여 내용을 확인하세요
             </p>
           </div>

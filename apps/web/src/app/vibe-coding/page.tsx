@@ -4,7 +4,6 @@ import {
   useCallback,
   useEffect,
   useState,
-  type CSSProperties,
   type FormEvent,
 } from "react";
 
@@ -90,20 +89,8 @@ function itemLabel(item: VibeSummaryItem): string {
   return item.name ?? item.title ?? item.id ?? "—";
 }
 
-const cardStyle: CSSProperties = {
-  backgroundColor: "white",
-  borderRadius: "12px",
-  padding: "24px",
-  boxShadow: "0 1px 3px rgba(0,0,0,0.08)",
-  border: "1px solid #e5e7eb",
-};
-
-const sectionTitleStyle: CSSProperties = {
-  fontSize: "18px",
-  fontWeight: 600,
-  color: "#111827",
-  margin: "0 0 16px 0",
-};
+const cardClass = "rounded-xl border border-gray-200 bg-white p-6 shadow-sm";
+const sectionTitleClass = "mb-4 text-lg font-semibold text-gray-900";
 
 export default function VibeCodingPage() {
   const [projects, setProjects] = useState<VibeSummaryItem[]>([]);
@@ -344,42 +331,18 @@ export default function VibeCodingPage() {
   function renderStatusBanner() {
     if (ingestStatus.kind === "idle") return null;
 
-    const styles: Record<
+    const statusClasses: Record<
       Exclude<IngestStatus["kind"], "idle">,
-      CSSProperties
+      string
     > = {
-      success: {
-        backgroundColor: "#d1fae5",
-        color: "#065f46",
-        border: "1px solid #6ee7b7",
-      },
-      failure: {
-        backgroundColor: "#fee2e2",
-        color: "#991b1b",
-        border: "1px solid #fca5a5",
-      },
-      pending: {
-        backgroundColor: "#fef3c7",
-        color: "#92400e",
-        border: "1px solid #fcd34d",
-      },
-      rejected: {
-        backgroundColor: "#fee2e2",
-        color: "#991b1b",
-        border: "1px solid #fca5a5",
-      },
+      success: "border border-emerald-300 bg-emerald-100 text-emerald-800",
+      failure: "border border-red-300 bg-red-100 text-red-800",
+      pending: "border border-amber-300 bg-amber-100 text-amber-800",
+      rejected: "border border-red-300 bg-red-100 text-red-800",
     };
 
     return (
-      <div
-        style={{
-          ...styles[ingestStatus.kind],
-          padding: "12px 16px",
-          borderRadius: "8px",
-          marginBottom: "16px",
-          fontSize: "14px",
-        }}
-      >
+      <div className={`mb-4 rounded-lg px-4 py-3 text-sm ${statusClasses[ingestStatus.kind]}`}>
         {ingestStatus.message}
       </div>
     );
@@ -388,35 +351,21 @@ export default function VibeCodingPage() {
   function renderSummaryList(items: VibeSummaryItem[], emptyLabel: string) {
     if (items.length === 0) {
       return (
-        <p style={{ fontSize: "14px", color: "#6b7280", margin: 0 }}>
-          {emptyLabel}
-        </p>
+        <p className="text-sm text-gray-500">{emptyLabel}</p>
       );
     }
 
     return (
-      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+      <div className="flex flex-col gap-2.5">
         {items.map((item, index) => (
           <div
             key={item.id ?? `${itemLabel(item)}-${index}`}
-            style={{
-              padding: "12px 14px",
-              borderRadius: "8px",
-              border: "1px solid #e5e7eb",
-              backgroundColor: "#f9fafb",
-            }}
+            className="rounded-lg border border-gray-200 bg-gray-50 px-3.5 py-3"
           >
-            <p
-              style={{
-                fontSize: "14px",
-                fontWeight: 600,
-                color: "#111827",
-                margin: "0 0 4px 0",
-              }}
-            >
+            <p className="mb-1 text-sm font-semibold text-gray-900">
               {itemLabel(item)}
             </p>
-            <p style={{ fontSize: "12px", color: "#6b7280", margin: 0 }}>
+            <p className="text-xs text-gray-500">
               {[
                 item.status,
                 item.type,
@@ -434,76 +383,42 @@ export default function VibeCodingPage() {
   }
 
   return (
-    <div
-      style={{ padding: "32px", minHeight: "100%", backgroundColor: "#f9fafb" }}
-    >
-      <div style={{ marginBottom: "28px" }}>
-        <h1
-          style={{
-            fontSize: "28px",
-            fontWeight: 700,
-            color: "#111827",
-            margin: "0 0 8px 0",
-          }}
-        >
+    <div className="min-h-full bg-gray-50 p-8">
+      <div className="mb-7">
+        <h1 className="mb-2 text-2xl font-bold text-gray-900">
           Vibe Coding
         </h1>
-        <p style={{ fontSize: "15px", color: "#6b7280", margin: 0 }}>
+        <p className="text-sm text-gray-500">
           Projects, agents, learning schedules, and RAG ingest{" "}
           {upstreamConnected ? "(connected)" : "(upstream unavailable)"}
         </p>
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: "16px",
-          marginBottom: "28px",
-        }}
-      >
-        <div style={cardStyle}>
-          <h2 style={sectionTitleStyle}>Projects</h2>
+      <div className="mb-7 grid grid-cols-3 gap-4">
+        <div className={cardClass}>
+          <h2 className={sectionTitleClass}>Projects</h2>
           {renderFetchHint(projectsState) && (
-            <p
-              style={{
-                fontSize: "13px",
-                color: "#6b7280",
-                margin: "0 0 12px 0",
-              }}
-            >
+            <p className="mb-3 text-xs text-gray-500">
               {renderFetchHint(projectsState)}
             </p>
           )}
           {renderSummaryList(projects, "No projects returned.")}
         </div>
 
-        <div style={cardStyle}>
-          <h2 style={sectionTitleStyle}>Agents</h2>
+        <div className={cardClass}>
+          <h2 className={sectionTitleClass}>Agents</h2>
           {renderFetchHint(agentsState) && (
-            <p
-              style={{
-                fontSize: "13px",
-                color: "#6b7280",
-                margin: "0 0 12px 0",
-              }}
-            >
+            <p className="mb-3 text-xs text-gray-500">
               {renderFetchHint(agentsState)}
             </p>
           )}
           {renderSummaryList(agents, "No agents returned.")}
         </div>
 
-        <div style={cardStyle}>
-          <h2 style={sectionTitleStyle}>Learning Schedules</h2>
+        <div className={cardClass}>
+          <h2 className={sectionTitleClass}>Learning Schedules</h2>
           {renderFetchHint(schedulesState) && (
-            <p
-              style={{
-                fontSize: "13px",
-                color: "#6b7280",
-                margin: "0 0 12px 0",
-              }}
-            >
+            <p className="mb-3 text-xs text-gray-500">
               {renderFetchHint(schedulesState)}
             </p>
           )}
@@ -511,9 +426,9 @@ export default function VibeCodingPage() {
         </div>
       </div>
 
-      <div style={cardStyle}>
-        <h2 style={sectionTitleStyle}>RAG Ingest</h2>
-        <p style={{ fontSize: "14px", color: "#6b7280", margin: "0 0 20px 0" }}>
+      <div className={cardClass}>
+        <h2 className={sectionTitleClass}>RAG Ingest</h2>
+        <p className="mb-5 text-sm text-gray-500">
           External sharing requires manual approval. Submit first to create a
           pending approval, then approve or reject before retry.
         </p>
@@ -521,32 +436,11 @@ export default function VibeCodingPage() {
         {renderStatusBanner()}
 
         {pendingApproval && ingestStatus.kind === "pending" && (
-          <div
-            style={{
-              padding: "16px",
-              borderRadius: "10px",
-              border: "1px solid #fcd34d",
-              backgroundColor: "#fffbeb",
-              marginBottom: "20px",
-            }}
-          >
-            <p
-              style={{
-                fontSize: "14px",
-                fontWeight: 600,
-                color: "#92400e",
-                margin: "0 0 8px 0",
-              }}
-            >
+          <div className="mb-5 rounded-lg border border-amber-300 bg-amber-50 p-4">
+            <p className="mb-2 text-sm font-semibold text-amber-800">
               Pending approval
             </p>
-            <div
-              style={{
-                fontSize: "13px",
-                color: "#78350f",
-                marginBottom: "12px",
-              }}
-            >
+            <div className="mb-3 text-xs text-amber-900">
               <div>ID: {pendingApproval.id}</div>
               {pendingApproval.actionType && (
                 <div>Action: {pendingApproval.actionType}</div>
@@ -558,20 +452,14 @@ export default function VibeCodingPage() {
                 <div>Requested by: {pendingApproval.requestedBy}</div>
               )}
             </div>
-            <div style={{ display: "flex", gap: "8px" }}>
+            <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => void handleApprove()}
                 disabled={ingestBusy}
-                style={{
-                  padding: "8px 16px",
-                  borderRadius: "8px",
-                  border: "none",
-                  backgroundColor: "#059669",
-                  color: "white",
-                  cursor: ingestBusy ? "wait" : "pointer",
-                  fontSize: "13px",
-                }}
+                className={`rounded-lg bg-emerald-600 px-4 py-2 text-xs text-white ${
+                  ingestBusy ? "cursor-wait" : "cursor-pointer"
+                }`}
               >
                 Approve &amp; ingest
               </button>
@@ -579,15 +467,9 @@ export default function VibeCodingPage() {
                 type="button"
                 onClick={() => void handleReject()}
                 disabled={ingestBusy}
-                style={{
-                  padding: "8px 16px",
-                  borderRadius: "8px",
-                  border: "1px solid #fca5a5",
-                  backgroundColor: "white",
-                  color: "#dc2626",
-                  cursor: ingestBusy ? "wait" : "pointer",
-                  fontSize: "13px",
-                }}
+                className={`rounded-lg border border-red-300 bg-white px-4 py-2 text-xs text-red-600 ${
+                  ingestBusy ? "cursor-wait" : "cursor-pointer"
+                }`}
               >
                 Reject
               </button>
@@ -596,54 +478,24 @@ export default function VibeCodingPage() {
         )}
 
         <form onSubmit={(event) => void handleIngestSubmit(event)}>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "1fr 1fr",
-              gap: "16px",
-              marginBottom: "16px",
-            }}
-          >
-            <label
-              style={{ display: "flex", flexDirection: "column", gap: "6px" }}
-            >
-              <span
-                style={{ fontSize: "13px", fontWeight: 500, color: "#374151" }}
-              >
-                Title
-              </span>
+          <div className="mb-4 grid grid-cols-2 gap-4">
+            <label className="flex flex-col gap-1.5">
+              <span className="text-xs font-medium text-gray-700">Title</span>
               <input
                 type="text"
                 value={ragTitle}
                 onChange={(event) => setRagTitle(event.target.value)}
                 placeholder="Document title"
-                style={{
-                  padding: "10px 12px",
-                  borderRadius: "8px",
-                  border: "1px solid #d1d5db",
-                  fontSize: "14px",
-                }}
+                className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm"
               />
             </label>
 
-            <label
-              style={{ display: "flex", flexDirection: "column", gap: "6px" }}
-            >
-              <span
-                style={{ fontSize: "13px", fontWeight: 500, color: "#374151" }}
-              >
-                Source type
-              </span>
+            <label className="flex flex-col gap-1.5">
+              <span className="text-xs font-medium text-gray-700">Source type</span>
               <select
                 value={ragSourceType}
                 onChange={(event) => setRagSourceType(event.target.value)}
-                style={{
-                  padding: "10px 12px",
-                  borderRadius: "8px",
-                  border: "1px solid #d1d5db",
-                  fontSize: "14px",
-                  backgroundColor: "white",
-                }}
+                className="rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm"
               >
                 <option value="markdown">markdown</option>
                 <option value="text">text</option>
@@ -653,31 +505,15 @@ export default function VibeCodingPage() {
             </label>
           </div>
 
-          <label
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "6px",
-              marginBottom: "16px",
-            }}
-          >
-            <span
-              style={{ fontSize: "13px", fontWeight: 500, color: "#374151" }}
-            >
-              Project ID
-            </span>
+          <label className="mb-4 flex flex-col gap-1.5">
+            <span className="text-xs font-medium text-gray-700">Project ID</span>
             <input
               type="text"
               value={ragProjectId}
               onChange={(event) => setRagProjectId(event.target.value)}
               placeholder="project-id"
               list="vibe-project-ids"
-              style={{
-                padding: "10px 12px",
-                borderRadius: "8px",
-                border: "1px solid #d1d5db",
-                fontSize: "14px",
-              }}
+              className="rounded-lg border border-gray-300 px-3 py-2.5 text-sm"
             />
             <datalist id="vibe-project-ids">
               {projects.map((project) =>
@@ -688,67 +524,34 @@ export default function VibeCodingPage() {
             </datalist>
           </label>
 
-          <label
-            style={{
-              display: "flex",
-              flexDirection: "column",
-              gap: "6px",
-              marginBottom: "16px",
-            }}
-          >
-            <span
-              style={{ fontSize: "13px", fontWeight: 500, color: "#374151" }}
-            >
-              Content
-            </span>
+          <label className="mb-4 flex flex-col gap-1.5">
+            <span className="text-xs font-medium text-gray-700">Content</span>
             <textarea
               value={ragContent}
               onChange={(event) => setRagContent(event.target.value)}
               rows={8}
               placeholder="Paste content to ingest into RAG"
-              style={{
-                padding: "10px 12px",
-                borderRadius: "8px",
-                border: "1px solid #d1d5db",
-                fontSize: "14px",
-                resize: "vertical",
-                fontFamily: "inherit",
-              }}
+              className="resize-y rounded-lg border border-gray-300 px-3 py-2.5 text-sm"
             />
           </label>
 
-          <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+          <div className="flex items-center gap-3">
             <button
               type="submit"
               disabled={
                 ingestBusy ||
                 (pendingApproval !== null && ingestStatus.kind === "pending")
               }
-              style={{
-                padding: "10px 20px",
-                borderRadius: "8px",
-                border: "none",
-                backgroundColor: "#111827",
-                color: "white",
-                cursor: ingestBusy ? "wait" : "pointer",
-                fontSize: "14px",
-                fontWeight: 500,
-              }}
+              className={`rounded-lg bg-gray-900 px-5 py-2.5 text-sm font-medium text-white ${
+                ingestBusy ? "cursor-wait" : "cursor-pointer"
+              }`}
             >
               {ingestBusy ? "Submitting…" : "Submit ingest"}
             </button>
             <button
               type="button"
               onClick={() => void loadSummaries()}
-              style={{
-                padding: "10px 20px",
-                borderRadius: "8px",
-                border: "1px solid #d1d5db",
-                backgroundColor: "white",
-                color: "#374151",
-                cursor: "pointer",
-                fontSize: "14px",
-              }}
+              className="cursor-pointer rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm text-gray-700"
             >
               Refresh summaries
             </button>
