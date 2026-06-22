@@ -1,4 +1,7 @@
 /**
+ * @deprecated C-Stack greenfield — portal :5434 migration not used.
+ * See docs/40-ADR-DEPRECATED-MODELS.md
+ *
  * AIOS v1 → v2 통합 마이그레이션 스크립트
  *
  * v1 레거시 데이터(Customer, Partner, Contact 등)를

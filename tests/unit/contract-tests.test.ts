@@ -156,6 +156,7 @@ describe('계약 테스트: Prisma select/omit 상수', () => {
       expect(keys).toContain('id');
       expect(keys).toContain('name');
       expect(keys).toContain('status');
+      expect(keys).toContain('organizationId');
       expect(keys).toContain('createdAt');
     });
   });
@@ -190,21 +191,21 @@ describe('계약 테스트: Prisma select/omit 상수', () => {
     it('필수 필드를 포함한다', () => {
       const keys = Object.keys(RESULT_SAFE_SELECT);
       expect(keys).toContain('id');
-      expect(keys).toContain('taskId');
       expect(keys).toContain('projectId');
-      expect(keys).toContain('content');
+      expect(keys).toContain('title');
+      expect(keys).toContain('status');
     });
   });
 
   describe('CUSTOMER_SAFE_OMIT', () => {
-    it('userId를 제외한다', () => {
-      expect(CUSTOMER_SAFE_OMIT).toHaveProperty('userId');
+    it('organizationId를 제외한다', () => {
+      expect(CUSTOMER_SAFE_OMIT).toHaveProperty('organizationId');
     });
   });
 
   describe('PARTNER_SAFE_OMIT', () => {
-    it('userId를 제외한다', () => {
-      expect(PARTNER_SAFE_OMIT).toHaveProperty('userId');
+    it('organizationId를 제외한다', () => {
+      expect(PARTNER_SAFE_OMIT).toHaveProperty('organizationId');
     });
   });
 });
