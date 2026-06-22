@@ -120,13 +120,17 @@ export type CommandExecuteRequest = z.infer<typeof CommandExecuteRequestSchema>;
 export type CommandExecuteResponse = z.infer<typeof CommandExecuteResponseSchema>;
 export type CommandsListResponse = z.infer<typeof CommandsListResponseSchema>;
 
-// ── Prisma select/omit 상수 ───────────────────────────
+// ── Prisma select/omit (BLRO C-Stack schema) ─────────
 export const PROJECT_SAFE_SELECT = {
   id: true,
+  organizationId: true,
+  customerId: true,
   name: true,
-  description: true,
+  summary: true,
   status: true,
-  priority: true,
+  opportunity: true,
+  riskLevel: true,
+  nextAction: true,
   createdAt: true,
   updatedAt: true,
 } as const;
@@ -136,6 +140,7 @@ export const USER_SAFE_SELECT = {
   name: true,
   email: true,
   role: true,
+  imageUrl: true,
   createdAt: true,
 } as const;
 
@@ -146,28 +151,30 @@ export const TASK_SAFE_SELECT = {
   description: true,
   status: true,
   priority: true,
-  assignee: true,
+  dueAt: true,
   createdAt: true,
   updatedAt: true,
-  completedAt: true,
 } as const;
 
-export const RESULT_SAFE_SELECT = {
+export const EXECUTION_RUN_SAFE_SELECT = {
   id: true,
-  taskId: true,
   projectId: true,
-  phase: true,
-  type: true,
+  title: true,
   status: true,
-  content: true,
+  riskLevel: true,
+  startedAt: true,
+  completedAt: true,
   createdAt: true,
-  updatedAt: true,
 } as const;
+
+/** @deprecated use EXECUTION_RUN_SAFE_SELECT */
+export const RESULT_SAFE_SELECT = EXECUTION_RUN_SAFE_SELECT;
 
 export const CUSTOMER_SAFE_OMIT = {
-  userId: true,
+  organizationId: true,
 } as const;
 
+/** @deprecated Partner model removed in BLRO SSOT */
 export const PARTNER_SAFE_OMIT = {
-  userId: true,
+  organizationId: true,
 } as const;
