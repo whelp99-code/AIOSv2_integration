@@ -1,5 +1,40 @@
 import NextAuth from 'next-auth'
 import GithubProvider from 'next-auth/providers/github'
+import CredentialsProvider from 'next-auth/providers/credentials'
+
+const providers = []
+
+// Add GitHub provider only if credentials are configured
+if (process.env.GITHUB_ID && process.env.GITHUB_SECRET) {
+  providers.push(
+    GithubProvider({
+      clientId: process.env.GITHUB_ID,
+      clientSecret: process.env.GITHUB_SECRET,
+    })
+  )
+}
+
+// Always add credentials provider for development
+providers.push(
+  CredentialsProvider({
+    name: 'Credentials',
+    credentials: {
+      email: { label: 'Email', type: 'email' },
+      password: { label: 'Password', type: 'password' },
+    },
+    async authorize(credentials) {
+      // For development, accept any credentials
+      if (process.env.NODE_ENV === 'development') {
+        return {
+          id: 'dev-user',
+          email: (credentials?.email as string) || 'dev@example.com',
+          name: 'Developer',
+        }
+      }
+      return null
+    },
+  })
+)
 
 export const {
   handlers,
@@ -14,12 +49,7 @@ export const {
     }
     return s;
   })(),
-  providers: [
-    GithubProvider({
-      clientId: process.env.GITHUB_ID ?? '',
-      clientSecret: process.env.GITHUB_SECRET ?? '',
-    }),
-  ],
+  providers,
   callbacks: {
     async session({ session, user }) {
       if (session.user) {

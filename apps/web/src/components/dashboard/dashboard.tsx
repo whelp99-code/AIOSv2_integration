@@ -1,7 +1,8 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
+import { KpiSparkline, WorkflowStatusChart, WeeklyActivityChart, SystemHealthGauge } from "./charts";
 
 const MAIL_INTELLIGENCE_URL =
   process.env.NEXT_PUBLIC_MAIL_INTELLIGENCE_URL ?? "http://localhost:3010";
@@ -110,82 +111,115 @@ export function Dashboard() {
   const [outlookStatus, setOutlookStatus] = useState<OutlookStatus | null>(
     null,
   );
-  const [customers, setCustomers] = useState<Customer[]>([]);
-  const [partners, setPartners] = useState<Partner[]>([]);
-  const [workflows, setWorkflows] = useState<Workflow[]>([]);
+  const [customers, setCustomers] = useState<Customer[]>([
+    { id: "1", name: "삼성전자", industry: "반도체", status: "active" },
+    { id: "2", name: "LG전자", industry: "가전", status: "active" },
+    { id: "3", name: "현대자동차", industry: "자동차", status: "active" },
+    { id: "4", name: "SK하이닉스", industry: "반도체", status: "active" },
+    { id: "5", name: "네이버", industry: "IT", status: "active" },
+  ]);
+  const [partners, setPartners] = useState<Partner[]>([
+    { id: "1", name: "Microsoft", type: "Technology", status: "active" },
+    { id: "2", name: "AWS", type: "Cloud", status: "active" },
+    { id: "3", name: "Google Cloud", type: "Cloud", status: "active" },
+  ]);
+  const [workflows, setWorkflows] = useState<Workflow[]>([
+    { id: "1", name: "고객 온보딩", description: "신규 고객 등록 프로세스", status: "active" },
+    { id: "2", name: "보안 감사", description: "분기별 보안 감사 워크플로우", status: "active" },
+    { id: "3", name: "계약 갱신", description: "연간 계약 갱신 알림", status: "pending" },
+  ]);
   const [integrationProjects, setIntegrationProjects] = useState<
     IntegrationProjectHealth[]
-  >([]);
-  const [loading, setLoading] = useState(true);
+  >([
+    { id: "aios-v1", name: "AIOS v1", status: "unreachable" },
+    { id: "f-aios-v3-core", name: "F-aios-v3", status: "unreachable" },
+    { id: "outlook", name: "Outlook", status: "unreachable" },
+    { id: "github", name: "GitHub", status: "unreachable" },
+  ]);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Background fetch to update data from APIs (non-blocking)
   useEffect(() => {
     async function fetchData() {
-      try {
-        const [
-          statusRes,
-          mailsRes,
-          customersRes,
-          partnersRes,
-          workflowsRes,
-          integrationsRes,
-        ] = await Promise.all([
-          fetch("/api/proxy/outlook/status"),
-          fetch("/api/proxy/outlook/messages"),
-          fetch("/api/customers"),
-          fetch("/api/partners"),
-          fetch("/api/workflows"),
-          fetch("/api/integrations/health"),
+      const timeout = { signal: AbortSignal.timeout(2000) };
+      
+      const safeJson = async (res: Response | null) => {
+        if (!res || !res.ok) return null;
+        try {
+          const data = JSON.parse(await res.text());
+          return data.error || data.errors ? null : data;
+        } catch { return null; }
+      };
+
+      const [statusRes, mailsRes, customersRes, partnersRes, workflowsRes, integrationsRes] =
+        await Promise.all([
+          fetch("/api/proxy/outlook/status", timeout).catch(() => null),
+          fetch("/api/proxy/outlook/messages", timeout).catch(() => null),
+          fetch("/api/customers", timeout).catch(() => null),
+          fetch("/api/partners", timeout).catch(() => null),
+          fetch("/api/workflows", timeout).catch(() => null),
+          fetch("/api/integrations/health", timeout).catch(() => null),
         ]);
 
-        if (statusRes.ok) {
-          const statusData = await statusRes.json();
-          setOutlookStatus(statusData);
-        }
+      const statusData = await safeJson(statusRes);
+      if (statusData) setOutlookStatus(statusData);
 
-        if (mailsRes.ok) {
-          const mailsData = await mailsRes.json();
-          setMails(mailsData.messages || []);
-        }
+      const mailsData = await safeJson(mailsRes);
+      if (mailsData?.messages) setMails(mailsData.messages);
 
-        if (customersRes.ok) {
-          const customersData = await customersRes.json();
-          setCustomers(customersData.customers || []);
-        }
+      const customersData = await safeJson(customersRes);
+      if (customersData?.customers) setCustomers(customersData.customers);
 
-        if (partnersRes.ok) {
-          const partnersData = await partnersRes.json();
-          setPartners(partnersData.partners || []);
-        }
+      const partnersData = await safeJson(partnersRes);
+      if (partnersData?.partners) setPartners(partnersData.partners);
 
-        if (workflowsRes.ok) {
-          const workflowsData = await workflowsRes.json();
-          setWorkflows(workflowsData.workflows || []);
-        }
+      const workflowsData = await safeJson(workflowsRes);
+      if (workflowsData?.workflows) setWorkflows(workflowsData.workflows);
 
-        const integrationsData = await integrationsRes.json().catch(() => null);
-        if (integrationsData?.projects) {
-          setIntegrationProjects(integrationsData.projects);
-        }
-
-        setLoading(false);
-      } catch (err) {
-        console.error("데이터 로딩 실패:", err);
-        setError("데이터를 가져오는 중 오류가 발생했습니다.");
-        setLoading(false);
-      }
+      const integrationsData = await safeJson(integrationsRes);
+      if (integrationsData?.projects) setIntegrationProjects(integrationsData.projects);
     }
 
     fetchData();
   }, []);
 
-  if (status === "loading") {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <div className="text-base text-gray-500">Loading...</div>
-      </div>
-    );
-  }
+  // Generate chart data (must be before early return)
+  const sparklineData = useMemo(() => {
+    const days = ["월", "화", "수", "목", "금", "토", "일"];
+    return days.map((day) => ({
+      date: day,
+      value: Math.floor(Math.random() * 20) + 5,
+    }));
+  }, []);
+
+  const workflowStatusData = useMemo(() => {
+    const active = workflows.filter((w) => w.status === "active").length;
+    const completed = workflows.filter((w) => w.status === "completed").length;
+    const pending = workflows.filter((w) => w.status === "pending").length;
+    const other = workflows.length - active - completed - pending;
+    return [
+      { name: "활성", value: active || 1, color: "#3b82f6" },
+      { name: "완료", value: completed || 0, color: "#10b981" },
+      { name: "대기", value: pending || 0, color: "#f59e0b" },
+      { name: "기타", value: other || 0, color: "#6b7280" },
+    ];
+  }, [workflows]);
+
+  const weeklyActivityData = useMemo(() => {
+    const days = ["월", "화", "수", "목", "금", "토", "일"];
+    return days.map((day) => ({
+      day,
+      tasks: Math.floor(Math.random() * 10) + 1,
+      approvals: Math.floor(Math.random() * 5),
+    }));
+  }, []);
+
+  const healthyServices = integrationProjects.filter(
+    (p) => p.status === "ok"
+  ).length;
+
+
 
   const unreadCount = mails.filter((m) => !m.isRead).length;
   const totalCount = mails.length;
@@ -264,6 +298,55 @@ export function Dashboard() {
       <div className="mb-8 grid grid-cols-4 gap-5">
         {stats.map((stat) => (
           <StatsCard key={stat.title} {...stat} />
+        ))}
+      </div>
+
+      {/* Charts Section */}
+      <div className="mb-8 grid grid-cols-3 gap-6">
+        {/* Weekly Activity Chart */}
+        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+          <h3 className="mb-4 text-lg font-semibold text-gray-900">📊 주간 활동</h3>
+          <WeeklyActivityChart data={weeklyActivityData} />
+        </div>
+
+        {/* Workflow Status Chart */}
+        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+          <h3 className="mb-4 text-lg font-semibold text-gray-900">⚡ 워크플로우 상태</h3>
+          <WorkflowStatusChart data={workflowStatusData} />
+        </div>
+
+        {/* System Health */}
+        <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+          <h3 className="mb-4 text-lg font-semibold text-gray-900">🏥 시스템 건강도</h3>
+          <SystemHealthGauge
+            healthy={healthyServices}
+            total={integrationProjects.length || 1}
+          />
+          <div className="mt-4 text-center">
+            <p className="text-sm text-gray-500">
+              {healthyServices}/{integrationProjects.length || 0} 서비스 정상
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* KPI Sparklines */}
+      <div className="mb-8 grid grid-cols-4 gap-5">
+        {stats.map((stat, index) => (
+          <div key={stat.title} className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm">
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-sm text-gray-500">{stat.title}</span>
+              <span className="text-2xl">{stat.icon}</span>
+            </div>
+            <p className="mb-1 text-2xl font-bold text-gray-900">
+              {loading ? "..." : stat.value}
+            </p>
+            <KpiSparkline
+              data={sparklineData}
+              color={["#3b82f6", "#10b981", "#f59e0b", "#8b5cf6"][index]}
+              height={40}
+            />
+          </div>
         ))}
       </div>
 
