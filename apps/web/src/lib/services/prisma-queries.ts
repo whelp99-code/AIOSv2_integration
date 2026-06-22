@@ -1,11 +1,11 @@
 import { prisma } from '@aios/db';
+import { ensureDefaultOrganization } from '../blro/default-org';
 import {
   PROJECT_SAFE_SELECT,
   USER_SAFE_SELECT,
   TASK_SAFE_SELECT,
-  RESULT_SAFE_SELECT,
+  EXECUTION_RUN_SAFE_SELECT,
   CUSTOMER_SAFE_OMIT,
-  PARTNER_SAFE_OMIT,
 } from '../schemas/aios-v1.schema';
 
 export async function findProjectSafe(projectId: string) {
@@ -15,9 +15,10 @@ export async function findProjectSafe(projectId: string) {
   });
 }
 
-export async function findProjectsSafe(userId?: string) {
+export async function findProjectsSafe(organizationId?: string) {
+  const orgId = organizationId ?? (await ensureDefaultOrganization()).id;
   return prisma.project.findMany({
-    where: userId ? { userId } : undefined,
+    where: { organizationId: orgId },
     select: PROJECT_SAFE_SELECT,
     orderBy: { updatedAt: 'desc' },
   });
@@ -38,26 +39,34 @@ export async function findTasksByProject(projectId: string) {
   });
 }
 
+/** @deprecated BLRO schema — use ExecutionRun via findRunsByProject */
 export async function findResultsByProject(projectId: string) {
-  return prisma.result.findMany({
+  return findRunsByProject(projectId);
+}
+
+export async function findRunsByProject(projectId: string) {
+  return prisma.executionRun.findMany({
     where: { projectId },
-    select: RESULT_SAFE_SELECT,
+    select: EXECUTION_RUN_SAFE_SELECT,
     orderBy: { createdAt: 'desc' },
   });
 }
 
-export async function findCustomersSafe(userId?: string) {
+export async function findCustomersSafe(organizationId?: string) {
+  const orgId = organizationId ?? (await ensureDefaultOrganization()).id;
   return prisma.customer.findMany({
-    where: userId ? { userId } : undefined,
+    where: { organizationId: orgId },
     omit: CUSTOMER_SAFE_OMIT,
     orderBy: { updatedAt: 'desc' },
   });
 }
 
-export async function findPartnersSafe(userId?: string) {
-  return prisma.partner.findMany({
-    where: userId ? { userId } : undefined,
-    omit: PARTNER_SAFE_OMIT,
+/** @deprecated Partner model removed — returns customers tagged as PARTNER status */
+export async function findPartnersSafe(organizationId?: string) {
+  const orgId = organizationId ?? (await ensureDefaultOrganization()).id;
+  return prisma.customer.findMany({
+    where: { organizationId: orgId, status: 'PARTNER' },
+    omit: CUSTOMER_SAFE_OMIT,
     orderBy: { updatedAt: 'desc' },
   });
 }
