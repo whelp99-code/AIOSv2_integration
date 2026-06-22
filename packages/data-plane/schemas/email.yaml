@@ -1,0 +1,44 @@
+entity: email
+version: 1
+layers:
+  bronze:
+    description: Raw inbound mail payload
+    fields:
+      - name: id
+        type: string
+        required: true
+      - name: rawPayload
+        type: object
+        required: true
+      - name: ingestedAt
+        type: string
+        format: datetime
+        required: true
+  silver:
+    description: Normalized mail record
+    fields:
+      - name: id
+        type: string
+        required: true
+      - name: subject
+        type: string
+        required: true
+      - name: from
+        type: string
+        required: true
+      - name: receivedAt
+        type: string
+        format: datetime
+        required: true
+  gold:
+    description: Business-ready mail projection
+    fields:
+      - name: id
+        type: string
+        required: true
+      - name: category
+        type: string
+        required: true
+      - name: projectId
+        type: string
+        required: false
