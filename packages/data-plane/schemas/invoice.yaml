@@ -1,0 +1,43 @@
+entity: invoice
+version: 1
+layers:
+  bronze:
+    description: Raw invoice document payload
+    fields:
+      - name: id
+        type: string
+        required: true
+      - name: rawPayload
+        type: object
+        required: true
+      - name: ingestedAt
+        type: string
+        format: datetime
+        required: true
+  silver:
+    description: Normalized invoice record
+    fields:
+      - name: id
+        type: string
+        required: true
+      - name: number
+        type: string
+        required: true
+      - name: amount
+        type: number
+        required: true
+      - name: currency
+        type: string
+        required: true
+  gold:
+    description: Business-ready invoice projection
+    fields:
+      - name: id
+        type: string
+        required: true
+      - name: projectId
+        type: string
+        required: true
+      - name: status
+        type: string
+        required: true

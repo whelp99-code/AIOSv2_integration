@@ -1,0 +1,44 @@
+entity: payment
+version: 1
+layers:
+  bronze:
+    description: Raw payment transaction payload
+    fields:
+      - name: id
+        type: string
+        required: true
+      - name: rawPayload
+        type: object
+        required: true
+      - name: ingestedAt
+        type: string
+        format: datetime
+        required: true
+  silver:
+    description: Normalized payment record
+    fields:
+      - name: id
+        type: string
+        required: true
+      - name: invoiceId
+        type: string
+        required: true
+      - name: amount
+        type: number
+        required: true
+      - name: paidAt
+        type: string
+        format: datetime
+        required: true
+  gold:
+    description: Business-ready payment projection
+    fields:
+      - name: id
+        type: string
+        required: true
+      - name: invoiceId
+        type: string
+        required: true
+      - name: status
+        type: string
+        required: true

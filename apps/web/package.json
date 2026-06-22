@@ -12,6 +12,7 @@
   "dependencies": {
     "@aios/application": "workspace:*",
     "@aios/config": "workspace:*",
+    "@aios/data-plane": "workspace:*",
     "@aios/db": "workspace:*",
     "@aios/domain": "workspace:*",
     "@aios/health": "workspace:*",

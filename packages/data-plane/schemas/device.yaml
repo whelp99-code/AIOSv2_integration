@@ -1,0 +1,40 @@
+entity: device
+version: 1
+layers:
+  bronze:
+    description: Raw device telemetry payload
+    fields:
+      - name: id
+        type: string
+        required: true
+      - name: rawPayload
+        type: object
+        required: true
+      - name: ingestedAt
+        type: string
+        format: datetime
+        required: true
+  silver:
+    description: Normalized device record
+    fields:
+      - name: id
+        type: string
+        required: true
+      - name: serialNumber
+        type: string
+        required: true
+      - name: model
+        type: string
+        required: true
+  gold:
+    description: Business-ready device projection
+    fields:
+      - name: id
+        type: string
+        required: true
+      - name: projectId
+        type: string
+        required: true
+      - name: status
+        type: string
+        required: true
