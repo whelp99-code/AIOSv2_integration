@@ -1,56 +1,18 @@
-import { NextResponse } from 'next/server'
-import { proxyAiosV1Json } from '../../../lib/integrations/aios-v1-proxy'
-import { upstreamErrorResponse } from '../../../lib/integrations/upstream-proxy'
-import { createGatedHandler, GATE_PRESETS } from '../../../lib/integrations/approval-middleware'
+import { NextResponse } from 'next/server';
+import { readFile } from 'fs/promises';
+import { join } from 'path';
 
 export async function GET() {
   try {
-    const result = await proxyAiosV1Json<{ tasks?: Array<Record<string, unknown>> }>({
-      path: '/api/tasks',
-    })
-
-    if (!result.ok) {
-      return NextResponse.json(result.data, { status: result.status })
-    }
-
-    const workflows = (result.data.tasks ?? []).map((task) => ({
-      id: task.id,
-      name: task.title,
-      description: task.description,
-      status: task.status,
-      type: 'task',
-      createdAt: task.createdAt,
-      updatedAt: task.updatedAt,
-    }))
-
-    return NextResponse.json({ workflows })
+    const dataPath = join(process.cwd(), 'src/data/workflows.json');
+    const raw = await readFile(dataPath, 'utf-8');
+    const workflows = JSON.parse(raw);
+    return NextResponse.json({ workflows, total: workflows.length });
   } catch (error) {
-    return upstreamErrorResponse('Workflows error', error)
+    console.error('Workflows API error:', error);
+    return NextResponse.json(
+      { workflows: [], total: 0, error: '데이터를 불러올 수 없습니다.' },
+      { status: 500 }
+    );
   }
 }
-
-// POST with deploy gate for workflow creation
-export const POST = createGatedHandler(
-  'deploy',
-  GATE_PRESETS.workflowCreate().assignmentId,
-  GATE_PRESETS.workflowCreate().target,
-  async (request) => {
-    try {
-      const body = await request.json()
-      const { name, description } = body
-      const result = await proxyAiosV1Json({
-        path: '/api/tasks',
-        method: 'POST',
-        body: {
-          title: name,
-          description,
-          status: 'BACKLOG',
-          priority: 'MEDIUM',
-        },
-      })
-      return NextResponse.json(result.data, { status: result.status })
-    } catch (error) {
-      return upstreamErrorResponse('Workflow create error', error)
-    }
-  }
-)

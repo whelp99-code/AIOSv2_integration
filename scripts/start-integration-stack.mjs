@@ -25,7 +25,7 @@ const PLAYGROUND = join(ROOT, "..");
 const SERVICES = [
   {
     name: "mail",
-    cwd: join(PLAYGROUND, "apps/mail-intelligence"),
+    cwd: join(PLAYGROUND, "mail-intelligence"),
     cmd: process.execPath,
     args: ["server.mjs"],
     env: { PORT: "3010" },

@@ -1,0 +1,32 @@
+[
+  {
+    "id": "partner-001",
+    "name": "NVIDIA",
+    "type": "기술 파트너",
+    "status": "active",
+    "contact": "James Kim",
+    "email": "james@nvidia.com",
+    "products": ["GPU", "CUDA", "TensorRT"],
+    "notes": "AI 인프라 공급 파트너"
+  },
+  {
+    "id": "partner-002",
+    "name": "Microsoft",
+    "type": "클라우드 파트너",
+    "status": "active",
+    "contact": "Sarah Lee",
+    "email": "sarah@microsoft.com",
+    "products": ["Azure", "OpenAI", "GitHub"],
+    "notes": "Azure 클라우드 및 AI 서비스"
+  },
+  {
+    "id": "partner-003",
+    "name": "Sangfor",
+    "type": "보안 파트너",
+    "status": "active",
+    "contact": "David Park",
+    "email": "david@sangfor.com",
+    "products": ["EDR", "XDR", " Firewall"],
+    "notes": "사이버 보안 솔루션 공급"
+  }
+]
