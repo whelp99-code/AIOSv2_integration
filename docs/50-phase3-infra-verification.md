@@ -2,7 +2,7 @@
 
 **검증 일자:** 2026-06-23  
 **범위:** GitHub Actions · Docker Compose · 부하 테스트 · 리소스 모니터링  
-**기준 커밋:** `b156146`
+**기준 커밋:** `b156146` · **검증 커밋:** `c76e4ff`
 
 > **주의:** `docs/46-phase3-verification.md`는 `packages/persona` BriefingEngine/ActionRouter 검증 문서이다. 본 문서는 인프라/CI/CD 트랙(Phase 3) 전용이다.
 
@@ -12,13 +12,15 @@
 
 | 구분 | 해시 | 메시지 |
 |------|------|--------|
-| **Phase 3 구현** | `b156146` | feat: Phase 3 - 인프라 + CI/CD |
-| P0 후속 | `dec72d2` | fix: P0 이슈 3건 수정 - 웹훅 갱신, LLM 제한, 리소스 모니터링 |
 | Phase 2 (의존) | `adaea68` | docker-compose.yml (Phase 2에서 추가) |
+| **Phase 3 구현** | `b156146` | feat: Phase 3 - 인프라 + CI/CD |
+| **검증 + 통합 수정** | `c76e4ff` | docs: Phase 1-3 Outlook/Dashboard/Infra 검증 + 통합 수정 |
 
 ---
 
-## 1. git diff 분석 (b156146)
+## 1. git diff 분석
+
+### Phase 3 단독 (`b156146`)
 
 | 파일 | LOC | 역할 |
 |------|-----|------|
@@ -26,7 +28,33 @@
 | `tests/load/load-test.ts` | 217 | 100건 메일 부하 테스트 스크립트 |
 | `tests/unit/phase3-infra.test.ts` | 334 | CI/CD · Docker · 부하 · 모니터링 검증 11건 |
 
-**변경 요약:** +658 LOC, 3 files (신규)
+**변경 요약:** +658 LOC, 3 files (신규/수정)
+
+### 최근 3커밋 누적 (`git diff --stat HEAD~3 HEAD`, 2026-06-23 실행)
+
+```
+ .github/workflows/ci.yml                           | 190 +++---
+ apps/web/package.json                              |   1 +
+ apps/web/src/app/api/approval/[id]/approve/route.ts |  18 +
+ apps/web/src/app/api/approval/[id]/reject/route.ts |  19 +
+ apps/web/src/app/api/briefing/today/route.ts       |  15 +
+ apps/web/src/app/briefing/page.tsx                 | 312 ++++++++++
+ apps/web/src/lib/briefing/ceo-briefing-service.ts  | 135 ++++
+ docker-compose.yml                                 |  97 +++
+ docs/48-phase1-outlook-verification.md             | 129 ++++
+ docs/49-phase2-dashboard-verification.md           | 132 ++++
+ docs/50-phase3-infra-verification.md               | 163 +++++
+ packages/api/src/routes/briefing.ts                | 202 ++++++
+ packages/api/src/webhooks/outlook.ts               |  29 +-
+ packages/auth/src/index.ts                         |   3 +-
+ pnpm-lock.yaml                                     | 689 +++++++++++++++++++++
+ tests/load/load-test.ts                            | 217 +++++++
+ tests/unit/phase2-dashboard.test.ts                | 318 ++++++++++
+ tests/unit/phase3-infra.test.ts                    | 334 ++++++++++
+ 18 files changed, 2907 insertions(+), 96 deletions(-)
+```
+
+**Phase 3 관련 파일 (HEAD~3 범위):** ci.yml, load-test.ts, phase3-infra.test.ts, docker-compose.yml
 
 ---
 
@@ -45,7 +73,7 @@
 
 **환경:** Node 20, pnpm 10, frozen lockfile
 
-### `docker-compose.yml` (Phase 2, b156146 검증 포함)
+### `docker-compose.yml` (Phase 2에서 추가, Phase 3 검증 포함)
 
 | 서비스 | image/build | healthcheck | 평가 |
 |--------|-------------|-------------|------|
@@ -75,20 +103,25 @@
 
 ---
 
-## 3. 테스트 결과
+## 3. 테스트 결과 (2026-06-23 실행)
 
 ```bash
-pnpm vitest run tests/unit/phase3-infra.test.ts
-# → 11/11 passed
-pnpm vitest run tests/unit/phase1-outlook.test.ts tests/unit/phase2-dashboard.test.ts tests/unit/phase3-infra.test.ts
+cd ~/Playground/AIOSv2_integration && npx vitest run
+# Test Files  35 passed (35)
+# Tests       517 passed (517)
+# Duration    4.59s
+
+npx vitest run tests/unit/phase3-infra.test.ts
+# → 11/11 passed (7ms)
+
+npx vitest run tests/unit/phase1-outlook.test.ts tests/unit/phase2-dashboard.test.ts tests/unit/phase3-infra.test.ts
 # → 39/39 passed
-pnpm test
-# → 517/517 passed (검증 세션)
 ```
 
 | 테스트 파일 | 케이스 | 결과 |
 |-------------|--------|------|
 | `tests/unit/phase3-infra.test.ts` | 11 | ✅ pass |
+| **전체 스위트** | 517 | ✅ pass |
 
 ---
 
@@ -101,7 +134,7 @@ pnpm test
 | P2 | P3-I03 | load-test.ts CI 파이프라인 미포함 | 📋 후속 |
 | P2 | P3-I04 | migrate 서비스 healthcheck 없음 | ✅ 허용 (one-shot job) |
 
-**검증 세션 코드 수정:** Phase 3 소스 변경 없음 (인프라 설정 파일은 baseline 유지).
+**검증 세션:** Phase 3 인프라 소스 변경 없음. 문서·테스트 재실행으로 검증 완료.
 
 ---
 
@@ -126,6 +159,7 @@ flowchart LR
 | **인프라 파일 수** | 3 (ci.yml, load-test, phase3 test) |
 | **LOC 합계** | 698 |
 | **Docker Compose** | 97 LOC (Phase 2) |
+| **HEAD~3 누적 diff** | 18 files, +2907 / -96 |
 
 ### 품질 등급
 
@@ -145,7 +179,7 @@ flowchart LR
 | Phase 1 Outlook | `5886c44` | 15/15 | 조건부 통과 ✅ |
 | Phase 2 Dashboard | `adaea68` | 13/13 | 통과 ✅ |
 | Phase 3 Infra | `b156146` | 11/11 | 통과 ✅ |
-| **합계** | — | **39/39** | **통과 ✅** |
+| **합계** | — | **39/39** (+ 전체 517/517) | **통과 ✅** |
 
 ---
 
@@ -155,9 +189,9 @@ flowchart LR
 
 - GitHub Actions lint→test→build→docker 파이프라인 구조 검증.
 - Docker Compose 서비스·헬스체크·의존성 적합.
-- 단위 테스트 11건 통과.
+- `npx vitest run` 전체 517/517 + phase3 11/11 통과.
 - Staging/Production deploy는 secrets 연동 후속 필요.
 
 ---
 
-*검증자: Cursor (orchestration) · 2026-06-23*
+*검증자: Cursor · 실행: 2026-06-23 14:05 KST*
