@@ -62,6 +62,98 @@ export class MailClassifier {
    * 기본 분류 규칙 초기화
    */
   private initializeDefaultRules(): void {
+    // 영업 관련 규칙 (강화)
+    this.addRule({
+      name: 'sales-opportunity',
+      category: 'SALES',
+      match: (mail) => {
+        const opportunityKeywords = ['기회', 'opportunity', '리드', 'lead', '잠재고객', 'prospect'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return opportunityKeywords.some(kw => text.includes(kw));
+      },
+      confidence: 0.85,
+    });
+
+    this.addRule({
+      name: 'sales-negotiation',
+      category: 'SALES',
+      match: (mail) => {
+        const negoKeywords = ['협상', 'negotiation', '계약', 'contract', '조건', 'terms'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return negoKeywords.some(kw => text.includes(kw));
+      },
+      confidence: 0.9,
+    });
+
+    // 재무 관련 규칙 (강화)
+    this.addRule({
+      name: 'finance-expense',
+      category: 'FINANCE',
+      match: (mail) => {
+        const expenseKeywords = ['비용', 'expense', '지출', 'expenditure', '영수증', 'receipt', '정산', 'settlement'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return expenseKeywords.some(kw => text.includes(kw));
+      },
+      confidence: 0.8,
+    });
+
+    this.addRule({
+      name: 'finance-budget',
+      category: 'FINANCE',
+      match: (mail) => {
+        const budgetKeywords = ['예산', 'budget', '비용절감', 'cost saving', '투자', 'investment'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return budgetKeywords.some(kw => text.includes(kw));
+      },
+      confidence: 0.75,
+    });
+
+    // 프리세일즈 관련 규칙 (강화)
+    this.addRule({
+      name: 'presales-demo',
+      category: 'PRESALES',
+      match: (mail) => {
+        const demoKeywords = ['데모', 'demo', '시연', 'presentation', 'POC', 'pilot'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return demoKeywords.some(kw => text.includes(kw));
+      },
+      confidence: 0.85,
+    });
+
+    this.addRule({
+      name: 'presales-solution',
+      category: 'PRESALES',
+      match: (mail) => {
+        const solutionKeywords = ['솔루션', 'solution', '아키텍처', 'architecture', '설계', 'design'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return solutionKeywords.some(kw => text.includes(kw));
+      },
+      confidence: 0.8,
+    });
+
+    // PM 관련 규칙 (강화)
+    this.addRule({
+      name: 'pm-task',
+      category: 'PM',
+      match: (mail) => {
+        const taskKeywords = ['작업', 'task', '할당', 'assign', '이슈', 'issue', '버그', 'bug'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return taskKeywords.some(kw => text.includes(kw));
+      },
+      confidence: 0.75,
+    });
+
+    this.addRule({
+      name: 'pm-milestone',
+      category: 'PM',
+      match: (mail) => {
+        const milestoneKeywords = ['마일스톤', 'milestone', '단계', 'phase', '릴리스', 'release'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return milestoneKeywords.some(kw => text.includes(kw));
+      },
+      confidence: 0.8,
+    });
+
     // 영업 관련 규칙
     this.addRule({
       name: 'sales-keywords',

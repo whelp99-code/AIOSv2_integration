@@ -21,6 +21,42 @@ export {
   type BriefingItem,
 } from './personas/work-support';
 
+// Sales Persona
+export {
+  SalesPersona,
+  type Customer,
+  type Opportunity,
+  type Proposal,
+  type SalesResult,
+} from './personas/sales';
+
+// Finance Persona
+export {
+  FinancePersona,
+  type Invoice,
+  type Expense,
+  type VATResult,
+  type FinanceResult,
+} from './personas/finance';
+
+// Presales Persona
+export {
+  PresalesPersona,
+  type TechReview,
+  type SolutionDesign,
+  type TechResponse,
+  type PresalesResult,
+} from './personas/presales';
+
+// PM Persona
+export {
+  PMPersona,
+  type Project,
+  type Task,
+  type ProjectUpdate,
+  type PMResult,
+} from './personas/pm';
+
 // Briefing Engine
 export {
   BriefingEngine,
