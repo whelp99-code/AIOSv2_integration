@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
+import { hookRegistry } from '../hooks';
 import { publishEvent } from '../publisher';
 import { getLayerSchema, type SchemaRegistry } from '../registry';
 
@@ -26,6 +27,14 @@ export async function projectFromMail(
     entity: 'project',
     layer: 'gold',
     payload: project,
+  });
+
+  // Gold 처리 완료 후 훅 실행 (페르소나 라우팅)
+  await hookRegistry.executeOnGoldComplete({
+    entity: 'project',
+    record: project,
+    layer: 'gold',
+    timestamp: new Date().toISOString(),
   });
 
   return { project, streamId };

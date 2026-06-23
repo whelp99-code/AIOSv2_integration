@@ -1673,3 +1673,79 @@ model PolicyDecisionLog {
   @@map("policy_decision_logs")
 }
 
+
+// ============================================
+// Persona System Models (AIOS v2)
+// ============================================
+
+enum PersonaType {
+  WORK_SUPPORT    // 업무지원
+  SALES           // 영업
+  PRESALES        // 프리세일즈
+  ENGINEER        // 엔지니어
+  PM              // PM
+  FINANCE         // 재무
+  MARKETING       // 마케팅
+  CEO             // CEO
+}
+
+enum PersonaActionStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REQUIRES_APPROVAL
+}
+
+model Persona {
+  id        String      @id @default(cuid())
+  type      PersonaType @unique
+  name      String
+  role      String
+  config    Json        @default("{}")
+  isActive  Boolean     @default(true)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  actions        PersonaAction[]
+  classifications MailClassification[]
+
+  @@map("personas")
+}
+
+model MailClassification {
+  id          String   @id @default(cuid())
+  mailId      String   @map("mail_id")
+  personaType PersonaType @map("persona_type")
+  confidence  Float
+  matchedRules Json    @map("matched_rules") @default("[]")
+  status      String   @default("pending")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  persona Persona @relation(fields: [personaType], references: [type])
+
+  @@index([mailId])
+  @@index([personaType])
+  @@index([status])
+  @@map("mail_classifications")
+}
+
+model PersonaAction {
+  id          String             @id @default(cuid())
+  personaType PersonaType        @map("persona_type")
+  mailId      String?            @map("mail_id")
+  action      String
+  input       Json
+  output      Json?
+  status      PersonaActionStatus @default(PENDING)
+  error       String?
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
+
+  persona Persona @relation(fields: [personaType], references: [type])
+
+  @@index([personaType])
+  @@index([mailId])
+  @@index([status])
+  @@map("persona_actions")
+}

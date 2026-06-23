@@ -20,3 +20,10 @@ export {
 export { ingestBronze, type BronzeIngestResult } from './bronze/ingest';
 export { normalizeSilver, type SilverNormalizeResult } from './silver/normalize';
 export { projectFromMail, type ProjectFromMailResult } from './gold/project-from-mail';
+
+// Routing Hook Pattern exports
+export {
+  hookRegistry,
+  type DataPlaneHooks,
+  type GoldCompleteItem,
+} from './hooks';
