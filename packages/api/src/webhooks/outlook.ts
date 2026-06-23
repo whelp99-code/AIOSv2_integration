@@ -53,10 +53,16 @@ export interface GraphMailMessage {
 export class OutlookWebhookHandler {
   private clientState: string;
   private mailProcessor: (mail: MailItem) => Promise<void>;
+  private mailFetcher?: (mailId: string) => Promise<MailItem>;
 
-  constructor(clientState: string, mailProcessor: (mail: MailItem) => Promise<void>) {
+  constructor(
+    clientState: string,
+    mailProcessor: (mail: MailItem) => Promise<void>,
+    mailFetcher?: (mailId: string) => Promise<MailItem>,
+  ) {
     this.clientState = clientState;
     this.mailProcessor = mailProcessor;
+    this.mailFetcher = mailFetcher;
   }
 
   /**
@@ -109,18 +115,17 @@ export class OutlookWebhookHandler {
   private async processMailEvent(mailId: string): Promise<void> {
     console.log(`[OutlookWebhook] Processing mail: ${mailId}`);
 
-    // Graph API에서 메일 상세 정보 조회
-    // 실제 구현에서는 GraphOAuthClient.getMessages() 사용
-    const mailItem: MailItem = {
-      id: mailId,
-      subject: '', // Graph API에서 조회
-      from: '',
-      to: [],
-      body: '',
-      receivedAt: new Date().toISOString(),
-    };
+    const mailItem: MailItem = this.mailFetcher
+      ? await this.mailFetcher(mailId)
+      : {
+          id: mailId,
+          subject: '',
+          from: '',
+          to: [],
+          body: '',
+          receivedAt: new Date().toISOString(),
+        };
 
-    // 메일 처리 함수 호출
     await this.mailProcessor(mailItem);
   }
 

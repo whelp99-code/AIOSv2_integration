@@ -17,6 +17,7 @@
     "@aios/domain": "workspace:*",
     "@aios/health": "workspace:*",
     "@aios/infrastructure": "workspace:*",
+    "@aios/persona": "workspace:*",
     "@aios/proxy-core": "workspace:*",
     "@aios/shared": "workspace:*",
     "@aios/ui": "workspace:*",
