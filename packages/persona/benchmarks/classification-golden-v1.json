@@ -1,0 +1,27 @@
+{
+  "version": "v1",
+  "created_at": "2026-06-23",
+  "description": "Golden dataset for MailClassifier accuracy measurement",
+  "minimum_samples": 500,
+  "recommended_samples": 1000,
+  "persona_categories": [
+    "WORK_SUPPORT",
+    "SALES",
+    "PRESALES",
+    "ENGINEER",
+    "PM",
+    "FINANCE",
+    "MARKETING",
+    "CEO"
+  ],
+  "labeling_rules": {
+    "reviewers_required": 2,
+    "agreement_threshold": 0.8,
+    "conflict_resolution": "manual_review"
+  },
+  "holdout_split": {
+    "train": 0.7,
+    "validation": 0.15,
+    "test": 0.15
+  }
+}

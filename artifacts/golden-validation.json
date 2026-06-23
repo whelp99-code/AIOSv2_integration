@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "kind": "algorithm-validation",
+  "description": "Golden dataset generation validation: 500 entries, 22.6% ambiguous, 8 categories balanced",
+  "input": { "count": 500, "seed": 42 },
+  "output": {
+    "totalEntries": 500,
+    "ambiguousCount": 113,
+    "ambiguousRatio": 0.226,
+    "categoryDistribution": { "WORK_SUPPORT": 70, "SALES": 70, "PRESALES": 60, "ENGINEER": 70, "PM": 60, "FINANCE": 60, "MARKETING": 50, "CEO": 60 },
+    "splits": { "eval": 400, "promptDev": 100 }
+  },
+  "validationCriteria": {
+    "minEntries": { "required": 500, "actual": 500, "passed": true },
+    "ambiguousRatio": { "required": ">=0.20", "actual": 0.226, "passed": true },
+    "categoryBalance": { "required": "each category within target", "actual": "all categories match", "passed": true },
+    "evalSplit": { "required": "80/20 split", "actual": "400/100", "passed": true }
+  }
+}

@@ -1,0 +1,154 @@
+{
+  "meta": {
+    "date": "2026-06-23",
+    "source": "packages/db/prisma/schema.prisma",
+    "totalModels": 95,
+    "businessModels": 92,
+    "authModels": 3,
+    "coreModels": 22,
+    "targetModels": 70,
+    "prismaDocumented": true
+  },
+  "authModels": [
+    { "name": "Account", "purpose": "NextAuth OAuth 계정 관리", "type": "auth" },
+    { "name": "Session", "purpose": "NextAuth 사용자 세션 관리", "type": "auth" },
+    { "name": "VerificationToken", "purpose": "NextAuth 이메일 인증 토큰", "type": "auth" }
+  ],
+  "coreModels": [
+    { "name": "User", "useCase": "사용자 계정 및 프로필", "owner": "auth-team", "status": "active", "api": "REST /api/users", "rollback": "N/A (core)" },
+    { "name": "Organization", "useCase": "조직/회사 단위 테넌트", "owner": "platform-team", "status": "active", "api": "REST /api/organizations", "rollback": "N/A (core)" },
+    { "name": "OrganizationMember", "useCase": "조직 멤버십 및 역할", "owner": "platform-team", "status": "active", "api": "REST /api/organizations/:id/members", "rollback": "N/A (core)" },
+    { "name": "Customer", "useCase": "고객사 관리", "owner": "sales-team", "status": "active", "api": "REST /api/customers", "rollback": "N/A (core)" },
+    { "name": "Contact", "useCase": "고객 연락처", "owner": "sales-team", "status": "active", "api": "REST /api/customers/:id/contacts", "rollback": "N/A (core)" },
+    { "name": "Project", "useCase": "프로젝트 관리", "owner": "pm-team", "status": "active", "api": "REST /api/projects", "rollback": "N/A (core)" },
+    { "name": "ProjectRequest", "useCase": "프로젝트 요청/의뢰", "owner": "pm-team", "status": "active", "api": "REST /api/project-requests", "rollback": "N/A (core)" },
+    { "name": "MailItem", "useCase": "수신 메일 원본 저장", "owner": "mail-team", "status": "active", "api": "REST /api/mail", "rollback": "N/A (core)" },
+    { "name": "IngestionSource", "useCase": "데이터 수집 소스(Outlook 등)", "owner": "ingestion-team", "status": "active", "api": "REST /api/ingestion/sources", "rollback": "N/A (core)" },
+    { "name": "IngestionItem", "useCase": "수집된 개별 항목", "owner": "ingestion-team", "status": "active", "api": "REST /api/ingestion/items", "rollback": "N/A (core)" },
+    { "name": "IngestionJob", "useCase": "수집 작업 실행 상태", "owner": "ingestion-team", "status": "active", "api": "REST /api/ingestion/jobs", "rollback": "N/A (core)" },
+    { "name": "PresalesReview", "useCase": "프리세일즈 기술 검토", "owner": "presales-team", "status": "active", "api": "REST /api/presales/reviews", "rollback": "N/A (core)" },
+    { "name": "Proposal", "useCase": "제안서 관리", "owner": "sales-team", "status": "active", "api": "REST /api/proposals", "rollback": "N/A (core)" },
+    { "name": "Task", "useCase": "작업/할일 관리", "owner": "pm-team", "status": "active", "api": "REST /api/tasks", "rollback": "N/A (core)" },
+    { "name": "Agent", "useCase": "AI 에이전트 정의", "owner": "agent-team", "status": "active", "api": "REST /api/agents", "rollback": "N/A (core)" },
+    { "name": "Workflow", "useCase": "워크플로우 정의", "owner": "automation-team", "status": "active", "api": "REST /api/workflows", "rollback": "N/A (core)" },
+    { "name": "ExecutionRun", "useCase": "워크플로우 실행 기록", "owner": "automation-team", "status": "active", "api": "REST /api/runs", "rollback": "N/A (core)" },
+    { "name": "RunStep", "useCase": "워크플로우 실행 단계", "owner": "automation-team", "status": "active", "api": "REST /api/runs/:id/steps", "rollback": "N/A (core)" },
+    { "name": "ApprovalItem", "useCase": "승인 항목 관리", "owner": "automation-team", "status": "active", "api": "REST /api/approvals", "rollback": "N/A (core)" },
+    { "name": "ToolConnection", "useCase": "외부 도구 연동(Slack, Notion 등)", "owner": "integration-team", "status": "active", "api": "REST /api/connections", "rollback": "N/A (core)" },
+    { "name": "KnowledgeDocument", "useCase": "지식 문서 관리", "owner": "knowledge-team", "status": "active", "api": "REST /api/documents", "rollback": "N/A (core)" },
+    { "name": "FinanceItem", "useCase": "재무 항목(청구서, 예산 등)", "owner": "finance-team", "status": "active", "api": "REST /api/finance", "rollback": "N/A (core)" }
+  ],
+  "waves": {
+    "A": {
+      "count": 12,
+      "description": "분류·관측성·품질 기반",
+      "models": [
+        { "name": "Persona", "useCase": "페르소나 정의 및 설정", "owner": "persona-team", "api": "REST /api/personas", "rollback": "DROP TABLE; no FK from core" },
+        { "name": "MailClassification", "useCase": "분류 결과 저장(rule/LLM/merged)", "owner": "classifier-team", "api": "REST /api/classifications", "rollback": "DROP TABLE; shadow-only初期" },
+        { "name": "PersonaAction", "useCase": "페르소나별 액션 정의", "owner": "persona-team", "api": "REST /api/personas/:id/actions", "rollback": "DROP TABLE" },
+        { "name": "LlmCall", "useCase": "LLM 호출 기록(provider/model/token/latency)", "owner": "classifier-team", "api": "REST /api/llm/calls", "rollback": "DROP TABLE; shadow log only" },
+        { "name": "CostEvent", "useCase": "비용 이벤트(LLM 호출 비용 추적)", "owner": "finance-team", "api": "REST /api/costs", "rollback": "DROP TABLE" },
+        { "name": "ErrorEvent", "useCase": "에러 이벤트 기록", "owner": "platform-team", "api": "REST /api/errors", "rollback": "DROP TABLE" },
+        { "name": "AuditLog", "useCase": "감사 로그(분류 결정 변경 이력)", "owner": "compliance-team", "api": "REST /api/audit", "rollback": "DROP TABLE" },
+        { "name": "StateTransitionLog", "useCase": "상태 전이 기록", "owner": "automation-team", "api": "REST /api/transitions", "rollback": "DROP TABLE" },
+        { "name": "QualityGate", "useCase": "벤치마크 pass/fail 기록", "owner": "qa-team", "api": "REST /api/quality-gates", "rollback": "DROP TABLE" },
+        { "name": "ValidationPlan", "useCase": "검증 계획 정의", "owner": "qa-team", "api": "REST /api/validation/plans", "rollback": "DROP TABLE" },
+        { "name": "ValidationCheck", "useCase": "검증 항목 결과", "owner": "qa-team", "api": "REST /api/validation/checks", "rollback": "DROP TABLE" },
+        { "name": "IntegrationHealth", "useCase": "통합 헬스 상태", "owner": "platform-team", "api": "REST /api/integrations/health", "rollback": "DROP TABLE" }
+      ]
+    },
+    "B": {
+      "count": 10,
+      "description": "메일 인사이트·지식·정책 메모리",
+      "models": [
+        { "name": "AutomationMailAccount", "useCase": "Outlook/Gmail 계정 연동", "owner": "mail-team", "api": "REST /api/mail/accounts", "rollback": "DELETE WHERE; FK to MailItem safe" },
+        { "name": "AutomationMailMessage", "useCase": "스레드 단위 메시지 관리", "owner": "mail-team", "api": "REST /api/mail/messages", "rollback": "DELETE WHERE" },
+        { "name": "MailInsightThread", "useCase": "메일 스레드 인사이트/요약", "owner": "classifier-team", "api": "REST /api/mail/insights", "rollback": "DROP TABLE; proposed-only初期" },
+        { "name": "MailDerivedCandidate", "useCase": "메일 기반 후보 생성(proposed 상태만)", "owner": "classifier-team", "api": "REST /api/mail/candidates", "rollback": "DROP TABLE; proposed-only" },
+        { "name": "AutomationKnowledgeDocument", "useCase": "자동화 지식 문서", "owner": "knowledge-team", "api": "REST /api/knowledge/auto", "rollback": "DROP TABLE" },
+        { "name": "KnowledgeChunk", "useCase": "지식 문서 청크(RAG용)", "owner": "knowledge-team", "api": "REST /api/knowledge/chunks", "rollback": "DROP TABLE" },
+        { "name": "PolicyMemory", "useCase": "분류 정책 메모리", "owner": "classifier-team", "api": "REST /api/policies/memory", "rollback": "DROP TABLE" },
+        { "name": "PolicyDecisionLog", "useCase": "정책 변경 이력", "owner": "compliance-team", "api": "REST /api/policies/decisions", "rollback": "DROP TABLE" },
+        { "name": "RuntimePolicy", "useCase": "런타임 정책/threshold config", "owner": "classifier-team", "api": "REST /api/policies/runtime", "rollback": "DROP TABLE" },
+        { "name": "NotificationEvent", "useCase": "알림 이벤트(즉시/daily digest)", "owner": "platform-team", "api": "REST /api/notifications", "rollback": "DROP TABLE" }
+      ]
+    },
+    "C": {
+      "count": 19,
+      "description": "자동화 워크플로 런타임",
+      "models": [
+        { "name": "AutomationProject", "useCase": "자동화 프로젝트", "owner": "automation-team", "api": "REST /api/automation/projects", "rollback": "DELETE WHERE; no core FK" },
+        { "name": "AutomationProjectMember", "useCase": "자동화 프로젝트 멤버", "owner": "automation-team", "api": "REST /api/automation/projects/:id/members", "rollback": "DELETE WHERE" },
+        { "name": "AutomationWorkspace", "useCase": "자동화 워크스페이스", "owner": "automation-team", "api": "REST /api/automation/workspaces", "rollback": "DELETE WHERE" },
+        { "name": "Command", "useCase": "명령어 정의", "owner": "automation-team", "api": "REST /api/commands", "rollback": "DELETE WHERE" },
+        { "name": "CommandRun", "useCase": "명령어 실행 기록", "owner": "automation-team", "api": "REST /api/commands/:id/runs", "rollback": "DELETE WHERE" },
+        { "name": "IntentAnalysis", "useCase": "의도 분석 결과", "owner": "classifier-team", "api": "REST /api/analysis/intent", "rollback": "DROP TABLE" },
+        { "name": "RiskAnalysis", "useCase": "위험 분석 결과", "owner": "classifier-team", "api": "REST /api/analysis/risk", "rollback": "DROP TABLE" },
+        { "name": "AutomationWorkflow", "useCase": "자동화 워크플로우", "owner": "automation-team", "api": "REST /api/automation/workflows", "rollback": "DELETE WHERE" },
+        { "name": "AutomationWorkflowStep", "useCase": "자동화 워크플로우 단계", "owner": "automation-team", "api": "REST /api/automation/workflows/:id/steps", "rollback": "DELETE WHERE" },
+        { "name": "AgentAssignment", "useCase": "에이전트 할당", "owner": "agent-team", "api": "REST /api/agents/:id/assignments", "rollback": "DELETE WHERE" },
+        { "name": "ToolCall", "useCase": "도구 호출 기록", "owner": "agent-team", "api": "REST /api/agents/:id/tool-calls", "rollback": "DELETE WHERE" },
+        { "name": "AgentMessage", "useCase": "에이전트 메시지", "owner": "agent-team", "api": "REST /api/agents/:id/messages", "rollback": "DELETE WHERE" },
+        { "name": "AgentDecisionLog", "useCase": "에이전트 의사결정 로그", "owner": "agent-team", "api": "REST /api/agents/:id/decisions", "rollback": "DELETE WHERE" },
+        { "name": "AutomationApprovalRequest", "useCase": "자동화 승인 요청", "owner": "automation-team", "api": "REST /api/automation/approvals", "rollback": "DELETE WHERE" },
+        { "name": "AutomationReport", "useCase": "자동화 리포트", "owner": "automation-team", "api": "REST /api/automation/reports", "rollback": "DELETE WHERE" },
+        { "name": "ValidationResult", "useCase": "검증 결과", "owner": "qa-team", "api": "REST /api/validation/results", "rollback": "DELETE WHERE" },
+        { "name": "ImprovementCandidate", "useCase": "개선 후보(proposed만 생성)", "owner": "qa-team", "api": "REST /api/improvements", "rollback": "DELETE WHERE; proposed-only" },
+        { "name": "RunTimelineItem", "useCase": "실행 타임라인 항목", "owner": "automation-team", "api": "REST /api/runs/:id/timeline", "rollback": "DELETE WHERE" },
+        { "name": "OutboxEvent", "useCase": "비동기 이벤트 아웃박스", "owner": "platform-team", "api": "INTERNAL outbox pattern", "rollback": "DELETE WHERE" }
+      ]
+    },
+    "D": {
+      "count": 17,
+      "description": "코드·저장소·CI 협업",
+      "models": [
+        { "name": "Repository", "useCase": "코드 저장소 정의", "owner": "devtools-team", "api": "REST /api/repositories", "rollback": "DELETE WHERE" },
+        { "name": "Branch", "useCase": "브랜치 관리", "owner": "devtools-team", "api": "REST /api/repositories/:id/branches", "rollback": "DELETE WHERE" },
+        { "name": "PullRequest", "useCase": "PR 관리", "owner": "devtools-team", "api": "REST /api/pull-requests", "rollback": "DELETE WHERE" },
+        { "name": "CodeChange", "useCase": "코드 변경 기록", "owner": "devtools-team", "api": "REST /api/code-changes", "rollback": "DELETE WHERE" },
+        { "name": "ChangedFile", "useCase": "변경 파일 목록", "owner": "devtools-team", "api": "REST /api/code-changes/:id/files", "rollback": "DELETE WHERE" },
+        { "name": "BuildRun", "useCase": "빌드 실행 기록", "owner": "devtools-team", "api": "REST /api/builds", "rollback": "DELETE WHERE" },
+        { "name": "TestRun", "useCase": "테스트 실행 기록", "owner": "devtools-team", "api": "REST /api/tests", "rollback": "DELETE WHERE" },
+        { "name": "CodexTask", "useCase": "Codex 작업 정의", "owner": "devtools-team", "api": "REST /api/codex/tasks", "rollback": "DELETE WHERE" },
+        { "name": "CodexTaskLog", "useCase": "Codex 작업 로그", "owner": "devtools-team", "api": "REST /api/codex/tasks/:id/logs", "rollback": "DELETE WHERE" },
+        { "name": "CursorSession", "useCase": "Cursor 세션 관리", "owner": "devtools-team", "api": "REST /api/cursor/sessions", "rollback": "DELETE WHERE" },
+        { "name": "GitHubIssue", "useCase": "GitHub 이슈 연동", "owner": "devtools-team", "api": "REST /api/github/issues", "rollback": "DELETE WHERE" },
+        { "name": "ExecutionPolicy", "useCase": "실행 정책", "owner": "automation-team", "api": "REST /api/policies/execution", "rollback": "DELETE WHERE" },
+        { "name": "WorkflowTemplate", "useCase": "워크플로우 템플릿", "owner": "automation-team", "api": "REST /api/workflow-templates", "rollback": "DELETE WHERE" },
+        { "name": "SkillCatalogItem", "useCase": "스킬 카탈로그 항목", "owner": "agent-team", "api": "REST /api/skills", "rollback": "DELETE WHERE" },
+        { "name": "SkillRun", "useCase": "스킬 실행 기록", "owner": "agent-team", "api": "REST /api/skills/:id/runs", "rollback": "DELETE WHERE" },
+        { "name": "WorkBreakdownItem", "useCase": "WBS 항목", "owner": "pm-team", "api": "REST /api/wbs", "rollback": "DELETE WHERE" },
+        { "name": "AgentAssignmentRule", "useCase": "에이전트 할당 규칙", "owner": "agent-team", "api": "REST /api/agent-assignment-rules", "rollback": "DELETE WHERE" }
+      ]
+    },
+    "E": {
+      "count": 12,
+      "description": "포털·레지스트리·설정 UX",
+      "models": [
+        { "name": "ModuleRegistry", "useCase": "모듈 레지스트리", "owner": "platform-team", "api": "REST /api/registry/modules", "rollback": "DELETE WHERE" },
+        { "name": "BlockRegistry", "useCase": "블록 레지스트리", "owner": "platform-team", "api": "REST /api/registry/blocks", "rollback": "DELETE WHERE" },
+        { "name": "LayoutSlot", "useCase": "레이아웃 슬롯", "owner": "platform-team", "api": "REST /api/portal/layouts", "rollback": "DELETE WHERE" },
+        { "name": "NodeRegistry", "useCase": "노드 레지스트리", "owner": "platform-team", "api": "REST /api/registry/nodes", "rollback": "DELETE WHERE" },
+        { "name": "QueryRegistry", "useCase": "쿼리 레지스트리", "owner": "platform-team", "api": "REST /api/registry/queries", "rollback": "DELETE WHERE" },
+        { "name": "ConnectorRegistry", "useCase": "커넥터 레지스트리", "owner": "integration-team", "api": "REST /api/registry/connectors", "rollback": "DELETE WHERE" },
+        { "name": "Canvas", "useCase": "캔버스 UI 구성", "owner": "platform-team", "api": "REST /api/portal/canvas", "rollback": "DELETE WHERE" },
+        { "name": "MemoryItem", "useCase": "메모리 항목(대화/작업 기억)", "owner": "agent-team", "api": "REST /api/memory", "rollback": "DELETE WHERE" },
+        { "name": "ReviewThread", "useCase": "리뷰 스레드", "owner": "qa-team", "api": "REST /api/reviews", "rollback": "DELETE WHERE" },
+        { "name": "AutomationPortalTask", "useCase": "포털 작업 항목", "owner": "platform-team", "api": "REST /api/portal/tasks", "rollback": "DELETE WHERE" },
+        { "name": "ConfigProfile", "useCase": "설정 프로필", "owner": "platform-team", "api": "REST /api/config/profiles", "rollback": "DELETE WHERE" },
+        { "name": "ConfigValue", "useCase": "설정 값(key-value)", "owner": "platform-team", "api": "REST /api/config/values", "rollback": "DELETE WHERE" }
+      ]
+    }
+  },
+  "validation": {
+    "totalCheck": "95 = 22 core + 3 auth + 70 target",
+    "waveCountCheck": {
+      "A": 12,
+      "B": 10,
+      "C": 19,
+      "D": 17,
+      "E": 12,
+      "total": 70
+    }
+  }
+}

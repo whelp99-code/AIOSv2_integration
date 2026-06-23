@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "kind": "algorithm-validation",
+  "description": "Rule baseline benchmark against golden dataset",
+  "input": { "dataset": "classification-golden-v1", "samples": 500, "split": "all" },
+  "output": {
+    "accuracy": 0.616,
+    "macroF1": 0.619,
+    "macroPrecision": 0.659,
+    "macroRecall": 0.610,
+    "perCategory": {
+      "WORK_SUPPORT": { "precision": 0.461, "recall": 0.586, "f1": 0.516 },
+      "SALES": { "precision": 0.636, "recall": 0.600, "f1": 0.618 },
+      "PRESALES": { "precision": 0.702, "recall": 0.667, "f1": 0.684 },
+      "ENGINEER": { "precision": 0.624, "recall": 0.757, "f1": 0.684 },
+      "PM": { "precision": 0.493, "recall": 0.583, "f1": 0.534 },
+      "FINANCE": { "precision": 0.804, "recall": 0.750, "f1": 0.776 },
+      "MARKETING": { "precision": 1.000, "recall": 0.440, "f1": 0.611 },
+      "CEO": { "precision": 0.556, "recall": 0.500, "f1": 0.526 }
+    }
+  },
+  "validationCriteria": {
+    "baselineDocumented": { "required": true, "actual": true, "passed": true },
+    "confusionMatrixPresent": { "required": true, "actual": true, "passed": true },
+    "perCategoryMetrics": { "required": true, "actual": true, "passed": true }
+  }
+}

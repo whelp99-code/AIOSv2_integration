@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "kind": "cli-replay",
+  "replaySafe": true,
+  "command": ["npx", "tsx", "packages/persona/src/mail/golden-data/generator.ts", "--count", "500", "--seed", "42"],
+  "recordedStdout": "Generated 500 entries\nAmbiguous: 113 (22.6%)\nSplits: eval=400, promptDev=100\nCategory distribution:\n  MARKETING: 50\n  FINANCE: 60\n  ENGINEER: 70\n  WORK_SUPPORT: 70\n  CEO: 60\n  SALES: 70\n  PRESALES: 60\n  PM: 60\n"
+}

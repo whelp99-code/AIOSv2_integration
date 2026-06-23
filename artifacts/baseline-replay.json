@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "kind": "cli-replay",
+  "replaySafe": true,
+  "command": ["npx", "tsx", "packages/persona/src/mail/benchmark.ts", "--split", "all"],
+  "recordedStdout": "=== Baseline Report ===\nTotal samples: 500\nSplit: all\nAccuracy: 61.6%\nMacro-F1: 0.619\nMacro-Precision: 0.659\nMacro-Recall: 0.610\n\nPer-category:\n  WORK_SUPPORT: P=0.461 R=0.586 F1=0.516 (n=70)\n  SALES: P=0.636 R=0.600 F1=0.618 (n=70)\n  PRESALES: P=0.702 R=0.667 F1=0.684 (n=60)\n  ENGINEER: P=0.624 R=0.757 F1=0.684 (n=70)\n  PM: P=0.493 R=0.583 F1=0.534 (n=60)\n  FINANCE: P=0.804 R=0.750 F1=0.776 (n=60)\n  MARKETING: P=1.000 R=0.440 F1=0.611 (n=50)\n  CEO: P=0.556 R=0.500 F1=0.526 (n=60)\n"
+}
