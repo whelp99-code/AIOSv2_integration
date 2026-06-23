@@ -163,8 +163,8 @@ export class BriefingEngine {
   private extractCEOActionItems(items: BriefingItem[]): CEOBriefingItem[] {
     return items
       .filter(item => item.actionRequired)
-      .map(item => ({
-        id: `ceo-action-${Date.now()}`,
+      .map((item, index) => ({
+        id: `ceo-action-${item.mailId}-${index}`,
         type: this.determineItemType(item),
         title: item.subject,
         description: item.summary,
@@ -185,8 +185,8 @@ export class BriefingEngine {
   private extractApprovalPending(items: BriefingItem[]): CEOBriefingItem[] {
     return items
       .filter(item => item.category === 'CEO' && item.actionRequired)
-      .map(item => ({
-        id: `approval-pending-${Date.now()}`,
+      .map((item, index) => ({
+        id: `approval-pending-${item.mailId}-${index}`,
         type: 'APPROVAL_PENDING' as const,
         title: `[승인 필요] ${item.subject}`,
         description: item.summary,

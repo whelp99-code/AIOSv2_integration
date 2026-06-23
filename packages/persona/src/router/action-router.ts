@@ -254,18 +254,17 @@ export class ActionRouter {
    * DLQ에서 액션 재시도
    */
   async retryFromDLQ(actionId: string): Promise<void> {
-    const index = this.actionQueue.findIndex(a => a.id === actionId);
+    const index = this.dlq.findIndex(a => a.id === actionId);
     if (index === -1) {
       throw new Error(`Action not found in DLQ: ${actionId}`);
     }
 
-    const action = this.actionQueue[index];
+    const action = this.dlq[index];
     action.status = 'PENDING';
     action.retryCount = 0;
     action.lastError = null;
     action.updatedAt = new Date().toISOString();
 
-    // DLQ에서 제거하고 큐에 다시 추가
     this.dlq.splice(index, 1);
     const insertIndex = this.actionQueue.findIndex(a => a.priority < action.priority);
     if (insertIndex === -1) {

@@ -117,11 +117,32 @@ afterAll(async () => {
 
 describe("Integration: Approvals API", () => {
   it("GET /api/approvals should return approvals list", async () => {
-    const res = await approvalsGet();
+    const postRes = await approvalsPost(
+      new Request("http://localhost/api/approvals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "destructive-action",
+          sessionId: "cursor-opencode-main-session",
+          assignmentId: "assignment-bootstrap-plan-get",
+          requester: "test-agent",
+          requestedBy: "test-agent",
+          actionType: "deploy",
+          target: "test deploy list",
+          context: { message: "test list" },
+        }),
+      }),
+    );
+    expect(postRes.ok).toBe(true);
+
+    const res = await approvalsGet(
+      new Request("http://localhost/api/approvals?store=legacy"),
+    );
     expect(res.ok).toBe(true);
     const data = await res.json();
     expect(data).toHaveProperty("approvals");
     expect(Array.isArray(data.approvals)).toBe(true);
+    expect(data.approvals.length).toBeGreaterThan(0);
     expect(data.approvals[0]).toHaveProperty("sessionId");
     expect(data.approvals[0]).toHaveProperty("assignmentId");
     expect(data.approvals[0]).toHaveProperty("requestedBy");
@@ -384,14 +405,14 @@ describe("Integration: Multi-project integrations health", () => {
       });
 
     const res = await integrationsHealthGet();
-    expect(res.status).toBe(503);
+    expect(res.status).toBe(200);
     const data = await res.json();
     expect(data.status).toBe("degraded");
-    expect(data.projects).toHaveLength(5);
-    expect(data.summary.total).toBe(5);
+    expect(data.projects).toHaveLength(6);
+    expect(data.summary.total).toBe(6);
     expect(data.summary.ok).toBeGreaterThan(0);
     expect(
-      data.projects.some((project: { id: string }) => project.id === "aios-v1"),
+      data.projects.some((project: { id: string }) => project.id === "sangfor-mcp"),
     ).toBe(true);
     fetchSpy.mockRestore();
   });

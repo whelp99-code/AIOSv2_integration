@@ -57,6 +57,7 @@ export function upstreamErrorResponse(
   return NextResponse.json(
     {
       error: label,
+      message,
       details: message,
     },
     { status },

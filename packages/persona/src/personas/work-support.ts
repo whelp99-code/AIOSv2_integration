@@ -5,7 +5,7 @@
  */
 
 import { type MailItem, type ClassificationResult, MailClassifier } from '../mail/classifier';
-import { PersonaRouter, type RoutingMessage } from '../router/router';
+import { PersonaRouter } from '../router/router';
 
 // 업무지원 처리 결과
 export interface WorkSupportResult {
@@ -112,7 +112,6 @@ export class WorkSupportPersona {
     const results: WorkSupportResult[] = [];
 
     for (const message of messages) {
-      // 이미 분류된 메시지를 처리
       const result: WorkSupportResult = {
         mailId: message.mailId,
         classification: message.classification,
@@ -123,8 +122,7 @@ export class WorkSupportPersona {
 
       results.push(result);
 
-      // ACK
-      await this.router.ack(message.mailId);
+      await this.router.ack(message.streamMessageId);
     }
 
     return results;

@@ -154,7 +154,7 @@ export class VoiceCommandProcessor {
     const entities = this.extractEntities(text);
 
     // 대상 페르소나 결정
-    const targetPersona = this.determineTargetPersona(intent, entities);
+    const targetPersona = this.determineTargetPersona(text, intent, entities);
 
     const command: VoiceCommand = {
       id: `vc-${Date.now()}`,
@@ -297,29 +297,29 @@ export class VoiceCommandProcessor {
   /**
    * 대상 페르소나 결정
    */
-  private determineTargetPersona(intent: VoiceIntent, entities: VoiceEntity[]): PersonaType | null {
-    const intentName = intent.name.toLowerCase();
+  private determineTargetPersona(text: string, intent: VoiceIntent, entities: VoiceEntity[]): PersonaType | null {
+    const corpus = `${text.toLowerCase()} ${intent.name.toLowerCase()}`;
 
-    // 의도 기반 페르소나 매핑
-    if (intentName.includes('견적') || intentName.includes('판매') || intentName.includes('영업')) {
+    // 의도·원문 텍스트 기반 페르소나 매핑
+    if (corpus.includes('견적') || corpus.includes('판매') || corpus.includes('영업')) {
       return 'SALES';
     }
-    if (intentName.includes('청구') || intentName.includes('비용') || intentName.includes('재무')) {
+    if (corpus.includes('청구') || corpus.includes('비용') || corpus.includes('재무')) {
       return 'FINANCE';
     }
-    if (intentName.includes('기술') || intentName.includes('사양') || intentName.includes('데모')) {
+    if (corpus.includes('기술') || corpus.includes('사양') || corpus.includes('데모')) {
       return 'PRESALES';
     }
-    if (intentName.includes('프로젝트') || intentName.includes('일정') || intentName.includes('작업')) {
+    if (corpus.includes('프로젝트') || corpus.includes('일정') || corpus.includes('작업')) {
       return 'PM';
     }
-    if (intentName.includes('코드') || intentName.includes('버그') || intentName.includes('빌드')) {
+    if (corpus.includes('코드') || corpus.includes('버그') || corpus.includes('빌드')) {
       return 'ENGINEER';
     }
-    if (intentName.includes('마케팅') || intentName.includes('콘텐츠') || intentName.includes('뉴스레터')) {
+    if (corpus.includes('마케팅') || corpus.includes('콘텐츠') || corpus.includes('뉴스레터')) {
       return 'MARKETING';
     }
-    if (intentName.includes('승인')) {
+    if (corpus.includes('승인')) {
       return 'CEO';
     }
 

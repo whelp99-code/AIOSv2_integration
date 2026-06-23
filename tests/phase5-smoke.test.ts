@@ -1,4 +1,4 @@
-import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 import type { AddressInfo } from "node:net";
 import { createServer, type Server } from "node:http";
 import { mkdtemp, mkdir, rm } from "node:fs/promises";
@@ -59,6 +59,11 @@ afterAll(async () => {
       });
     });
   }
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.useRealTimers();
 });
 
 describe("Phase 5: AIOS v1 customers proxy smoke", () => {

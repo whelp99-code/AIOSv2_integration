@@ -11,6 +11,7 @@ export {
 export {
   PersonaRouter,
   type RoutingMessage,
+  type ConsumedRoutingMessage,
   type PersonaRouterConfig,
 } from './router/router';
 

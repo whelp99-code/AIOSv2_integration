@@ -1,18 +1,22 @@
-import { NextResponse } from 'next/server';
-import { readFile } from 'fs/promises';
-import { join } from 'path';
+import { getAiosV1Url } from '../../../lib/integrations/upstream-urls';
+import {
+  proxyUpstreamJson,
+  upstreamErrorResponse,
+  upstreamProxyResponse,
+} from '../../../lib/integrations/upstream-proxy';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const dataPath = join(process.cwd(), 'src/data/customers.json');
-    const raw = await readFile(dataPath, 'utf-8');
-    const customers = JSON.parse(raw);
-    return NextResponse.json({ customers, total: customers.length });
+    const url = new URL(request.url);
+    const path = `/api/customers${url.search}`;
+
+    const result = await proxyUpstreamJson<unknown[]>({
+      baseUrl: getAiosV1Url(),
+      path,
+    });
+
+    return upstreamProxyResponse(result);
   } catch (error) {
-    console.error('Customers API error:', error);
-    return NextResponse.json(
-      { customers: [], total: 0, error: '데이터를 불러올 수 없습니다.' },
-      { status: 500 }
-    );
+    return upstreamErrorResponse('Proxy error', error, 502);
   }
 }

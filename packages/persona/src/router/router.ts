@@ -17,6 +17,11 @@ export interface RoutingMessage {
   correlationId: string;
 }
 
+/** consume() 결과 — Redis Stream 메시지 ID 포함 */
+export interface ConsumedRoutingMessage extends RoutingMessage {
+  streamMessageId: string;
+}
+
 // 라우터 설정
 export interface PersonaRouterConfig {
   redisUrl?: string;
@@ -87,7 +92,7 @@ export class PersonaRouter {
   /**
    * 메시지 수신 (Consumer Group 사용)
    */
-  async consume(count: number = 10, blockMs: number = 5000): Promise<RoutingMessage[]> {
+  async consume(count: number = 10, blockMs: number = 5000): Promise<ConsumedRoutingMessage[]> {
     const results = await this.redis.xreadgroup(
       'GROUP', this.consumerGroup, this.consumerName,
       'COUNT', count,
@@ -99,13 +104,17 @@ export class PersonaRouter {
       return [];
     }
 
-    const messages: RoutingMessage[] = [];
-    for (const [, streams] of results as any) {
-      for (const [, fields] of streams) {
-        const data = fields[1]; // data 필드
+    const messages: ConsumedRoutingMessage[] = [];
+    for (const [, streams] of results as [string, [string, string[]][]][]) {
+      for (const [streamMessageId, fields] of streams) {
+        const dataIndex = fields.indexOf('data');
+        const data = dataIndex >= 0 ? fields[dataIndex + 1] : undefined;
         if (data) {
           try {
-            messages.push(JSON.parse(data));
+            messages.push({
+              ...JSON.parse(data) as RoutingMessage,
+              streamMessageId,
+            });
           } catch (e) {
             console.error('[PersonaRouter] Failed to parse message:', e);
           }
