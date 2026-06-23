@@ -153,6 +153,63 @@ export class MailClassifier {
       },
       confidence: 0.8,
     });
+    // 엔지니어 관련 규칙
+    this.addRule({
+      name: 'engineer-code-review',
+      category: 'ENGINEER',
+      match: (mail) => {
+        const codeKeywords = ['코드', 'code', '리뷰', 'review', 'PR', 'pull request', 'merge', 'commit'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return codeKeywords.some(kw => text.includes(kw));
+      },
+      confidence: 0.8,
+    });
+
+    this.addRule({
+      name: 'engineer-bug-fix',
+      category: 'ENGINEER',
+      match: (mail) => {
+        const bugKeywords = ['버그', 'bug', '오류', 'error', '수정', 'fix', '패치', 'patch'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return bugKeywords.some(kw => text.includes(kw));
+      },
+      confidence: 0.85,
+    });
+
+    this.addRule({
+      name: 'engineer-build-deploy',
+      category: 'ENGINEER',
+      match: (mail) => {
+        const buildKeywords = ['빌드', 'build', '배포', 'deploy', 'CI/CD', 'pipeline', '인프라', 'infra'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return buildKeywords.some(kw => text.includes(kw));
+      },
+      confidence: 0.8,
+    });
+
+    // 마케팅 관련 규칙 (강화)
+    this.addRule({
+      name: 'marketing-newsletter',
+      category: 'MARKETING',
+      match: (mail) => {
+        const newsletterKeywords = ['뉴스레터', 'newsletter', '메일링', 'mailing', '구독', 'subscribe'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return newsletterKeywords.some(kw => text.includes(kw));
+      },
+      confidence: 0.85,
+    });
+
+    this.addRule({
+      name: 'marketing-brand',
+      category: 'MARKETING',
+      match: (mail) => {
+        const brandKeywords = ['브랜드', 'brand', '로고', 'logo', '디자인', 'design', '가이드라인', 'guideline'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return brandKeywords.some(kw => text.includes(kw));
+      },
+      confidence: 0.8,
+    });
+
 
     // 영업 관련 규칙
     this.addRule({

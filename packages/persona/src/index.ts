@@ -14,6 +14,15 @@ export {
   type PersonaRouterConfig,
 } from './router/router';
 
+// Action Router
+export {
+  ActionRouter,
+  type ActionItem,
+  type ActionResult,
+  type ActionStatus,
+  type ActionRouterConfig,
+} from './router/action-router';
+
 // Work Support Persona
 export {
   WorkSupportPersona,
@@ -57,11 +66,40 @@ export {
   type PMResult,
 } from './personas/pm';
 
+// Engineer Persona
+export {
+  EngineerPersona,
+  type CodeReview,
+  type TechTask,
+  type SystemBuild,
+  type EngineerResult,
+} from './personas/engineer';
+
+// Marketing Persona
+export {
+  MarketingPersona,
+  type ContentPlan,
+  type Newsletter,
+  type BrandAsset,
+  type MarketingResult,
+} from './personas/marketing';
+
+// Approval Gate
+export {
+  ApprovalGate,
+  type ApprovalRequest,
+  type ApprovalStatus,
+  type AuditLog,
+  type ApprovalPolicy,
+  type ApprovalGateResult,
+} from './approval/gate';
+
 // Briefing Engine
 export {
   BriefingEngine,
   type DailyBriefing,
   type BriefingSummary,
-  type ActionItem,
-  type BriefingStats,
+  type BriefingItem as BriefingEngineItem,
+  type CEOBriefingItem,
+  type PersonaStats,
 } from './briefing/engine';
