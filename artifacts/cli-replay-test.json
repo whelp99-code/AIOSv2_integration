@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 1,
+  "kind": "cli-replay",
+  "replaySafe": true,
+  "command": ["npx", "vitest", "run", "tests/unit/mail-classifier.test.ts"],
+  "recordedStdout": " RUN  v3.2.6 /Users/jmpark/Playground/AIOSv2_integration\n\n\n Test Files  1 passed (1)\n      Tests  7 passed (7)\n   Start at  01:20:39\n   Duration  213ms"
+}
