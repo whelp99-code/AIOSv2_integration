@@ -124,6 +124,38 @@ describe('WaveEStore', () => {
     expect(store.getConfigValue('app-config', 'lang')).toBe('ko');
     expect(store.getConfigValue('app-config', 'newKey')).toBeNull();
   });
+
+  it('clear() resets all collections including config snapshots', () => {
+    const store = new WaveEStore();
+    store.createConfigProfile('app-config');
+    store.setConfigValue('app-config', 'theme', 'light');
+    store.snapshotConfig('app-config');
+    store.setConfigValue('app-config', 'theme', 'dark');
+
+    store.clear();
+    expect(store.modules).toHaveLength(0);
+    expect(store.configProfiles).toHaveLength(0);
+    expect(store.rollbackConfig('app-config')).toBe(false);
+  });
+
+  it('upserts modules, blocks, and connectors by key', () => {
+    const store = new WaveEStore();
+    store.registerModule('mail', 'Old Name', '0.1.0');
+    store.registerModule('mail', 'New Name', '2.0.0', ['dep-a']);
+    expect(store.modules).toHaveLength(1);
+    expect(store.modules[0].displayName).toBe('New Name');
+    expect(store.modules[0].version).toBe('2.0.0');
+
+    store.registerBlock('b1', 'mail', 'Block v1');
+    store.registerBlock('b1', 'mail', 'Block v2', { enabled: true });
+    expect(store.blocks).toHaveLength(1);
+    expect(store.blocks[0].displayName).toBe('Block v2');
+
+    store.registerConnector('outlook', 'Old Outlook', 'mail');
+    store.registerConnector('outlook', 'Microsoft Outlook', 'mail');
+    expect(store.connectors).toHaveLength(1);
+    expect(store.connectors[0].displayName).toBe('Microsoft Outlook');
+  });
 });
 
 // ── PortalEngine ──────────────────────────────────────────────────────
@@ -261,5 +293,51 @@ describe('PortalEngine', () => {
     expect(s.blocks).toBe(1);
     expect(s.configProfiles).toBe(1);
     expect(s.configValues).toBe(1);
+  });
+
+  it('composePage replaces stale slots on re-compose', () => {
+    const store = new WaveEStore();
+    const engine = new PortalEngine(store);
+
+    engine.registerModule({
+      moduleKey: 'dashboard',
+      displayName: 'Dashboard',
+      blocks: [
+        { blockKey: 'nav', displayName: 'Navigation' },
+        { blockKey: 'mail-list', displayName: 'Mail List' },
+      ],
+    });
+
+    engine.composePage({
+      pageKey: 'main-dashboard',
+      title: 'Main Dashboard',
+      slots: [
+        { slotKey: 'header', blockKey: 'nav', sortOrder: 0 },
+        { slotKey: 'content', blockKey: 'mail-list', sortOrder: 1 },
+      ],
+    });
+
+    engine.composePage({
+      pageKey: 'main-dashboard',
+      title: 'Main Dashboard',
+      slots: [{ slotKey: 'header', blockKey: 'nav', sortOrder: 0 }],
+    });
+
+    expect(engine.readPage('main-dashboard')).toHaveLength(1);
+  });
+
+  it('applyConfigChange returns success=false for missing profile', () => {
+    const store = new WaveEStore();
+    const engine = new PortalEngine(store);
+
+    const result = engine.applyConfigChange({
+      profileKey: 'missing',
+      key: 'threshold',
+      value: 0.7,
+      reason: 'initial',
+    });
+
+    expect(result.success).toBe(false);
+    expect(result.previousValue).toBeNull();
   });
 });

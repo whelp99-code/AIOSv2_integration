@@ -59,13 +59,10 @@ export class PortalEngine {
    * Compose a portal page by mapping blocks to layout slots.
    */
   composePage(config: PortalPageConfig): ReturnType<WaveEStore['getLayoutSlots']> {
+    this.store.removeLayoutSlotsNotIn(config.pageKey, config.slots.map(s => s.slotKey));
     for (const slot of config.slots) {
-      this.store.setLayoutSlot(config.pageKey, slot.slotKey, slot.sortOrder, undefined);
-      // Find block by key and link
-      const block = this.store.blocks.find(b => b.blockKey === slot.blockKey);
-      if (block) {
-        this.store.setLayoutSlot(config.pageKey, slot.slotKey, slot.sortOrder, block.id);
-      }
+      const block = this.store.getBlockByKey(slot.blockKey);
+      this.store.setLayoutSlot(config.pageKey, slot.slotKey, slot.sortOrder, block?.id);
     }
     return this.store.getLayoutSlots(config.pageKey);
   }
@@ -92,6 +89,10 @@ export class PortalEngine {
    * Apply a config change. Supports snapshot before change for rollback.
    */
   applyConfigChange(change: ConfigChange): { success: boolean; previousValue: unknown } {
+    const profileExists = this.store.configProfiles.some(p => p.key === change.profileKey);
+    if (!profileExists) {
+      return { success: false, previousValue: null };
+    }
     const previousValue = this.store.getConfigValue(change.profileKey, change.key);
     this.store.setConfigValue(change.profileKey, change.key, change.value);
     return { success: true, previousValue };

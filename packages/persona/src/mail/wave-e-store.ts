@@ -83,7 +83,12 @@ export class WaveEStore {
 
   registerModule(moduleKey: string, displayName: string, version: string = '0.1.0', dependencies: string[] = []): ModuleRegistryRecord {
     const existing = this.modules.find(m => m.moduleKey === moduleKey);
-    if (existing) { existing.version = version; existing.dependencies = dependencies; return existing; }
+    if (existing) {
+      existing.displayName = displayName;
+      existing.version = version;
+      existing.dependencies = dependencies;
+      return existing;
+    }
     const r: ModuleRegistryRecord = { id: genId('mod'), moduleKey, displayName, version, dependencies, status: 'active', createdAt: new Date().toISOString() };
     this.modules.push(r); return r;
   }
@@ -92,8 +97,20 @@ export class WaveEStore {
   // ── Block Registry ─────────────────────────────────────────────
 
   registerBlock(blockKey: string, moduleKey: string, displayName: string, config?: Record<string, unknown>): BlockRegistryRecord {
+    const existing = this.blocks.find(b => b.blockKey === blockKey && b.moduleKey === moduleKey);
+    if (existing) {
+      existing.displayName = displayName;
+      existing.configJson = config ?? null;
+      return existing;
+    }
     const r: BlockRegistryRecord = { id: genId('blk'), blockKey, moduleKey, displayName, configJson: config ?? null, createdAt: new Date().toISOString() };
     this.blocks.push(r); return r;
+  }
+  getBlockByKey(blockKey: string): BlockRegistryRecord | null {
+    for (let i = this.blocks.length - 1; i >= 0; i--) {
+      if (this.blocks[i].blockKey === blockKey) return this.blocks[i];
+    }
+    return null;
   }
   getBlocksByModule(moduleKey: string): BlockRegistryRecord[] { return this.blocks.filter(b => b.moduleKey === moduleKey); }
 
@@ -107,6 +124,15 @@ export class WaveEStore {
   }
   getLayoutSlots(pageKey: string): LayoutSlotRecord[] {
     return this.layoutSlots.filter(s => s.pageKey === pageKey).sort((a, b) => a.sortOrder - b.sortOrder);
+  }
+  removeLayoutSlotsNotIn(pageKey: string, slotKeys: string[]): void {
+    const keep = new Set(slotKeys);
+    for (let i = this.layoutSlots.length - 1; i >= 0; i--) {
+      const slot = this.layoutSlots[i];
+      if (slot.pageKey === pageKey && !keep.has(slot.slotKey)) {
+        this.layoutSlots.splice(i, 1);
+      }
+    }
   }
 
   // ── Node Registry ──────────────────────────────────────────────
@@ -126,6 +152,12 @@ export class WaveEStore {
   // ── Connector Registry ─────────────────────────────────────────
 
   registerConnector(connectorKey: string, displayName: string, connectorType: string): ConnectorRegistryRecord {
+    const existing = this.connectors.find(c => c.connectorKey === connectorKey);
+    if (existing) {
+      existing.displayName = displayName;
+      existing.connectorType = connectorType;
+      return existing;
+    }
     const r: ConnectorRegistryRecord = { id: genId('conn'), connectorKey, displayName, connectorType, status: 'active', healthStatus: 'unknown', lastCheckedAt: null, createdAt: new Date().toISOString() };
     this.connectors.push(r); return r;
   }
@@ -255,7 +287,7 @@ export class WaveEStore {
   clear(): void {
     for (const key of Object.keys(this) as Array<keyof WaveEStore>) {
       if (Array.isArray(this[key])) (this[key] as unknown[]).length = 0;
-      if (key === 'configSnapshots') (this[key] as Map<string, unknown>).clear();
     }
+    this.configSnapshots.clear();
   }
 }
