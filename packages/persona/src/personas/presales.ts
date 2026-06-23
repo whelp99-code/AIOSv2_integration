@@ -68,14 +68,21 @@ export class PresalesPersona {
       design = this.designSolution(review, mail);
     }
 
-    // 3. 기술 답변 초안
-    const response = this.draftResponse(mail, review, design);
+    // 3. 기술 답변 초안 (솔루션 설계가 있는 경우에만)
+    let response: TechResponse | null = null;
+    if (design) {
+      response = this.draftResponse(mail, review, design);
+    }
 
-    // 4. 액션 결정
-    let action: PresalesResult['action'] = 'NO_ACTION';
-    if (response) action = 'RESPONSE_DRAFTED';
-    else if (design) action = 'SOLUTION_DESIGNED';
-    else if (review) action = 'TECH_REVIEWED';
+    // 4. 액션 결정 — 파이프라인 단계별로 가장 높은 완료 단계 반영
+    let action: PresalesResult['action'];
+    if (response) {
+      action = 'RESPONSE_DRAFTED';
+    } else if (design) {
+      action = 'SOLUTION_DESIGNED';
+    } else {
+      action = 'TECH_REVIEWED';
+    }
 
     return {
       mailId: mail.id,

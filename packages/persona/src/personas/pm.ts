@@ -141,7 +141,7 @@ export class PMPersona {
       project,
       task: null,
       updates,
-      action: 'STATUS_UPDATED',
+      action: updates.length > 0 ? 'STATUS_UPDATED' : 'NO_ACTION',
       timestamp: new Date().toISOString(),
     };
   }
@@ -172,7 +172,7 @@ export class PMPersona {
       project,
       task: null,
       updates,
-      action: 'SCHEDULE_UPDATED',
+      action: updates.length > 0 ? 'SCHEDULE_UPDATED' : 'NO_ACTION',
       timestamp: new Date().toISOString(),
     };
   }

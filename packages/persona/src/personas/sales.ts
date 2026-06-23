@@ -109,6 +109,17 @@ export class SalesPersona {
   }
 
   /**
+   * 이메일 주소에서 도메인 추출
+   */
+  private extractEmailDomain(email: string): string | null {
+    const parts = email.toLowerCase().trim().split('@');
+    if (parts.length !== 2 || !parts[0] || !parts[1]) {
+      return null;
+    }
+    return parts[1];
+  }
+
+  /**
    * 고객 매칭
    */
   private matchCustomer(mail: MailItem): Customer | null {
@@ -119,11 +130,15 @@ export class SalesPersona {
       return customer;
     }
 
-    // 도메인 기반 검색
-    for (const [, customer] of this.customers) {
-      if (mail.from.toLowerCase().includes(customer.email.split('@')[1])) {
-        console.log(`[Sales] Customer matched by domain: ${customer.name}`);
-        return customer;
+    // 도메인 기반 검색 (정확한 도메인 일치)
+    const fromDomain = this.extractEmailDomain(mail.from);
+    if (fromDomain) {
+      for (const [, customer] of this.customers) {
+        const customerDomain = this.extractEmailDomain(customer.email);
+        if (customerDomain && fromDomain === customerDomain) {
+          console.log(`[Sales] Customer matched by domain: ${customer.name}`);
+          return customer;
+        }
       }
     }
 
