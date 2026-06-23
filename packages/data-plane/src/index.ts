@@ -27,3 +27,10 @@ export {
   type DataPlaneHooks,
   type GoldCompleteItem,
 } from './hooks';
+// Persona Pipeline integration
+export {
+  PersonaPipeline,
+  type IngestionItem,
+  type PipelineResult,
+  type PersonaClassification,
+} from './integration/persona-pipeline';

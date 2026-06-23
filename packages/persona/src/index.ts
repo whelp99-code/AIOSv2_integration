@@ -103,3 +103,17 @@ export {
   type CEOBriefingItem,
   type PersonaStats,
 } from './briefing/engine';
+// Voice Command
+export {
+  VoiceCommandProcessor,
+  type VoiceCommand,
+  type VoiceIntent,
+  type VoiceEntity,
+  type VoiceCommandResult,
+  type VoiceConfig,
+  type STTResult,
+  type TTSRequest,
+  type TTSResult,
+  type ISTTProvider,
+  type ITTSProvider,
+} from './voice/index';
