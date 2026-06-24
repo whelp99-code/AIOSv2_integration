@@ -1,6 +1,6 @@
 {
   "meta": {
-    "generatedAt": "2026-06-23T11:25:53.014Z",
+    "generatedAt": "2026-06-23T15:48:37.395Z",
     "classifierVersion": "rule-baseline-v1",
     "goldenDatasetVersion": "classification-golden-v1",
     "totalSamples": 500,
@@ -8,120 +8,105 @@
     "promptDevSamples": 0
   },
   "overall": {
-    "accuracy": 0.616,
-    "macroPrecision": 0.6593007902503103,
-    "macroRecall": 0.6103571428571429,
-    "macroF1": 0.6185802619193601,
-    "weightedF1": 0.6179596551604777
+    "accuracy": 0.7,
+    "macroPrecision": 0.7459179101775866,
+    "macroRecall": 0.6998809523809524,
+    "macroF1": 0.703567939748939,
+    "weightedF1": 0.6981921147698541
   },
   "perCategory": {
     "WORK_SUPPORT": {
-      "precision": 0.4606741573033708,
-      "recall": 0.5857142857142857,
-      "f1": 0.5157232704402516,
+      "precision": 0.5909090909090909,
+      "recall": 0.7428571428571429,
+      "f1": 0.6582278481012659,
       "support": 70,
-      "truePositives": 41,
-      "falsePositives": 48,
-      "falseNegatives": 29
+      "truePositives": 52,
+      "falsePositives": 36,
+      "falseNegatives": 18
     },
     "SALES": {
-      "precision": 0.6363636363636364,
-      "recall": 0.6,
-      "f1": 0.6176470588235293,
+      "precision": 0.75,
+      "recall": 0.42857142857142855,
+      "f1": 0.5454545454545454,
       "support": 70,
-      "truePositives": 42,
-      "falsePositives": 24,
-      "falseNegatives": 28
+      "truePositives": 30,
+      "falsePositives": 10,
+      "falseNegatives": 40
     },
     "PRESALES": {
-      "precision": 0.7017543859649122,
-      "recall": 0.6666666666666666,
-      "f1": 0.6837606837606838,
+      "precision": 0.6493506493506493,
+      "recall": 0.8333333333333334,
+      "f1": 0.72992700729927,
       "support": 60,
-      "truePositives": 40,
-      "falsePositives": 17,
-      "falseNegatives": 20
+      "truePositives": 50,
+      "falsePositives": 27,
+      "falseNegatives": 10
     },
     "ENGINEER": {
-      "precision": 0.6235294117647059,
-      "recall": 0.7571428571428571,
-      "f1": 0.6838709677419355,
+      "precision": 0.6274509803921569,
+      "recall": 0.9142857142857143,
+      "f1": 0.7441860465116279,
       "support": 70,
-      "truePositives": 53,
-      "falsePositives": 32,
-      "falseNegatives": 17
+      "truePositives": 64,
+      "falsePositives": 38,
+      "falseNegatives": 6
     },
     "PM": {
-      "precision": 0.49295774647887325,
+      "precision": 0.5737704918032787,
       "recall": 0.5833333333333334,
-      "f1": 0.534351145038168,
+      "f1": 0.5785123966942148,
       "support": 60,
       "truePositives": 35,
-      "falsePositives": 36,
+      "falsePositives": 26,
       "falseNegatives": 25
     },
     "FINANCE": {
-      "precision": 0.8035714285714286,
-      "recall": 0.75,
-      "f1": 0.7758620689655172,
+      "precision": 1,
+      "recall": 0.6666666666666666,
+      "f1": 0.8,
       "support": 60,
-      "truePositives": 45,
-      "falsePositives": 11,
-      "falseNegatives": 15
+      "truePositives": 40,
+      "falsePositives": 0,
+      "falseNegatives": 20
     },
     "MARKETING": {
       "precision": 1,
-      "recall": 0.44,
-      "f1": 0.6111111111111112,
+      "recall": 0.68,
+      "f1": 0.8095238095238095,
       "support": 50,
-      "truePositives": 22,
+      "truePositives": 34,
       "falsePositives": 0,
-      "falseNegatives": 28
+      "falseNegatives": 16
     },
     "CEO": {
-      "precision": 0.5555555555555556,
-      "recall": 0.5,
-      "f1": 0.5263157894736842,
+      "precision": 0.7758620689655172,
+      "recall": 0.75,
+      "f1": 0.7627118644067795,
       "support": 60,
-      "truePositives": 30,
-      "falsePositives": 24,
-      "falseNegatives": 30
+      "truePositives": 45,
+      "falsePositives": 13,
+      "falseNegatives": 15
     }
   },
   "confusionMatrix": [
     {
+      "actual": "SALES",
+      "predicted": "PRESALES",
+      "count": 18
+    },
+    {
       "actual": "WORK_SUPPORT",
       "predicted": "ENGINEER",
       "count": 12
     },
     {
-      "actual": "WORK_SUPPORT",
-      "predicted": "PM",
-      "count": 12
-    },
-    {
       "actual": "SALES",
-      "predicted": "PRESALES",
-      "count": 12
-    },
-    {
-      "actual": "MARKETING",
-      "predicted": "WORK_SUPPORT",
-      "count": 12
-    },
-    {
-      "actual": "SALES",
-      "predicted": "WORK_SUPPORT",
+      "predicted": "ENGINEER",
       "count": 11
     },
     {
       "actual": "PRESALES",
-      "predicted": "WORK_SUPPORT",
-      "count": 10
-    },
-    {
-      "actual": "PRESALES",
-      "predicted": "SALES",
+      "predicted": "PM",
       "count": 10
     },
     {
@@ -130,47 +115,47 @@
       "count": 10
     },
     {
-      "actual": "FINANCE",
-      "predicted": "CEO",
-      "count": 10
-    },
-    {
-      "actual": "CEO",
+      "actual": "PM",
       "predicted": "ENGINEER",
       "count": 10
     },
     {
+      "actual": "FINANCE",
+      "predicted": "WORK_SUPPORT",
+      "count": 10
+    },
+    {
+      "actual": "FINANCE",
+      "predicted": "SALES",
+      "count": 10
+    },
+    {
       "actual": "CEO",
-      "predicted": "PM",
+      "predicted": "WORK_SUPPORT",
       "count": 10
     },
     {
       "actual": "MARKETING",
-      "predicted": "PM",
+      "predicted": "CEO",
       "count": 8
     },
     {
+      "actual": "WORK_SUPPORT",
+      "predicted": "PM",
+      "count": 6
+    },
+    {
+      "actual": "SALES",
+      "predicted": "WORK_SUPPORT",
+      "count": 6
+    },
+    {
       "actual": "ENGINEER",
       "predicted": "PM",
       "count": 6
     },
     {
-      "actual": "ENGINEER",
-      "predicted": "FINANCE",
-      "count": 6
-    },
-    {
-      "actual": "WORK_SUPPORT",
-      "predicted": "FINANCE",
-      "count": 5
-    },
-    {
       "actual": "SALES",
-      "predicted": "ENGINEER",
-      "count": 5
-    },
-    {
-      "actual": "ENGINEER",
       "predicted": "CEO",
       "count": 5
     },
@@ -180,54 +165,27 @@
       "count": 5
     },
     {
-      "actual": "PM",
+      "actual": "CEO",
       "predicted": "ENGINEER",
       "count": 5
     },
     {
-      "actual": "PM",
-      "predicted": "CEO",
-      "count": 5
-    },
-    {
-      "actual": "FINANCE",
-      "predicted": "SALES",
-      "count": 5
-    },
-    {
-      "actual": "CEO",
-      "predicted": "WORK_SUPPORT",
-      "count": 5
-    },
-    {
-      "actual": "CEO",
-      "predicted": "SALES",
-      "count": 5
-    },
-    {
       "actual": "MARKETING",
-      "predicted": "SALES",
+      "predicted": "PRESALES",
       "count": 4
     },
     {
       "actual": "MARKETING",
-      "predicted": "CEO",
+      "predicted": "PM",
       "count": 4
     }
   ],
   "disagreementCases": [
     {
-      "id": "gm-0407",
-      "predicted": "WORK_SUPPORT",
-      "actual": "MARKETING",
-      "confidence": 0.5,
-      "difficulty": "medium"
-    },
-    {
       "id": "gm-0388",
-      "predicted": "CEO",
+      "predicted": "WORK_SUPPORT",
       "actual": "FINANCE",
-      "confidence": 0.9,
+      "confidence": 0.3,
       "difficulty": "hard",
       "conflictZone": "FINANCE vs CEO payment approval"
     },
@@ -239,6 +197,13 @@
       "difficulty": "easy"
     },
     {
+      "id": "gm-0497",
+      "predicted": "ENGINEER",
+      "actual": "CEO",
+      "confidence": 0.8,
+      "difficulty": "medium"
+    },
+    {
       "id": "gm-0073",
       "predicted": "PRESALES",
       "actual": "SALES",
@@ -247,18 +212,11 @@
     },
     {
       "id": "gm-0325",
-      "predicted": "CEO",
+      "predicted": "ENGINEER",
       "actual": "PM",
-      "confidence": 0.9,
+      "confidence": 0.85,
       "difficulty": "hard",
       "conflictZone": "PM vs ENGINEER triage"
-    },
-    {
-      "id": "gm-0476",
-      "predicted": "ENGINEER",
-      "actual": "CEO",
-      "confidence": 0.85,
-      "difficulty": "medium"
     },
     {
       "id": "gm-0436",
@@ -276,39 +234,12 @@
       "conflictZone": "FINANCE vs SALES contract"
     },
     {
-      "id": "gm-0366",
-      "predicted": "CEO",
-      "actual": "FINANCE",
-      "confidence": 0.9,
-      "difficulty": "medium"
-    },
-    {
-      "id": "gm-0453",
-      "predicted": "SALES",
-      "actual": "CEO",
-      "confidence": 0.9,
-      "difficulty": "easy"
-    },
-    {
-      "id": "gm-0147",
-      "predicted": "WORK_SUPPORT",
-      "actual": "PRESALES",
-      "confidence": 0.5,
-      "difficulty": "medium"
-    },
-    {
-      "id": "gm-0492",
+      "id": "gm-0136",
       "predicted": "ENGINEER",
-      "actual": "CEO",
-      "confidence": 0.85,
-      "difficulty": "medium"
-    },
-    {
-      "id": "gm-0195",
-      "predicted": "WORK_SUPPORT",
-      "actual": "PRESALES",
-      "confidence": 0.5,
-      "difficulty": "medium"
+      "actual": "SALES",
+      "confidence": 0.9,
+      "difficulty": "medium",
+      "conflictZone": "SALES vs PRESALES expansion"
     },
     {
       "id": "gm-0006",
@@ -325,62 +256,25 @@
       "difficulty": "medium"
     },
     {
-      "id": "gm-0001",
-      "predicted": "PM",
-      "actual": "WORK_SUPPORT",
-      "confidence": 0.7,
-      "difficulty": "easy"
-    },
-    {
-      "id": "gm-0047",
-      "predicted": "FINANCE",
-      "actual": "WORK_SUPPORT",
-      "confidence": 0.75,
-      "difficulty": "hard",
-      "conflictZone": "PM vs FINANCE"
-    },
-    {
-      "id": "gm-0161",
-      "predicted": "SALES",
-      "actual": "PRESALES",
+      "id": "gm-0449",
+      "predicted": "ENGINEER",
+      "actual": "CEO",
       "confidence": 0.8,
-      "difficulty": "hard",
-      "conflictZone": "PRESALES vs SALES combined"
-    },
-    {
-      "id": "gm-0049",
-      "predicted": "PM",
-      "actual": "WORK_SUPPORT",
-      "confidence": 0.7,
-      "difficulty": "easy"
-    },
-    {
-      "id": "gm-0160",
-      "predicted": "WORK_SUPPORT",
-      "actual": "PRESALES",
-      "confidence": 0.5,
       "difficulty": "medium"
-    },
-    {
-      "id": "gm-0013",
-      "predicted": "PM",
-      "actual": "WORK_SUPPORT",
-      "confidence": 0.7,
-      "difficulty": "easy"
     },
     {
       "id": "gm-0399",
-      "predicted": "PM",
+      "predicted": "PRESALES",
       "actual": "MARKETING",
-      "confidence": 0.7,
+      "confidence": 0.8,
       "difficulty": "medium"
     },
     {
-      "id": "gm-0317",
-      "predicted": "PRESALES",
-      "actual": "PM",
-      "confidence": 0.75,
-      "difficulty": "easy"
+      "id": "gm-0371",
+      "predicted": "SALES",
+      "actual": "FINANCE",
+      "confidence": 0.85,
+      "difficulty": "medium"
     },
     {
       "id": "gm-0022",
@@ -388,21 +282,6 @@
       "actual": "WORK_SUPPORT",
       "confidence": 0.75,
       "difficulty": "easy"
-    },
-    {
-      "id": "gm-0429",
-      "predicted": "WORK_SUPPORT",
-      "actual": "MARKETING",
-      "confidence": 0.5,
-      "difficulty": "easy"
-    },
-    {
-      "id": "gm-0422",
-      "predicted": "CEO",
-      "actual": "MARKETING",
-      "confidence": 0.9,
-      "difficulty": "hard",
-      "conflictZone": "MARKETING vs FINANCE budget"
     },
     {
       "id": "gm-0328",
@@ -420,18 +299,18 @@
       "difficulty": "medium"
     },
     {
-      "id": "gm-0378",
-      "predicted": "CEO",
+      "id": "gm-0383",
+      "predicted": "SALES",
       "actual": "FINANCE",
-      "confidence": 0.9,
+      "confidence": 0.85,
       "difficulty": "medium"
     },
     {
-      "id": "gm-0293",
-      "predicted": "PRESALES",
-      "actual": "PM",
-      "confidence": 0.75,
-      "difficulty": "easy"
+      "id": "gm-0461",
+      "predicted": "ENGINEER",
+      "actual": "CEO",
+      "confidence": 0.8,
+      "difficulty": "medium"
     },
     {
       "id": "gm-0424",
@@ -457,33 +336,17 @@
       "conflictZone": "SALES vs PRESALES proposal"
     },
     {
-      "id": "gm-0269",
-      "predicted": "FINANCE",
-      "actual": "ENGINEER",
+      "id": "gm-0315",
+      "predicted": "WORK_SUPPORT",
+      "actual": "PM",
       "confidence": 0.8,
-      "difficulty": "hard",
-      "conflictZone": "ENGINEER vs FINANCE infra cost"
-    },
-    {
-      "id": "gm-0236",
-      "predicted": "CEO",
-      "actual": "ENGINEER",
-      "confidence": 0.9,
-      "difficulty": "hard",
-      "conflictZone": "ENGINEER vs FINANCE payment bug"
-    },
-    {
-      "id": "gm-0477",
-      "predicted": "SALES",
-      "actual": "CEO",
-      "confidence": 0.9,
-      "difficulty": "easy"
+      "difficulty": "medium"
     },
     {
       "id": "gm-0330",
-      "predicted": "WORK_SUPPORT",
+      "predicted": "PRESALES",
       "actual": "PM",
-      "confidence": 0.5,
+      "confidence": 0.8,
       "difficulty": "medium"
     },
     {
@@ -494,40 +357,74 @@
       "difficulty": "medium"
     },
     {
-      "id": "gm-0129",
+      "id": "gm-0426",
+      "predicted": "CEO",
+      "actual": "MARKETING",
+      "confidence": 0.95,
+      "difficulty": "medium"
+    },
+    {
+      "id": "gm-0478",
       "predicted": "WORK_SUPPORT",
+      "actual": "CEO",
+      "confidence": 0.85,
+      "difficulty": "easy"
+    },
+    {
+      "id": "gm-0129",
+      "predicted": "CEO",
       "actual": "SALES",
-      "confidence": 0.5,
+      "confidence": 0.95,
       "difficulty": "hard",
       "conflictZone": "SALES vs PM reporting"
     },
     {
-      "id": "gm-0245",
-      "predicted": "FINANCE",
-      "actual": "ENGINEER",
+      "id": "gm-0470",
+      "predicted": "WORK_SUPPORT",
+      "actual": "CEO",
       "confidence": 0.8,
-      "difficulty": "hard",
-      "conflictZone": "ENGINEER vs FINANCE infra cost"
+      "difficulty": "medium"
     },
     {
-      "id": "gm-0405",
+      "id": "gm-0473",
+      "predicted": "ENGINEER",
+      "actual": "CEO",
+      "confidence": 0.8,
+      "difficulty": "medium"
+    },
+    {
+      "id": "gm-0490",
       "predicted": "WORK_SUPPORT",
-      "actual": "MARKETING",
-      "confidence": 0.5,
+      "actual": "CEO",
+      "confidence": 0.85,
       "difficulty": "easy"
     },
     {
-      "id": "gm-0172",
+      "id": "gm-0482",
       "predicted": "WORK_SUPPORT",
-      "actual": "PRESALES",
-      "confidence": 0.5,
+      "actual": "CEO",
+      "confidence": 0.8,
+      "difficulty": "medium"
+    },
+    {
+      "id": "gm-0446",
+      "predicted": "WORK_SUPPORT",
+      "actual": "CEO",
+      "confidence": 0.8,
+      "difficulty": "medium"
+    },
+    {
+      "id": "gm-0372",
+      "predicted": "WORK_SUPPORT",
+      "actual": "FINANCE",
+      "confidence": 0.8,
       "difficulty": "medium"
     },
     {
       "id": "gm-0081",
-      "predicted": "WORK_SUPPORT",
+      "predicted": "CEO",
       "actual": "SALES",
-      "confidence": 0.5,
+      "confidence": 0.95,
       "difficulty": "hard",
       "conflictZone": "SALES vs PM reporting"
     },
@@ -546,17 +443,10 @@
       "difficulty": "easy"
     },
     {
-      "id": "gm-0487",
-      "predicted": "PM",
-      "actual": "CEO",
-      "confidence": 0.7,
-      "difficulty": "easy"
-    },
-    {
       "id": "gm-0090",
       "predicted": "WORK_SUPPORT",
       "actual": "SALES",
-      "confidence": 0.5,
+      "confidence": 0.8,
       "difficulty": "medium"
     },
     {
@@ -578,8 +468,80 @@
       "id": "gm-0126",
       "predicted": "WORK_SUPPORT",
       "actual": "SALES",
-      "confidence": 0.5,
+      "confidence": 0.8,
       "difficulty": "medium"
+    },
+    {
+      "id": "gm-0303",
+      "predicted": "WORK_SUPPORT",
+      "actual": "PM",
+      "confidence": 0.8,
+      "difficulty": "medium"
+    },
+    {
+      "id": "gm-0359",
+      "predicted": "SALES",
+      "actual": "FINANCE",
+      "confidence": 0.85,
+      "difficulty": "medium"
+    },
+    {
+      "id": "gm-0133",
+      "predicted": "PRESALES",
+      "actual": "SALES",
+      "confidence": 0.8,
+      "difficulty": "easy"
+    },
+    {
+      "id": "gm-0193",
+      "predicted": "PM",
+      "actual": "PRESALES",
+      "confidence": 0.9,
+      "difficulty": "medium"
+    },
+    {
+      "id": "gm-0286",
+      "predicted": "WORK_SUPPORT",
+      "actual": "PM",
+      "confidence": 0.3,
+      "difficulty": "medium"
+    },
+    {
+      "id": "gm-0394",
+      "predicted": "CEO",
+      "actual": "MARKETING",
+      "confidence": 0.95,
+      "difficulty": "medium"
+    },
+    {
+      "id": "gm-0088",
+      "predicted": "ENGINEER",
+      "actual": "SALES",
+      "confidence": 0.9,
+      "difficulty": "medium",
+      "conflictZone": "SALES vs PRESALES expansion"
+    },
+    {
+      "id": "gm-0112",
+      "predicted": "ENGINEER",
+      "actual": "SALES",
+      "confidence": 0.9,
+      "difficulty": "medium",
+      "conflictZone": "SALES vs PRESALES expansion"
+    },
+    {
+      "id": "gm-0282",
+      "predicted": "PRESALES",
+      "actual": "PM",
+      "confidence": 0.8,
+      "difficulty": "medium"
+    },
+    {
+      "id": "gm-0116",
+      "predicted": "PRESALES",
+      "actual": "SALES",
+      "confidence": 0.75,
+      "difficulty": "easy"
     }
   ],
   "conflictZoneAnalysis": {
@@ -593,7 +555,7 @@
       "total": 5,
       "correct": 0,
       "accuracy": 0,
-      "mainConfusion": "FINANCE→CEO"
+      "mainConfusion": "FINANCE→WORK_SUPPORT"
     },
     "PRESALES vs SALES presentation": {
       "total": 5,
@@ -605,7 +567,7 @@
       "total": 5,
       "correct": 0,
       "accuracy": 0,
-      "mainConfusion": "PM→CEO"
+      "mainConfusion": "PM→ENGINEER"
     },
     "FINANCE vs SALES contract": {
       "total": 5,
@@ -615,21 +577,21 @@
     },
     "SALES vs PRESALES expansion": {
       "total": 6,
-      "correct": 6,
-      "accuracy": 1,
-      "mainConfusion": "none"
+      "correct": 0,
+      "accuracy": 0,
+      "mainConfusion": "SALES→ENGINEER"
     },
     "PM vs FINANCE": {
       "total": 5,
-      "correct": 0,
-      "accuracy": 0,
-      "mainConfusion": "WORK_SUPPORT→FINANCE"
+      "correct": 5,
+      "accuracy": 1,
+      "mainConfusion": "none"
     },
     "PRESALES vs SALES combined": {
       "total": 5,
-      "correct": 0,
-      "accuracy": 0,
-      "mainConfusion": "PRESALES→SALES"
+      "correct": 5,
+      "accuracy": 1,
+      "mainConfusion": "none"
     },
     "PM boundary": {
       "total": 6,
@@ -639,9 +601,9 @@
     },
     "MARKETING vs FINANCE budget": {
       "total": 4,
-      "correct": 0,
-      "accuracy": 0,
-      "mainConfusion": "MARKETING→CEO"
+      "correct": 4,
+      "accuracy": 1,
+      "mainConfusion": "none"
     },
     "PM vs FINANCE meeting": {
       "total": 5,
@@ -657,15 +619,15 @@
     },
     "ENGINEER vs FINANCE infra cost": {
       "total": 6,
-      "correct": 0,
-      "accuracy": 0,
-      "mainConfusion": "ENGINEER→FINANCE"
+      "correct": 6,
+      "accuracy": 1,
+      "mainConfusion": "none"
     },
     "ENGINEER vs FINANCE payment bug": {
       "total": 5,
-      "correct": 0,
-      "accuracy": 0,
-      "mainConfusion": "ENGINEER→CEO"
+      "correct": 5,
+      "accuracy": 1,
+      "mainConfusion": "none"
     },
     "PRESALES vs SALES competitive": {
       "total": 5,
@@ -683,7 +645,7 @@
       "total": 5,
       "correct": 0,
       "accuracy": 0,
-      "mainConfusion": "SALES→WORK_SUPPORT"
+      "mainConfusion": "SALES→CEO"
     },
     "PM vs ENGINEER release": {
       "total": 5,
@@ -705,62 +667,62 @@
     },
     "CEO vs SALES customer issue": {
       "total": 5,
-      "correct": 0,
-      "accuracy": 0,
-      "mainConfusion": "CEO→WORK_SUPPORT"
+      "correct": 5,
+      "accuracy": 1,
+      "mainConfusion": "none"
     },
     "MARKETING vs spam": {
       "total": 4,
-      "correct": 0,
-      "accuracy": 0,
-      "mainConfusion": "MARKETING→SALES"
+      "correct": 4,
+      "accuracy": 1,
+      "mainConfusion": "none"
     }
   },
   "errorBreakdown": {
     "byDifficulty": {
       "easy": {
         "total": 177,
-        "errors": 52,
-        "accuracy": 0.7062146892655368
+        "errors": 28,
+        "accuracy": 0.8418079096045198
       },
       "medium": {
         "total": 243,
-        "errors": 76,
-        "accuracy": 0.6872427983539094
+        "errors": 92,
+        "accuracy": 0.6213991769547325
       },
       "hard": {
         "total": 80,
-        "errors": 64,
-        "accuracy": 0.2
+        "errors": 30,
+        "accuracy": 0.625
       }
     },
     "byLanguage": {
       "ko": {
         "total": 367,
-        "errors": 139,
-        "accuracy": 0.6212534059945504
+        "errors": 90,
+        "accuracy": 0.7547683923705722
       },
       "en": {
         "total": 98,
-        "errors": 40,
-        "accuracy": 0.5918367346938775
+        "errors": 51,
+        "accuracy": 0.47959183673469385
       },
       "mixed": {
         "total": 35,
-        "errors": 13,
-        "accuracy": 0.6285714285714286
+        "errors": 9,
+        "accuracy": 0.7428571428571429
       }
     },
     "byAmbiguity": {
       "ambiguous": {
         "total": 113,
-        "errors": 64,
-        "accuracy": 0.4336283185840708
+        "errors": 36,
+        "accuracy": 0.6814159292035398
       },
       "clear": {
         "total": 387,
-        "errors": 128,
-        "accuracy": 0.6692506459948321
+        "errors": 114,
+        "accuracy": 0.7054263565891473
       }
     }
   }

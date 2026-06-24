@@ -75,6 +75,18 @@ export class MailClassifier {
     });
 
     this.addRule({
+      name: 'sales-deal',
+      category: 'SALES',
+      match: (mail) => {
+        const dealKeywords = ['매출', '거래처', '영업실적', '매출목표', '수주', '거래', '구매의향', '발주', '주문', '납품'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return dealKeywords.some(kw => text.includes(kw));
+      },
+      confidence: 0.85,
+    });
+
+
+    this.addRule({
       name: 'sales-negotiation',
       category: 'SALES',
       match: (mail) => {
@@ -121,6 +133,29 @@ export class MailClassifier {
     });
 
     this.addRule({
+      name: 'presales-rfp',
+      category: 'PRESALES',
+      match: (mail) => {
+        const rfpKeywords = ['RFP', 'RFI', '고객사', '고객', 'customer', '사전검증', '적합성', '평가', '비교표', 'comparison', 'matrix', '매핑'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return rfpKeywords.some(kw => text.includes(kw));
+      },
+      confidence: 0.8,
+    });
+
+    this.addRule({
+      name: 'presales-environment',
+      category: 'PRESALES',
+      match: (mail) => {
+        const envKeywords = ['테스트환경', 'sandbox', '테스트 환경', '환경 설정', 'integration test', '검증환경'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return envKeywords.some(kw => text.includes(kw));
+      },
+      confidence: 0.75,
+    });
+
+
+    this.addRule({
       name: 'presales-solution',
       category: 'PRESALES',
       match: (mail) => {
@@ -153,6 +188,29 @@ export class MailClassifier {
       },
       confidence: 0.8,
     });
+
+    this.addRule({
+      name: 'pm-planning',
+      category: 'PM',
+      match: (mail) => {
+        const pmPlanKeywords = ['스프린트', 'sprint', '스토리', 'story', '백로그', 'backlog', '우선순위', 'priority', '칸반', 'kanban', 'WBS', '산출물', 'deliverable', '요구사항', 'requirement'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return pmPlanKeywords.some(kw => text.includes(kw));
+      },
+      confidence: 0.9,
+    });
+
+    this.addRule({
+      name: 'pm-status',
+      category: 'PM',
+      match: (mail) => {
+        const pmStatusKeywords = ['진행상황', '상태보고', '주간보고', '일일보고', 'standup', '회고', 'retrospective', '데모데이', 'planning poker'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return pmStatusKeywords.some(kw => text.includes(kw));
+      },
+      confidence: 0.85,
+    });
+
     // 엔지니어 관련 규칙
     this.addRule({
       name: 'engineer-code-review',
@@ -186,6 +244,18 @@ export class MailClassifier {
       },
       confidence: 0.8,
     });
+
+    this.addRule({
+      name: 'engineer-infra',
+      category: 'ENGINEER',
+      match: (mail) => {
+        const infraKeywords = ['컴파일', 'compile', '디버그', 'debug', '테스트케이스', 'testcase', 'API', 'DB', '서버', 'server', '클라이언트', 'client', '캐시', 'cache', '로드밸런서', 'loadbalancer', '쿠버네티스', 'kubernetes', '도커', 'docker'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return infraKeywords.some(kw => text.includes(kw));
+      },
+      confidence: 0.9,
+    });
+
 
     // 마케팅 관련 규칙 (강화)
     this.addRule({
@@ -284,25 +354,84 @@ export class MailClassifier {
       confidence: 0.75,
     });
 
+    this.addRule({
+      name: 'marketing-campaign',
+      category: 'MARKETING',
+      match: (mail) => {
+        const campaignKeywords = ['캠페인', 'campaign', 'SNS', '소셜', 'social', '광고', 'advertising', '프로모션', 'promotion', '타겟팅', 'targeting', '퍼널', 'funnel', '전환율', 'conversion'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return campaignKeywords.some(kw => text.includes(kw));
+      },
+      confidence: 0.85,
+    });
+
+
     // CEO 관련 규칙 (승인 필요)
     this.addRule({
       name: 'ceo-approval',
       category: 'CEO',
       match: (mail) => {
-        const ceoKeywords = ['승인', 'approval', '결제', 'payment', '긴급', 'urgent'];
+        const ceoKeywords = ['대표결제', '긴급지시', '긴급결제', '경영방침', '대표이사지시'];
         const subject = mail.subject.toLowerCase();
         return ceoKeywords.some(kw => subject.includes(kw));
       },
       confidence: 0.9,
     });
 
-    // 업무지원 (기본값)
+    this.addRule({
+      name: 'ceo-directive',
+      category: 'CEO',
+      match: (mail) => {
+        const ceoDirectiveKeywords = ['대표이사', 'CEO', '경영진', '경영', '전사적', '전사', '전략적', '전략', '긴급지시', '긴급결제', '이사회', 'board', '경영방침', '비전', 'vision'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return ceoDirectiveKeywords.some(kw => text.includes(kw));
+      },
+      confidence: 0.95,
+    });
+
+    this.addRule({
+      name: 'ceo-report',
+      category: 'CEO',
+      match: (mail) => {
+        const ceoReportKeywords = ['대표님', '사장님', '임원', 'executive', '경영보고', '사업보고', '실적보고', '분기보고'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return ceoReportKeywords.some(kw => text.includes(kw));
+      },
+      confidence: 0.9,
+    });
+
+
+    // WORK_SUPPORT 고유 규칙 (catch-all 대신 명시적 키워드 매칭)
+    this.addRule({
+      name: 'work-support-request',
+      category: 'WORK_SUPPORT',
+      match: (mail) => {
+        const wsKeywords = ['지원', 'support', '요청', 'request', '확인부탁', '검토부탁', '문의드립니다', '업무지원', '도움', '안내', '공지', '전달드립니다'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return wsKeywords.some(kw => text.includes(kw));
+      },
+      confidence: 0.8,
+    });
+
+    this.addRule({
+      name: 'work-support-admin',
+      category: 'WORK_SUPPORT',
+      match: (mail) => {
+        const adminKeywords = ['휴가', '연차', '출장', '근태', '복리후생', '사내', '사규', '규정', '교육', '연수'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return adminKeywords.some(kw => text.includes(kw));
+      },
+      confidence: 0.85,
+    });
+
+    // 업무지원 (기본값 — 마지막 규칙, 낮은 신뢰도)
     this.addRule({
       name: 'work-support-default',
       category: 'WORK_SUPPORT',
-      match: () => true, // 다른 규칙에 매칭되지 않으면 업무지원
-      confidence: 0.5,
+      match: () => true,
+      confidence: 0.3,
     });
+
   }
 
   /**

@@ -150,6 +150,18 @@ class MailClassifier {
       },
       confidence: 0.85,
     });
+
+    this.addRule({
+      name: 'sales-deal',
+      category: 'SALES',
+      match: (mail) => {
+        const kw = ['매출', '거래처', '영업실적', '매출목표', '수주', '거래', '구매의향', '발주', '주문', '납품'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return kw.some(k => text.includes(k));
+      },
+      confidence: 0.85,
+    });
+
     this.addRule({
       name: 'sales-negotiation',
       category: 'SALES',
@@ -200,6 +212,29 @@ class MailClassifier {
       },
       confidence: 0.8,
     });
+
+    this.addRule({
+      name: 'presales-rfp',
+      category: 'PRESALES',
+      match: (mail) => {
+        const kw = ['RFP', 'RFI', '고객사', '고객', 'customer', '사전검증', '적합성', '평가', '비교표', 'comparison', 'matrix', '매핑'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return kw.some(k => text.includes(k));
+      },
+      confidence: 0.8,
+    });
+
+    this.addRule({
+      name: 'presales-environment',
+      category: 'PRESALES',
+      match: (mail) => {
+        const kw = ['테스트환경', 'sandbox', '테스트 환경', '환경 설정', 'integration test', '검증환경'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return kw.some(k => text.includes(k));
+      },
+      confidence: 0.75,
+    });
+
     this.addRule({
       name: 'pm-task',
       category: 'PM',
@@ -220,6 +255,29 @@ class MailClassifier {
       },
       confidence: 0.8,
     });
+
+    this.addRule({
+      name: 'pm-planning',
+      category: 'PM',
+      match: (mail) => {
+        const kw = ['스프린트', 'sprint', '스토리', 'story', '백로그', 'backlog', '우선순위', 'priority', '칸반', 'kanban', 'WBS', '산출물', 'deliverable', '요구사항', 'requirement'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return kw.some(k => text.includes(k));
+      },
+      confidence: 0.9,
+    });
+
+    this.addRule({
+      name: 'pm-status',
+      category: 'PM',
+      match: (mail) => {
+        const kw = ['진행상황', '상태보고', '주간보고', '일일보고', 'standup', '회고', 'retrospective', '데모데이', 'planning poker'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return kw.some(k => text.includes(k));
+      },
+      confidence: 0.85,
+    });
+
     this.addRule({
       name: 'engineer-code-review',
       category: 'ENGINEER',
@@ -250,6 +308,18 @@ class MailClassifier {
       },
       confidence: 0.8,
     });
+
+    this.addRule({
+      name: 'engineer-infra',
+      category: 'ENGINEER',
+      match: (mail) => {
+        const kw = ['컴파일', 'compile', '디버그', 'debug', '테스트케이스', 'testcase', 'API', 'DB', '서버', 'server', '클라이언트', 'client', '캐시', 'cache', '로드밸런서', 'loadbalancer', '쿠버네티스', 'kubernetes', '도커', 'docker'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return kw.some(k => text.includes(k));
+      },
+      confidence: 0.9,
+    });
+
     this.addRule({
       name: 'marketing-newsletter',
       category: 'MARKETING',
@@ -270,6 +340,18 @@ class MailClassifier {
       },
       confidence: 0.8,
     });
+
+    this.addRule({
+      name: 'marketing-campaign',
+      category: 'MARKETING',
+      match: (mail) => {
+        const kw = ['캠페인', 'campaign', 'SNS', '소셜', 'social', '광고', 'advertising', '프로모션', 'promotion', '타겟팅', 'targeting', '퍼널', 'funnel', '전환율', 'conversion'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return kw.some(k => text.includes(k));
+      },
+      confidence: 0.85,
+    });
+
     this.addRule({
       name: 'sales-keywords',
       category: 'SALES',
@@ -330,16 +412,61 @@ class MailClassifier {
       name: 'ceo-approval',
       category: 'CEO',
       match: (mail) => {
-        const kw = ['승인', 'approval', '결제', 'payment', '긴급', 'urgent'];
+        const kw = ['대표결제', '긴급지시', '긴급결제', '경영방침', '대표이사지시'];
         return kw.some(k => mail.subject.toLowerCase().includes(k));
       },
       confidence: 0.9,
     });
+
+    this.addRule({
+      name: 'ceo-directive',
+      category: 'CEO',
+      match: (mail) => {
+        const kw = ['대표이사', 'CEO', '경영진', '경영', '전사적', '전사', '전략적', '전략', '긴급지시', '긴급결제', '이사회', 'board', '경영방침', '비전', 'vision'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return kw.some(k => text.includes(k));
+      },
+      confidence: 0.95,
+    });
+
+    this.addRule({
+      name: 'ceo-report',
+      category: 'CEO',
+      match: (mail) => {
+        const kw = ['대표님', '사장님', '임원', 'executive', '경영보고', '사업보고', '실적보고', '분기보고'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return kw.some(k => text.includes(k));
+      },
+      confidence: 0.9,
+    });
+
+    this.addRule({
+      name: 'work-support-request',
+      category: 'WORK_SUPPORT',
+      match: (mail) => {
+        const kw = ['지원', 'support', '요청', 'request', '확인부탁', '검토부탁', '문의드립니다', '업무지원', '도움', '안내', '공지', '전달드립니다'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return kw.some(k => text.includes(k));
+      },
+      confidence: 0.8,
+    });
+
+    this.addRule({
+      name: 'work-support-admin',
+      category: 'WORK_SUPPORT',
+      match: (mail) => {
+        const kw = ['휴가', '연차', '출장', '근태', '복리후생', '사내', '사규', '규정', '교육', '연수'];
+        const text = `${mail.subject} ${mail.body}`.toLowerCase();
+        return kw.some(k => text.includes(k));
+      },
+      confidence: 0.85,
+    });
+
     this.addRule({
       name: 'work-support-default',
       category: 'WORK_SUPPORT',
       match: () => true,
-      confidence: 0.5,
+      confidence: 0.3,
     });
   }
 
@@ -515,6 +642,90 @@ function calculateMetrics(
   };
 }
 
+
+// ── 5-Fold Cross-Validation ──────────────────────────────────────────
+
+function runCrossValidation(golden: GoldenMailEntry[], k: number = 5): void {
+  // Shuffle data
+  const shuffled = [...golden].sort(() => Math.random() - 0.5);
+  const foldSize = Math.floor(shuffled.length / k);
+  const foldAccuracies: number[] = [];
+  const foldF1s: number[] = [];
+
+  console.log(`=== ${k}-Fold Cross-Validation ===`);
+  console.log(`Total samples: ${shuffled.length}, Fold size: ${foldSize}\n`);
+
+  for (let fold = 0; fold < k; fold++) {
+    const testStart = fold * foldSize;
+    const testEnd = fold === k - 1 ? shuffled.length : testStart + foldSize;
+    const testData = shuffled.slice(testStart, testEnd);
+    const trainData = [...shuffled.slice(0, testStart), ...shuffled.slice(testEnd)];
+
+    // Train: analyze train data to count category distributions (for info)
+    const trainDist: Record<string, number> = {};
+    for (const entry of trainData) {
+      trainDist[entry.label.category] = (trainDist[entry.label.category] || 0) + 1;
+    }
+
+    // Test: run classifier on test fold
+    const classifier = new MailClassifier();
+    const results: Array<{ predicted: PersonaType; actual: PersonaType; entry: GoldenMailEntry; result: ClassificationResult }> = [];
+
+    for (const entry of testData) {
+      const mail: MailItem = {
+        id: entry.id,
+        subject: entry.subject,
+        from: entry.from,
+        to: entry.to,
+        body: entry.body,
+        receivedAt: entry.receivedAt,
+      };
+      const result = classifier.classify(mail);
+      results.push({
+        predicted: result.category,
+        actual: entry.label.category,
+        entry,
+        result,
+      });
+    }
+
+    const correct = results.filter(r => r.predicted === r.actual).length;
+    const accuracy = correct / results.length;
+
+    // Calculate F1
+    const confusion: Record<string, Record<string, number>> = {};
+    for (const cat of ALL_CATEGORIES) {
+      confusion[cat] = {};
+      for (const cat2 of ALL_CATEGORIES) confusion[cat][cat2] = 0;
+    }
+    for (const r of results) confusion[r.actual][r.predicted]++;
+
+    let macroF = 0;
+    for (const cat of ALL_CATEGORIES) {
+      const tp = confusion[cat][cat];
+      const fp = ALL_CATEGORIES.reduce((sum, c) => sum + (c !== cat ? confusion[c][cat] : 0), 0);
+      const fn = ALL_CATEGORIES.reduce((sum, c) => sum + (c !== cat ? confusion[cat][c] : 0), 0);
+      const p = tp + fp > 0 ? tp / (tp + fp) : 0;
+      const r = tp + fn > 0 ? tp / (tp + fn) : 0;
+      macroF += p + r > 0 ? (2 * p * r) / (p + r) : 0;
+    }
+    macroF /= ALL_CATEGORIES.length;
+
+    foldAccuracies.push(accuracy);
+    foldF1s.push(macroF);
+    console.log(`  Fold ${fold + 1}: Accuracy=${(accuracy * 100).toFixed(1)}% (${correct}/${results.length}), F1=${macroF.toFixed(3)}`);
+  }
+
+  const meanAcc = foldAccuracies.reduce((a, b) => a + b, 0) / k;
+  const meanF1 = foldF1s.reduce((a, b) => a + b, 0) / k;
+  const stdAcc = Math.sqrt(foldAccuracies.reduce((sum, a) => sum + (a - meanAcc) ** 2, 0) / k);
+
+  console.log(`\n=== CV Summary ===`);
+  console.log(`Mean Accuracy: ${(meanAcc * 100).toFixed(1)}% (±${(stdAcc * 100).toFixed(1)}%)`);
+  console.log(`Mean F1: ${meanF1.toFixed(3)}`);
+  console.log(`Per-fold: ${foldAccuracies.map(a => (a * 100).toFixed(1) + '%').join(', ')}`);
+}
+
 // ── CLI ────────────────────────────────────────────────────────────────
 
 function main() {
@@ -522,11 +733,16 @@ function main() {
   let goldenPath = path.join(__dirname, 'golden-data', 'classification-golden-v1.json');
   let outputPath = path.join(__dirname, 'baseline-report.json');
   let splitOnly = 'all'; // 'eval', 'prompt-dev', 'all'
+  let cvMode = false;
+  let cvFolds = 5;
+
 
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--golden') goldenPath = args[++i];
     if (args[i] === '--output') outputPath = args[++i];
     if (args[i] === '--split') splitOnly = args[++i];
+    if (args[i] === '--cv') { cvMode = true; cvFolds = parseInt(args[++i]) || 5; }
+
   }
 
   const golden: GoldenMailEntry[] = JSON.parse(fs.readFileSync(goldenPath, 'utf-8'));
@@ -540,6 +756,11 @@ function main() {
     } else if (splitOnly === 'prompt-dev') {
       evalIds = new Set(manifest.splits.promptDev.ids);
     }
+  }
+
+  if (cvMode) {
+    runCrossValidation(golden, cvFolds);
+    return;
   }
 
   const dataset = evalIds ? golden.filter(e => evalIds.has(e.id)) : golden;

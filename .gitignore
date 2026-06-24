@@ -42,3 +42,7 @@ pnpm-debug.log*
 
 # Misc
 *.tsbuildinfo
+
+# GJC runtime
+.gjc/
+artifacts/

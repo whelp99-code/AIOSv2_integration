@@ -1,0 +1,126 @@
+{
+  "meta": {
+    "generatedAt": "2026-06-23T14:43:43.315Z",
+    "classifierVersion": "hybrid-v1",
+    "goldenDatasetVersion": "classification-golden-v1",
+    "mode": "offline",
+    "totalSamples": 500
+  },
+  "gates": [
+    {
+      "name": "Accuracy",
+      "metric": "accuracy",
+      "threshold": "≥ 0.95",
+      "actual": 0,
+      "passed": false
+    },
+    {
+      "name": "Macro-F1",
+      "metric": "macroF1",
+      "threshold": "≥ 0.93",
+      "actual": 0,
+      "passed": false
+    },
+    {
+      "name": "High-risk false route",
+      "metric": "highRiskFalseRouteRate",
+      "threshold": "≤ 0.01",
+      "actual": 0,
+      "passed": true
+    },
+    {
+      "name": "P95 latency",
+      "metric": "totalP95",
+      "threshold": "≤ 2000ms",
+      "actual": 0,
+      "passed": true
+    },
+    {
+      "name": "LLM call ratio",
+      "metric": "llmCallRatio",
+      "threshold": "≤ 0.35",
+      "actual": 0,
+      "passed": true
+    },
+    {
+      "name": "Schema valid rate",
+      "metric": "schemaValidRate",
+      "threshold": "≥ 0.995",
+      "actual": 1,
+      "passed": true
+    }
+  ],
+  "overall": {
+    "accuracy": 0,
+    "macroF1": 0,
+    "macroPrecision": 0,
+    "macroRecall": 0,
+    "highRiskFalseRouteRate": 0,
+    "llmCallRatio": 0,
+    "schemaValidRate": 1
+  },
+  "latency": {
+    "ruleP50": 0,
+    "ruleP95": 0,
+    "llmP50": 0,
+    "llmP95": 0,
+    "totalP50": 0,
+    "totalP95": 0
+  },
+  "confusionMatrix": [],
+  "perCategory": {
+    "WORK_SUPPORT": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "support": 0
+    },
+    "SALES": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "support": 0
+    },
+    "PRESALES": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "support": 0
+    },
+    "ENGINEER": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "support": 0
+    },
+    "PM": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "support": 0
+    },
+    "FINANCE": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "support": 0
+    },
+    "MARKETING": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "support": 0
+    },
+    "CEO": {
+      "precision": 0,
+      "recall": 0,
+      "f1": 0,
+      "support": 0
+    }
+  },
+  "costEstimate": {
+    "totalTokens": 0,
+    "estimatedCostUsd": 0,
+    "avgTokensPerCall": 0
+  }
+}
